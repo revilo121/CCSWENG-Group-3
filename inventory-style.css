@@ -86,7 +86,7 @@ body {
 
 /* Sidebar */
 .sidebar {
-    width: 260px;
+    width: 25vh;
     background-color: #f7f7f7;
     padding: 30px 20px;
     border-right: 1px solid #ddd;

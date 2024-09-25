@@ -86,7 +86,7 @@ body {
 /* Sidebar */
 .sidebar {
     position: fixed; /* Sidebar is fixed */
-    width: 220px; /* Adjusted the width of the sidebar */
+    width: 25vh; /* Adjusted the width of the sidebar */
     background-color: #f7f7f7;
     height: 100vh;
     top: 50px; /* Aligns with the top bar */
@@ -179,6 +179,7 @@ nav ul li a:hover {
     padding: 80px 30px 20px 30px;
     overflow-y: auto;
     background-color: #ffffff;
+    width: 100%;
 }
 
 /* Section for inventory overview */
@@ -318,4 +319,9 @@ nav ul li a:hover {
         margin-left: 200px;
         padding: 80px 15px 15px 220px;
     }
+}
+
+#inv-count {
+    text-align: center;
+
 }
