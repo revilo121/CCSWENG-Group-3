@@ -225,6 +225,18 @@ nav ul li a:hover {
     border-radius: 8px;
 }
 
+.out-of-stock {
+    background-color: #f8d7da;
+}
+
+.low-stock {
+    background-color: #fff3cd;
+}
+
+.in-stock {
+    background-color: #d4edda;
+}
+
 .chart-container {
     width: 100%;
     height: 200px; /* Fixed height */
