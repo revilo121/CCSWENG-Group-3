@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory Dashboard</title>
-    <link rel="stylesheet" href="inventory-style.css">
+    <link rel="stylesheet" href="dashboard-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
-
+    
 </head>
 <body>
     <header class="top-bar">
@@ -24,9 +24,7 @@
             </div>
             <i class="fas fa-caret-down profile-dropdown-icon"></i>
             <ul class="profile-dropdown">
-                <li><a href="#">Profile</a></li>
                 <li><a href="login.html">Logout</a></li>
-                <li><a href="#">Settings</a></li>
             </ul>
         </div>
     </header>
@@ -47,8 +45,8 @@
         </div>
         <nav>
             <ul>
-                <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                <li class="active"><a href="#"><i class="fas fa-box"></i> Inventory</a></li>
+                <li class="active"><a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="inventory.html"><i class="fas fa-box"></i> Inventory</a></li>
                 <li><a href="#"><i class="fas fa-shopping-cart"></i> Purchase Order</a></li>
                 <li><a href="#"><i class="fas fa-exchange-alt"></i> Transfer Order</a></li>
             </ul>
@@ -56,7 +54,10 @@
     </div>
 
     <div class="main-content">
-        <section class="inventory-status">
+        <h1>Dashboard</h1>
+
+        <!-- Inventory Overview -->
+        <section class="inventory-overview">
             <div class="status out-of-stock">
                 <i class="fas fa-exclamation-circle"></i>
                 <div class="status-text">
@@ -80,52 +81,76 @@
             </div>
         </section>
 
-        <section class="inventory-table">
-            <div class="inventory-controls">
-                <button class="add-item"><i class="fas fa-plus"></i> Add Item</button>
-                <button class="stock-in">Stock In</button>
-                <button class="stock-out">Stock Out</button>
-                <button class="stock-move">Stock Move</button>
-                <div class="search-bar">
-                    <input type="text" placeholder="Search items...">
-                    <i class="fas fa-search search-icon"></i>
-                </div>
-                <div class="sorting-controls">
-                    <button class="sort"><i class="fas fa-sort"></i> Sort by</button>
-                    <button class="filter"><i class="fas fa-filter"></i> Filter by</button>
-                    <button class="pagination-btn prev"><i class="fas fa-chevron-left"></i></button>
-                    <button class="pagination-btn next"><i class="fas fa-chevron-right"></i></button>
+        <!-- Summary Section -->
+        <section class="summary">
+            <div class="summary-card chart-card">
+                <h4>Most Stocked Items</h4>
+                <div class="chart-container">
+                    <canvas id="mostStockedChart"></canvas>
                 </div>
             </div>
+            <div class="summary-card">
+                <h4>Recently Stocked Items</h4>
+                <ul>
+                    <li><span class="dot" style="background-color: #f8c471;"></span> Egg</li>
+                    <li><span class="dot" style="background-color: #f39c12;"></span> Bread</li>
+                    <li><span class="dot" style="background-color: #7dcea0;"></span> Milk</li>
+                </ul>
+            </div>
+            <div class="summary-card">
+                <h4>Inventory Value</h4>
+                <p>12345678 Php</p>
+            </div>
+            <div class="summary-card">
+                <h4>Purchase Orders Expense</h4>
+                <p>12345 Php</p>
+            </div>
+            <div class="summary-card">
+                <h4>Delivery</h4>
+                <p>12345 Php</p>
+            </div>
+            <div class="summary-card">
+                <h4>Orders</h4>
+                <p>6 Pending Purchase Orders</p>
+                <p>0 Orders for Approval</p>
+            </div>
+        </section>
 
-            <div class="inventory-grid">
-                <div class="item-card stock-room">
-                    <div class="card-header">
-                        <span class="item-label">stock room</span>
-                        <span class="item-dot"></span>
-                    </div>
-                    <span class="item-name">Ajinomoto Betsin</span>
-                    <p>Price: Variable</p>
-                    <p>Cost: P220.00</p>
-                    <p>In Stock: 5</p>
-                    <div class="card-menu">
-                        <i class="fas fa-ellipsis-h"></i>
-                    </div>
-                </div>
-
-                <!-- Add more item cards here -->
-
+        <!-- Inventory History and Recent Movement -->
+        <section class="additional-info">
+            <div class="info-box">
+                <h4>Inventory History</h4>
+            </div>
+            <div class="info-box">
+                <h4>Recent Inventory Movement</h4>
             </div>
         </section>
     </div>
 
+    <!-- Add a script for the chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Branch dropdown functionality
-        const branchSelect = document.querySelector('.branch-select');
-        const branchOptions = document.querySelector('.branch-options');
-
-        branchSelect.addEventListener('click', () => {
-            branchOptions.classList.toggle('show');
+        const ctx = document.getElementById('mostStockedChart').getContext('2d');
+        const mostStockedChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Egg', 'Bread', 'Milk'],
+                datasets: [{
+                    label: 'Most Stocked Items',
+                    data: [30, 20, 50],
+                    backgroundColor: ['#f8c471', '#f39c12', '#7dcea0'],
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    }
+                }
+            }
         });
     </script>
 </body>
