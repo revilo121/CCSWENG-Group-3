@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Dashboard</title>
+    <link rel="stylesheet" href="dashboard-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+    
+</head>
+<body>
+    <header class="top-bar">
+        <div class="user-info">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-text">
+                <span class="username">Steve Johnson</span>
+                <span class="role">admin</span>
+            </div>
+            <i class="fas fa-caret-down profile-dropdown-icon"></i>
+            <ul class="profile-dropdown">
+                <li><a href="login.html">Logout</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <div class="sidebar">
+        <h2 class="logo">Sefina's</h2>
+        <div class="branch-info">
+            <h3 class="branch-select">
+                <span>Branch A</span>
+                <i class="fas fa-caret-down"></i>
+            </h3>
+            <ul class="branch-options">
+                <li>Branch B</li>
+                <li>Branch C</li>
+                <li>Branch D</li>
+            </ul>
+            <p>Olongapo City</p>
+        </div>
+        <nav>
+            <ul>
+                <li class="active"><a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="inventory.html"><i class="fas fa-box"></i> Inventory</a></li>
+                <li><a href="#"><i class="fas fa-shopping-cart"></i> Purchase Order</a></li>
+                <li><a href="#"><i class="fas fa-exchange-alt"></i> Transfer Order</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <h1>Dashboard</h1>
+
+        <!-- Inventory Overview -->
+        <section class="inventory-overview">
+            <div class="status out-of-stock">
+                <i class="fas fa-exclamation-circle"></i>
+                <div class="status-text">
+                    <span class="status-label">Out Of Stock</span>
+                    <h2 id = inv-count >5</h2>
+                </div>
+            </div>
+            <div class="status low-stock">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="status-text">
+                    <span class="status-label">Low Stock</span>
+                    <h2 id = inv-count>55</h2>
+                </div>
+            </div>
+            <div class="status in-stock">
+                <i class="fas fa-check-circle"></i>
+                <div class="status-text">
+                    <span class="status-label">In Stock</span>
+                    <h2 id = inv-count>555</h2>
+                </div>
+            </div>
+        </section>
+
+        <!-- Summary Section -->
+        <section class="summary">
+            <div class="summary-card chart-card">
+                <h4>Most Stocked Items</h4>
+                <div class="chart-container">
+                    <canvas id="mostStockedChart"></canvas>
+                </div>
+            </div>
+            <div class="summary-card">
+                <h4>Recently Stocked Items</h4>
+                <ul>
+                    <li><span class="dot" style="background-color: #f8c471;"></span> Egg</li>
+                    <li><span class="dot" style="background-color: #f39c12;"></span> Bread</li>
+                    <li><span class="dot" style="background-color: #7dcea0;"></span> Milk</li>
+                </ul>
+            </div>
+            <div class="summary-card">
+                <h4>Inventory Value</h4>
+                <p>12345678 Php</p>
+            </div>
+            <div class="summary-card">
+                <h4>Purchase Orders Expense</h4>
+                <p>12345 Php</p>
+            </div>
+            <div class="summary-card">
+                <h4>Delivery</h4>
+                <p>12345 Php</p>
+            </div>
+            <div class="summary-card">
+                <h4>Orders</h4>
+                <p>6 Pending Purchase Orders</p>
+                <p>0 Orders for Approval</p>
+            </div>
+        </section>
+
+        <!-- Inventory History and Recent Movement -->
+        <section class="additional-info">
+            <div class="info-box">
+                <h4>Inventory History</h4>
+            </div>
+            <div class="info-box">
+                <h4>Recent Inventory Movement</h4>
+            </div>
+        </section>
+    </div>
+
+    <!-- Add a script for the chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('mostStockedChart').getContext('2d');
+        const mostStockedChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Egg', 'Bread', 'Milk'],
+                datasets: [{
+                    label: 'Most Stocked Items',
+                    data: [30, 20, 50],
+                    backgroundColor: ['#f8c471', '#f39c12', '#7dcea0'],
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
