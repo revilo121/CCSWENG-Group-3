@@ -1,32 +1,52 @@
-const express = require('express');
-const router = express.Router();
+const express = require('express'); 
+const router = express.Router(); 
 
 
 router.get('/', (req, res) => {
-  res.render('index'); 
+  res.render('login'); 
 });
 
 
 router.post('/login', (req, res) => {
+  const { username, password } = req.body;
   
-  if (/* login successful */) {
-    req.session.isAuthenticated = true; 
-    res.redirect('/dashboard');
+ 
+  if (username && password) {
+    req.session.isAuthenticated = true;
+    res.redirect('/storeselect'); 
   } else {
-    req.flash('error', 'Invalid username or password');
-    res.redirect('/');
+    
+    res.redirect('/'); 
   }
 });
 
-// Dashboard route 
+
+router.get('/storeselect', (req, res) => {
+  if (req.session.isAuthenticated) {
+    res.render('storeselect'); 
+  } else {
+    res.redirect('/'); 
+  }
+});
+
+
+router.post('/select-store', (req, res) => {
+
+  res.redirect('/dashboard'); 
+});
+
 router.get('/dashboard', (req, res) => {
   if (req.session.isAuthenticated) {
-    
-    res.render('dashboard');
+      const store = req.query.store || 'default'; 
+      res.render('dashboard', { store }); 
   } else {
-    req.flash('error', 'You need to be logged in to access the dashboard');
-    res.redirect('/');
+      res.redirect('/'); 
   }
+});
+
+router.get('/inventory', (req, res) => {
+  const store = req.query.store || 'default'; 
+  res.render('inventory', { store }); 
 });
 
 // Logout route
@@ -35,4 +55,4 @@ router.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
-module.exports = router;
+module.exports = router; 

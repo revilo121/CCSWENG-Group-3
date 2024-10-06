@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Dashboard</title>
+    <link rel="stylesheet" href="/assets/inventory-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+    <header class="top-bar">
+        <div class="user-info">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-text">
+                <span class="username">Steve Johnson</span>
+                <span class="role">admin</span>
+            </div>
+            <i class="fas fa-caret-down profile-dropdown-icon"></i>
+            <ul class="profile-dropdown">
+                <li><a href="#">Profile</a></li>
+                <li><a href="login.html">Logout</a></li>
+                <li><a href="#">Settings</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <div class="sidebar">
+        <h2 class="logo">Sefina's</h2>
+        <div class="branch-info">
+            <h3 class="branch-select">
+                <span>Branch A</span>
+                <i class="fas fa-caret-down"></i>
+            </h3>
+            <ul class="branch-options">
+                <li>Branch B</li>
+                <li>Branch C</li>
+                <li>Branch D</li>
+            </ul>
+            <p>Olongapo City</p>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li class="active"><a href="#"><i class="fas fa-box"></i> Inventory</a></li>
+                <li><a href="#"><i class="fas fa-shopping-cart"></i> Purchase Order</a></li>
+                <li><a href="#"><i class="fas fa-exchange-alt"></i> Transfer Order</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <section class="inventory-status">
+            <div class="status out-of-stock">
+                <i class="fas fa-exclamation-circle"></i>
+                <div class="status-text">
+                    <span class="status-label">Out Of Stock</span>
+                    <h2>5</h2>
+                </div>
+            </div>
+            <div class="status low-stock">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="status-text">
+                    <span class="status-label">Low Stock</span>
+                    <h2>55</h2>
+                </div>
+            </div>
+            <div class="status in-stock">
+                <i class="fas fa-check-circle"></i>
+                <div class="status-text">
+                    <span class="status-label">In Stock</span>
+                    <h2>555</h2>
+                </div>
+            </div>
+        </section>
+
+        <section class="inventory-table">
+            <div class="inventory-controls">
+                <button class="add-item"><i class="fas fa-plus"></i> Add Item</button>
+                <button class="stock-in">Stock In</button>
+                <button class="stock-out">Stock Out</button>
+                <button class="stock-move">Stock Move</button>
+                <div class="search-bar">
+                    <input type="text" placeholder="Search items...">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <div class="sorting-controls">
+                    <button class="sort"><i class="fas fa-sort"></i> Sort by</button>
+                    <button class="filter"><i class="fas fa-filter"></i> Filter by</button>
+                    <button class="pagination-btn prev"><i class="fas fa-chevron-left"></i></button>
+                    <button class="pagination-btn next"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <div class="inventory-grid">
+                <div class="item-card stock-room">
+                    <div class="card-header">
+                        <span class="item-label">stock room</span>
+                        <span class="item-dot"></span>
+                    </div>
+                    <span class="item-name">Ajinomoto Betsin</span>
+                    <p>Price: Variable</p>
+                    <p>Cost: P220.00</p>
+                    <p>In Stock: 5</p>
+                    <div class="card-menu">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </div>
+                </div>
+
+                <!-- Add more item cards here -->
+
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Branch dropdown functionality
+        const branchSelect = document.querySelector('.branch-select');
+        const branchOptions = document.querySelector('.branch-options');
+
+        branchSelect.addEventListener('click', () => {
+            branchOptions.classList.toggle('show');
+        });
+    </script>
+</body>
+</html>
