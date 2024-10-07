@@ -6,6 +6,11 @@ body {
     flex-direction: column;
 }
 
+.form {
+    display: flex;
+    
+}
+
 .login-fb {
     margin: 30px;
     margin-top: 0;
@@ -13,7 +18,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    font-family: Roboto;
+    
     font-size: 14px;
     border-style: solid;
     width: 40vh;
@@ -24,7 +29,7 @@ body {
     justify-content: center;
     border-color:#FFF5E1;
     align-items: center;
-    padding-bottom: 9vh;
+    padding-bottom: 4vh;
     padding-top: 3vh;
     gap: 8vh;
     border-radius: 5px;
@@ -34,7 +39,7 @@ body {
 .input-fb{
     display: flex;
     flex-direction: column;
-    font-family: IBM Plex Sans;
+    font-family: IBM Plex Sans; 
     
 }
 
@@ -53,11 +58,12 @@ button{
     padding-right: 7vh;
     border-color: white;
     border-style: solid;
-    text-align: center;
-    font-family: IBM Plex Sans;
+    text-align: center; 
+    font-family: IBM Plex Sans; 
     color: white;
     font-size: 14px;
-    margin-top: 1vh;
+    margin-top: 5vh;
+    align-self: center;
 }
 
 button:hover{
