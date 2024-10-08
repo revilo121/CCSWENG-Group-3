@@ -38,17 +38,17 @@ router.post('/select-store', (req, res) => {
 router.get('/dashboard', (req, res) => {
   if (req.session.isAuthenticated) {
       const store = req.query.store || 'default'; 
-      res.render('dashboard', { store }); 
+      res.render('dashboard', { store, currentRoute: '/dashboard' } ); 
   } else {
       res.redirect('/'); 
   }
 });
 
 router.get('/inventory', (req, res) => {
+  console.log("inventory request")
   const store = req.query.store || 'default'; 
-  res.render('inventory', { store }); 
+  res.render('inventory', { store, currentRoute: '/inventory' } ); 
 });
-
 // Logout route
 router.get('/logout', (req, res) => {
   req.session.destroy();

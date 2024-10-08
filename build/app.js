@@ -24,6 +24,11 @@ app.use(session({
     saveUninitialized: false
 }));
 
+app.use((req, res, next) => {
+    res.locals.currentRoute = req.path;
+    next();
+});
+
 
 app.use(bodyParser.urlencoded({ extended: true }));
 

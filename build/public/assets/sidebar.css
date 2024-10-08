@@ -1,0 +1,16 @@
+
+.sidebar {
+    
+    width: 12.5%; 
+    background-color: #f7f7f7;
+    height: 100vh;
+    left: 0;
+    padding: 8vh 2.6vh;
+    border-right: 1px solid #ddd;
+}
+
+nav ul li.active a,
+nav ul li a:hover {
+    background-color: #D9534F;
+    color: #fff;
+}

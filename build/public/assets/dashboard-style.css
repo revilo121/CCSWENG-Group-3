@@ -83,17 +83,7 @@ body {
     display: block;
 }
 
-/* Sidebar */
-.sidebar {
-    position: fixed; /* Sidebar is fixed */
-    width: 25vh; /* Adjusted the width of the sidebar */
-    background-color: #f7f7f7;
-    height: 100vh;
-    top: 50px; /* Aligns with the top bar */
-    left: 0;
-    padding: 30px 20px;
-    border-right: 1px solid #ddd;
-}
+
 
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
 
@@ -167,26 +157,30 @@ nav ul li a i {
     margin-right: 10px;
 }
 
-nav ul li.active a,
-nav ul li a:hover {
-    background-color: #D9534F;
-    color: #fff;
+.main-fb{
+    display: flex;
+    width: 100%;
+    
 }
 
+.content-fb{
+    margin-left: 3vh;
+    margin-right: 3vh;
+}
 /* Main content styling */
 .main-content {
-    margin-left: 220px; /* Matches sidebar width */
-    padding: 80px 30px 20px 30px;
+    padding-top: 7.5vh;
     overflow-y: auto;
     background-color: #ffffff;
-    width: 100%;
+    width: 88%;
 }
 
 /* Section for inventory overview */
 .inventory-overview {
     display: flex;
+    
     justify-content: space-around;
-    margin-bottom: 20px;
+    margin-bottom: 3vh;
 }
 
 .status {

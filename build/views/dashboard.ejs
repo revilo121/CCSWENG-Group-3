@@ -5,14 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="/assets/dashboard-style.css">
+    <link rel="stylesheet" href="/assets/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
     
 </head>
 <body>
@@ -32,32 +33,13 @@
         </div>
     </header>
 
-    <div class="sidebar">
-        <h2 class="logo">Sefina's</h2>
-        <div class="branch-info">
-            <h3 class="branch-select">
-                <span>Branch A</span>
-                <i class="fas fa-caret-down"></i>
-            </h3>
-            <ul class="branch-options">
-                <li>Branch B</li>
-                <li>Branch C</li>
-                <li>Branch D</li>
-            </ul>
-            <p>Olongapo City</p>
-        </div>
-        <nav>
-            <ul>
-                <li class="active"><a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a href="/inventory"><i class="fas fa-box"></i> Inventory</a></li> 
-                <li><a href="#"><i class="fas fa-shopping-cart"></i> Purchase Order</a></li>
-                <li><a href="#"><i class="fas fa-exchange-alt"></i> Transfer Order</a></li>
-            </ul>
-        </nav>
-    </div>
+    <div class = main-fb>
+        
+    <%- include('partials/sidebar' )%>
 
     <div class="main-content">
-        <h1>Dashboard</h1>
+        <div class = content-fb>
+            <h1>Dashboard</h1>
 
         <!-- Inventory Overview -->
         <section class="inventory-overview">
@@ -128,7 +110,11 @@
                 <h4>Recent Inventory Movement</h4>
             </div>
         </section>
+        </div>
+        
     </div>
+    </div>
+    
 
     <!-- Add a script for the chart -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

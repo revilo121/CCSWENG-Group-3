@@ -1,0 +1,31 @@
+<div class="sidebar">
+    <h2 class="logo">Sefina's</h2>
+    <div class="branch-info">
+        <h3 class="branch-select">
+            <span>Branch A</span>
+            <i class="fas fa-caret-down"></i>
+        </h3>
+        <ul class="branch-options">
+            <li>Branch B</li>
+            <li>Branch C</li>
+            <li>Branch D</li>
+        </ul>
+        <p>Olongapo City</p>
+    </div>
+    <nav>
+        <ul>
+            <li class="<%= currentRoute === '/dashboard' ? 'active' : '' %>">
+                <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            </li>
+            <li class="<%= currentRoute === '/inventory' ? 'active' : '' %>">
+                <a href="/inventory"><i class="fas fa-box"></i> Inventory</a>
+            </li>
+            <li class="<%= currentRoute === '/purchase-order' ? 'active' : '' %>">
+                <a href="/purchase-order"><i class="fas fa-shopping-cart"></i> Purchase Order</a>
+            </li>
+            <li class="<%= currentRoute === '/transfer-order' ? 'active' : '' %>">
+                <a href="/transfer-order"><i class="fas fa-exchange-alt"></i> Transfer Order</a>
+            </li>
+        </ul>
+    </nav>
+</div>
