@@ -6,6 +6,8 @@
     <title>Dashboard</title>
     <link rel="stylesheet" href="/assets/dashboard-style.css">
     <link rel="stylesheet" href="/assets/sidebar.css">
+    <link rel="stylesheet" href="/assets/topbar.css">
+    <link rel="stylesheet" href="/assets/topbar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,22 +19,8 @@
     
 </head>
 <body>
-    <header class="top-bar">
-        <div class="user-info">
-            <div class="user-avatar">
-                <i class="fas fa-user-circle"></i>
-            </div>
-            <div class="user-text">
-                <span class="username">Steve Johnson</span>
-                <span class="role">admin</span>
-            </div>
-            <i class="fas fa-caret-down profile-dropdown-icon"></i>
-            <ul class="profile-dropdown">
-                <li><a href="login.html">Logout</a></li>
-            </ul>
-        </div>
-    </header>
-
+    
+    <%- include('partials/topbar' )%>
     <div class = main-fb>
         
     <%- include('partials/sidebar' )%>

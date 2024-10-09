@@ -3,6 +3,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
+const bcrypt = require('bcryptjs');
 
 const routes = require('./routes/routes'); 
 
@@ -10,13 +11,16 @@ const app = express();
 const PORT = process.env.PORT || 3500;
 
 
-mongoose.connect('mongodb://localhost:27017/dbconnect', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
+const dbURL = 'mongodb+srv://julrquirante:<password>@cluster0.df7qo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+mongoose.connect(dbURL)
+.then(() => {
+    console.log("Connected to Database");
 })
-    .then(() => console.log('Connected to MongoDB!'))
-    .catch(err => console.error('MongoDB connection error:', err));
+.catch(() => {
+    console.log("Failed to connect to the Database");
+})
 
+const User = require('./models/user');
 
 app.use(session({
     secret: 'secret',
