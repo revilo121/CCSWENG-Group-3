@@ -21,7 +21,7 @@
 
     <div class = "main-fb">
 
-        <%- include('partials/sidebar', { currentRoute }) %>
+        <%- include('partials/sidebar') %>
         
         <div class="main-content">
             <section class="inventory-status">
@@ -51,7 +51,40 @@
             <section class="inventory-table">
                 <div class="inventory-controls">
                     <button class="add-item"><i class="fas fa-plus"></i> Add Item</button>
-                    <button class="stock-in">Stock In</button>
+
+                    <!-- add item modal -->
+                    <div id="addItemModal" class="modal">
+                        <div class="modal-content">
+                          <span class="close">&times;</span>
+                          <h2>Add New Item</h2>
+                          <form id="addItemForm" action="/add-item" method="POST">
+                            <label for="name">Item Name</label>
+                            <input type="text" id="name" name="name" required>
+                            
+                            <label for="category">Category</label>
+                            <input type="text" id="category" name="category" required>
+                            
+                            <label for="price">Price</label>
+                            <input type="number" id="price" name="price" required>
+                            
+                            <label for="quantityInStock">Quantity In Stock</label>
+                            <input type="number" id="quantity" name="quantity" required>
+                            
+                            <label for="lowStockThreshold">Low Stock Threshold</label>
+                            <input type="number" id="lowStockThreshold" name="lowStockThreshold" required>
+                            
+                            <label for="measurementUnit">Measurement Unit</label>
+                            <input type="text" id="measurementUnit" name="measurementUnit" required>
+
+                            <input type="hidden" id="selectedBranch" name="branchStored" value="<%= selectedBranch %>">
+                            
+                            <button type="submit">Add Item</button>
+                        </form>
+                            </div>
+                        </div>
+
+
+                        <button class="stock-in">Stock In</button>
                     <button class="stock-out">Stock Out</button>
                     
                     <div class="search-bar">
@@ -95,14 +128,49 @@
 
     
 
-    <script>
-        // Branch dropdown functionality
-        const branchSelect = document.querySelector('.branch-select');
-        const branchOptions = document.querySelector('.branch-options');
+<script>
+       // Branch dropdown functionality
+const branchSelect = document.querySelector('.branch-select');
+const branchOptions = document.querySelector('.branch-options');
 
-        branchSelect.addEventListener('click', () => {
-            branchOptions.classList.toggle('show');
-        });
+branchSelect.addEventListener('click', () => {
+    branchOptions.classList.toggle('show');
+});
+
+// Modal functionality
+const modal = document.getElementById("addItemModal");
+const btn = document.querySelector(".add-item");
+const span = document.getElementsByClassName("close")[0];
+
+// Open the modal when the "Add Item" button is clicked
+btn.onclick = function() {
+    modal.style.display = "block";
+}
+
+// Close the modal when the "x" span is clicked
+span.onclick = function() {
+    modal.style.display = "none";
+}
+
+// Close the modal when clicking outside of it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+// Ensure the form inside the modal submits properly
+const addItemForm = document.getElementById("addItemForm");
+
+addItemForm.addEventListener('submit', function(event) {
+    // Prevent the form from submitting normally (if you're handling it via JS, otherwise omit this line)
+    // event.preventDefault();
+
+    // Add any additional validation here (optional)
+
+    // The form will now submit to the server
+});
+
     </script>
 </body>
 </html>

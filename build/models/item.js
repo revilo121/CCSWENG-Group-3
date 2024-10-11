@@ -5,7 +5,7 @@ const ItemSchema = new Schema({
     name: { type: String, required: true },
     category: { type: String, required: true },
     price: { type: Number, required: true },
-    quantityInStock: { type: Number, required: true },
+    quantity: { type: Number, required: true },
     lowStockThreshold: { type: Number, required: true }, 
     measurementUnit: { type: String, required: true },  
     branchStored: {type: String, required: true}

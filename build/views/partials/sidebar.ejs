@@ -1,16 +1,25 @@
 <div class="sidebar">
     <h2 class="logo">Sefina's</h2>
     <div class="branch-info">
-        <h3 class="branch-select">
-            <span>Branch A</span>
+        <h3 class="branch-select" id="branch-select-toggle">
+            <!-- This is the toggle for the dropdown -->
+            <span><%= selectedBranch %></span>
             <i class="fas fa-caret-down"></i>
         </h3>
-        <ul class="branch-options">
-            <li>Branch B</li>
-            <li>Branch C</li>
-            <li>Branch D</li>
+        <ul class="branch-options" id="branch-options-list" style="display: none;">
+            <% branches.forEach(branch => { %>
+                <li>
+                    <!-- Submit form when branch is clicked -->
+                    <form action="/select-branch" method="POST" class="branch-form">
+                        <input type="hidden" name="selectedBranch" value="<%= branch.name %>">
+                        <input type="hidden" name="redirectTo" value="<%= currentRoute %>">
+                        <a href="#" onclick="this.closest('form').submit(); return false;">
+                            <%= branch.name %>
+                        </a>
+                    </form>
+                </li>
+            <% }) %>
         </ul>
-        <p>Olongapo City</p>
     </div>
     <nav>
         <ul>
@@ -21,11 +30,27 @@
                 <a href="/inventory"><i class="fas fa-box"></i> Inventory</a>
             </li>
             <li class="<%= currentRoute === '/purchase-order' ? 'active' : '' %>">
-                <a href="/purchase-order"><i class="fas fa-shopping-cart"></i> Purchase Order</a>
+                <a href="/purchaseorder"><i class="fas fa-shopping-cart"></i> Purchase Order</a>
             </li>
             <li class="<%= currentRoute === '/transfer-order' ? 'active' : '' %>">
-                <a href="/transfer-order"><i class="fas fa-exchange-alt"></i> Transfer Order</a>
+                <a href="/transferorder"><i class="fas fa-exchange-alt"></i> Transfer Order</a>
             </li>
         </ul>
     </nav>
 </div>
+
+<script>
+    document.getElementById('branch-select-toggle').addEventListener('click', function() {
+    var dropdown = document.getElementById('branch-options-list');
+    
+    // Toggle dropdown visibility
+    if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+        dropdown.style.display = 'block';
+    } else {
+        dropdown.style.display = 'none';
+    }
+});
+
+    
+</script>
+

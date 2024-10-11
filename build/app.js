@@ -3,7 +3,8 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
-const bcrypt = require('bcryptjs');
+const cookieParser = require('cookie-parser')
+
 
 const routes = require('./routes/routes'); 
 
@@ -21,7 +22,11 @@ mongoose.connect(dbURL)
 })
 
 const User = require('./models/user');
+const Branch = require('./models/branch');
+const Item = require('./models/item');
 
+
+app.use(express.urlencoded({ extended: true }));
 app.use(session({
     secret: 'secret',
     resave: false,
