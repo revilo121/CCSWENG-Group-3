@@ -82,7 +82,7 @@
 
         <section class="inventory-table">
             <div class="purchase-order-controls">
-                <button class="create-purchase-order"><i class="fas fa-plus"></i> Create Purchase Order</button>
+                <button class="create-purchase-order" onclick="createPurchaseOrder()"><i class="fas fa-plus"></i> Create Purchase Order</button>
                 <div class="search-bar">
                     <input type="text" placeholder="Search items...">
                     <i class="fas fa-search search-icon"></i>
@@ -98,13 +98,13 @@
             <div class="order-grid">
                 <div class="item-card">
                     <div class="card-header">
-                        <span class="item-name">P0001</span>
+                        <span class="item-name">P000X</span>
                         <span class="item-dot"></span>
                     </div>
-                    <p>Created by:</p>
-                    <p>Supplier:</p>
+                    <p>Created by: Juan</p>
+                    <p>Supplier: Supply Place</p>
                     <p>Cost: P220.00</p>
-                    <p>Arrival:</p>
+                    <p>Arrival: January 1, 1999</p>
                     <div class="card-menu">
                         <i class="fas fa-ellipsis-h"></i>
                     </div>
@@ -112,19 +112,19 @@
 
                 <div class="item-card">
                     <div class="card-header">
-                        <span class="item-name">P0002</span>
+                        <span class="item-name">P00XX</span>
                         <span class="item-dot2"></span>
                     </div>
-                    <p>Created by:</p>
-                    <p>Supplier:</p>
+                    <p>Created by: Juana</p>
+                    <p>Supplier: Supply Warehouse</p>
                     <p>Cost: P3.80</p>
-                    <p>Arrival:</p>
+                    <p>Arrival: October 12, 2024</p>
                     <div class="card-menu">
                         <i class="fas fa-ellipsis-h"></i>
                     </div>
                 </div>
 
-                <!-- Add more item cards here -->
+                
 
             </div>
         </section>
@@ -139,5 +139,8 @@
             branchOptions.classList.toggle('show');
         });
     </script>
+
+<script src="purchaseorder.js"></script>
+
 </body>
 </html>
