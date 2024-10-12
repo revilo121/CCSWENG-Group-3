@@ -336,11 +336,23 @@ nav ul li a:hover {
 }
 
 .item-dot {
-    width: 8px;
-    height: 8px;
-    background-color: orange;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-}
+    display: inline-block;
+  }
+  
+  .item-dot.red {
+    background-color: red;
+  }
+  
+  .item-dot.orange {
+    background-color: orange;
+  }
+  
+  .item-dot.green {
+    background-color: green;
+  }
 
 .item-name {
     font-weight: bold;

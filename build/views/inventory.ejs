@@ -17,7 +17,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <%- include('partials/topbar' )%>
+    <%- include('partials/topbar')%>
 
     <div class = "main-fb">
 
@@ -26,27 +26,27 @@
         <div class="main-content">
             <section class="inventory-status">
                 <div class="status out-of-stock">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <div class="status-text">
-                        <span class="status-label">Out Of Stock</span>
-                        <h2>5</h2>
-                    </div>
+                  <i class="fas fa-exclamation-circle"></i>
+                  <div class="status-text">
+                    <span class="status-label">Out Of Stock</span>
+                    <h2><%= outOfStockCount %></h2> 
+                  </div>
                 </div>
                 <div class="status low-stock">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <div class="status-text">
-                        <span class="status-label">Low Stock</span>
-                        <h2>55</h2>
-                    </div>
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <div class="status-text">
+                    <span class="status-label">Low Stock</span>
+                    <h2><%= lowStockCount %></h2> 
+                  </div>
                 </div>
                 <div class="status in-stock">
-                    <i class="fas fa-check-circle"></i>
-                    <div class="status-text">
-                        <span class="status-label">In Stock</span>
-                        <h2>555</h2>
-                    </div>
+                  <i class="fas fa-check-circle"></i>
+                  <div class="status-text">
+                    <span class="status-label">In Stock</span>
+                    <h2><%= sufficientStockCount %></h2> 
+                  </div>
                 </div>
-            </section>
+              </section>
     
             <section class="inventory-table">
                 <div class="inventory-controls">
@@ -99,25 +99,34 @@
                     </div>
                 </div>
     
-                <div class="inventory-grid">
-                    
-                    <div class="item-card stock-room">
-                        <div class="card-header">
-                            <span class="item-label">stock room</span>
-                            <span class="item-dot"></span>
-                        </div>
-                        <span class="item-name">Ajinomoto Betsin</span>
-                        <p>Price: Variable</p>
-                        <p>Cost: P220.00</p>
-                        <p>In Stock: 5</p>
-                        <div class="card-menu">
+                <div class="inventory-grid" id="inventoryGrid">
+                    <% if (inventory && inventory.length > 0) { %>
+                      <% inventory.forEach(item => { %>
+                        <div class="item-card <%= item.branchStored %>">
+                          <div class="card-header">
+                            <span class="item-label"><%= item.category %></span>
+                  
+                            <!-- Correct background color handling -->
+                            <span class="item-dot 
+                                <%= item.quantity === 0 ? 'red' 
+                                : item.quantity <= item.lowStockThreshold ? 'orange' 
+                                : 'green' %>">
+                            </span>
+                          </div>
+                          <span class="item-name"><%= item.name %></span>
+                          <p>Price: ₱<%= item.price.toFixed(2) %></p>
+                          <p>In Stock: <%= item.quantity %> <%= item.measurementUnit %></p>
+                          <div class="card-menu">
                             <i class="fas fa-ellipsis-h"></i>
+                          </div>
                         </div>
-                    </div>
-    
-                    <!-- Add more item cards here -->
-    
-                </div>
+                      <% }) %>
+                    <% } else { %>
+                      <p>No items in inventory.</p>
+                    <% } %>
+                  </div>
+                  
+
             </section>
         </div>
         </div>

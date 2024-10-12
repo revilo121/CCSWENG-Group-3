@@ -3,7 +3,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 
 
 const routes = require('./routes/routes'); 
@@ -12,7 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 3500;
 
 
-const dbURL = 'mongodb+srv://julrquirante:<password>@cluster0.df7qo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+const dbURL = 'mongodb+srv://julrquirante:MioOpFVk8eEnFpay@cluster0.df7qo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 mongoose.connect(dbURL)
 .then(() => {
     console.log("Connected to Database");

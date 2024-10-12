@@ -17,8 +17,8 @@ router.get('/login', (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-  const { username, password, defBranch } = req.body;
-  defbranch = 'Main'
+  const { username, password} = req.body;
+  
 
   let errors = []
   console.log(username);
@@ -97,9 +97,25 @@ router.get('/inventory', async (req, res) => {
   if (req.session.isAuthenticated) {
     const branches = await Branch.find({}, 'name');  // Fetch all branch names
 
+    
+    
+
     // Set the selected branch, defaulting to 'Main' if none is selected
     const selectedBranch = req.session.selectedBranch || 'Main';
-    res.render('inventory', {currentRoute: '/inventory', username: req.session.username, role: req.session.role, branches, selectedBranch } ); 
+    const inventory = await Item.find({ branchStored: selectedBranch });
+    const outOfStockCount = inventory.filter(item => item.quantity === 0).length;
+    const lowStockCount = inventory.filter(item => item.quantity > 0 && item.quantity <= item.lowStockThreshold).length;
+    const sufficientStockCount = inventory.filter(item => item.quantity > item.lowStockThreshold).length;
+    res.render('inventory', 
+      {currentRoute: '/inventory', 
+        username: req.session.username, 
+        role: req.session.role, 
+        branches, 
+        selectedBranch, 
+        inventory: inventory,
+        outOfStockCount,
+        lowStockCount,
+        sufficientStockCount } ); 
   } else {
     res.redirect('/')
   }
@@ -112,7 +128,7 @@ router.post('/add-item', async (req, res) => {
     console.log('Form Data: ', req.body)
     const { name, category, quantity, price, lowStockThreshold,  measurementUnit, branchStored} = req.body;
     
-    console.log('Added to Branch: ',branchStored);
+    console.log('Added to Branch: ', branchStored);
     // Create a new Item instance
     const newItem = new Item({
       name,
@@ -121,7 +137,8 @@ router.post('/add-item', async (req, res) => {
       price,
       lowStockThreshold,
       measurementUnit,
-      branchStored
+      branchStored,
+  
     });
 
     // Save the item to the database
