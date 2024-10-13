@@ -14,3 +14,101 @@ nav ul li a:hover {
     background-color: #D9534F;
     color: #fff;
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
+
+.logo img{
+    font-size: 45px;
+    text-align: center;
+    color: #D9534F;
+    font-weight: bold;
+    margin-bottom: 20px;
+    font-family: 'Dancing Script', cursive;
+}
+
+img{
+    margin-top: 10px;
+    width: 18vh;
+}
+
+.branch-info {
+    margin-bottom: 20px;
+    position: relative;
+    color: #D9534F;
+}
+
+.branch-select {
+    display: flex;
+    justify-content: space-between; /* Space between the branch name and icons */
+    align-items: center;
+    cursor: pointer;
+    color: #D9534F;
+    text-align: left; /* Align text (branch name) to the left */
+}
+
+.branch-select span {
+    flex-grow: 1; /* Ensure the branch name takes up remaining space */
+    text-align: left; /* Align the branch name to the left */
+}
+
+.branch-select i {
+    margin-right: 10px; /* Adds space between the branch name and the icons */
+    margin-left: 15px; 
+}
+
+
+.branch-options {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #fff;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px 0;
+    list-style: none;
+    color: #D9534F;
+}
+
+.branch-options li {
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+.branch-options li:hover {
+    background-color: #f0f0f0;
+}
+
+.branch-options.show {
+    display: block;
+}
+
+nav ul {
+    list-style: none;
+}
+
+nav ul li {
+    margin: 15px 0;
+}
+
+nav ul li a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    font-size: 16px;
+    color: #333;
+    padding: 12px 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+nav ul li a i {
+    margin-right: 10px;
+}
+
+nav ul li.active a,
+nav ul li a:hover {
+    background-color: #D9534F;
+    color: #fff;
+}

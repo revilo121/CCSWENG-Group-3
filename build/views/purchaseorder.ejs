@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,98 +8,87 @@
     <link rel="stylesheet" href="/assets/purchaseorder-style.css">
     <link rel="stylesheet" href="/assets/sidebar.css">
     <link rel="stylesheet" href="/assets/topbar.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" async>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet" async>
 </head>
 
 <body>
-    <%- include('partials/topbar')%>
+    <%- include('partials/topbar') %>
 
-    <%- include('partials/sidebar') %>
+    <div class="main-fb">
+        <%- include('partials/sidebar') %>
 
-    <div class="main-content">
-        <section class="order-status">
-            <div class="status for-approval">
-                <i class="fas fa-exclamation-circle"></i>
-                <div class="status-text">
-                    <span class="status-label">For Approval</span>
-                    <h2>5</h2>
-                </div>
-            </div>
-            <div class="status pending">
-                <i class="fas fa-exclamation-triangle"></i>
-                <div class="status-text">
-                    <span class="status-label">Pending</span>
-                    <h2>55</h2>
-                </div>
-            </div>
-            <div class="status completed">
-                <i class="fas fa-check-circle"></i>
-                <div class="status-text">
-                    <span class="status-label">Completed (This month)</span>
-                    <h2>555</h2>
-                </div>
-            </div>
-        </section>
-
-        <section class="inventory-table">
-            <div class="purchase-order-controls">
-                <button class="create-purchase-order" onclick="createPurchaseOrder()"><i class="fas fa-plus"></i> Create Purchase Order</button>
-                <div class="search-bar">
-                    <input type="text" placeholder="Search items...">
-                    <i class="fas fa-search search-icon"></i>
-                </div>
-                <div class="sorting-controls">
-                    <button class="sort"><i class="fas fa-sort"></i> Sort by</button>
-                    <button class="filter"><i class="fas fa-filter"></i> Filter by</button>
-                    <button class="pagination-btn prev"><i class="fas fa-chevron-left"></i></button>
-                    <button class="pagination-btn next"><i class="fas fa-chevron-right"></i></button>
-                </div>
-            </div>
-
-            <div class="order-grid">
-                <div class="item-card">
-                    <div class="card-header">
-                        <span class="item-name">P000X</span>
-                        <span class="item-dot"></span>
+        <div class="main-content">
+            <h1>Purchase Order</h1>
+            <!-- Order Status Section -->
+            <section class="order-status">
+                <div class="status for-approval">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div class="status-text">
+                        <span class="status-label">For Approval</span>
+                        <h2>5</h2>
                     </div>
-                    <p>Created by: Juan</p>
-                    <p>Supplier: Supply Place</p>
-                    <p>Cost: P220.00</p>
-                    <p>Arrival: January 1, 1999</p>
-                    <div class="card-menu">
-                        <i class="fas fa-ellipsis-h"></i>
+                </div>
+                <div class="status pending">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div class="status-text">
+                        <span class="status-label">Pending</span>
+                        <h2>55</h2>
+                    </div>
+                </div>
+                <div class="status completed">
+                    <i class="fas fa-check-circle"></i>
+                    <div class="status-text">
+                        <span class="status-label">Completed (This month)</span>
+                        <h2>555</h2>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Purchase Orders Table Section -->
+            <section class="inventory-table">
+                <div class="purchase-order-controls">
+                    <button class="create-purchase-order" onclick="createPurchaseOrder()">
+                        <i class="fas fa-plus"></i> Create Purchase Order
+                    </button>
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search items..." aria-label="Search orders">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                    <div class="sorting-controls">
+                        <button class="sort"><i class="fas fa-sort"></i> Sort by</button>
+                        <button class="filter"><i class="fas fa-filter"></i> Filter by</button>
+                        <button class="pagination-btn prev"><i class="fas fa-chevron-left"></i></button>
+                        <button class="pagination-btn next"><i class="fas fa-chevron-right"></i></button>
                     </div>
                 </div>
 
-                <div class="item-card">
-                    <div class="card-header">
-                        <span class="item-name">P00XX</span>
-                        <span class="item-dot2"></span>
+                <!-- Order Grid -->
+                <div class="order-grid" id="orderGrid">
+                    <!-- Example of card, can loop this dynamically -->
+                    <div class="item-card">
+                        <div class="card-header">
+                            <span class="item-name">P000X</span>
+                            <span class="item-dot"></span>
+                        </div>
+                        <p>Created by: Juan</p>
+                        <p>Supplier: Supply Place</p>
+                        <p>Cost: P220.00</p>
+                        <p>Arrival: January 1, 1999</p>
+                        <div class="card-menu">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </div>
                     </div>
-                    <p>Created by: Juana</p>
-                    <p>Supplier: Supply Warehouse</p>
-                    <p>Cost: P3.80</p>
-                    <p>Arrival: October 12, 2024</p>
-                    <div class="card-menu">
-                        <i class="fas fa-ellipsis-h"></i>
-                    </div>
+                    <!-- More item-cards here -->
                 </div>
-
-                
-            
-            </div>
-        
-        </section>
-    
+            </section>
+        </div>
     </div>
 
-
-
     <script>
+        // Branch dropdown functionality (if needed)
         const branchSelect = document.querySelector('.branch-select');
         const branchOptions = document.querySelector('.branch-options');
 
@@ -109,6 +99,7 @@
         }
     </script>
 
-    <script src="purchaseorder.js"></script>
+    <script src="/assets/purchaseorder.js"></script>
 </body>
+
 </html>

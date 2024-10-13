@@ -1,8 +1,11 @@
 <div class="sidebar">
-    <h2 class="logo">Sefina's</h2>
+    <div class = "logo">
+        <img src="/img/LOGO_Sefina_noBG.PNG">
+        </div>
     <div class="branch-info">
         <h3 class="branch-select" id="branch-select-toggle">
-            <!-- This is the toggle for the dropdown -->
+            <!-- Shop icon added before the branch name -->
+            <i class="fas fa-store"></i> 
             <span><%= selectedBranch %></span>
             <i class="fas fa-caret-down"></i>
         </h3>
@@ -20,6 +23,7 @@
                 </li>
             <% }) %>
         </ul>
+        
     </div>
     <nav>
         <ul>

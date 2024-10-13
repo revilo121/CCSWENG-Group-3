@@ -13,32 +13,33 @@
     <title>Sefina's Login</title>
 </head>
 <body>
-    <img src="/img/sefina's text no bg.png">
     
-
-    <div class="login-fb">
-        <form action="/login" method="POST"> 
-            <div class="input-fb">
-                <p>Username</p>
-                <input type="text" name="username" required>
-                <br>
-                <p>Password</p>
-                <input type="password" name="password" required>
-                <button type="submit">Login</button> 
+        <div class="container">
+            <div class="login-container">
+                <form action="/login" method="POST">
+                    <img src="/img/LOGO_Sefina_noBG.PNG">
+                    <div class="input-container">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username"  required>
+                    </div>
+                    <div class="input-container">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit">Login</button> 
+                </form>
             </div>
-            
-        </form>
-
-    </div>
-
     
-    <% if (errors && errors.length > 0) { %>
-        <ul class="error-messages">
-            <% errors.forEach(function(error) { %>
-                <b><li><%= error.msg %></li></b>
-            <% }); %>
-        </ul>
-    <% } %>
+            <% if (errors && errors.length > 0) { %>
+                <ul class="error-messages">
+                    <% errors.forEach(function(error) { %>
+                        <li class="error"><%= error.msg %></li>
+                    <% }); %>
+                </ul>
+            <% } %>
+        </div>
+    </html>
+    
 
 </body>
 </html>

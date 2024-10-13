@@ -9,53 +9,55 @@
     <link rel="stylesheet" href="/assets/topbar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
+    <!-- Font links (optimized preconnect) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <%- include('partials/topbar')%>
 
-    <div class = "main-fb">
-
+    <div class="main-fb">
         <%- include('partials/sidebar') %>
-        
+
         <div class="main-content">
+          <h1>Inventory</h1>
+            <!-- Inventory Status Section -->
             <section class="inventory-status">
                 <div class="status out-of-stock">
-                  <i class="fas fa-exclamation-circle"></i>
+                  <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
                   <div class="status-text">
                     <span class="status-label">Out Of Stock</span>
-                    <h2><%= outOfStockCount %></h2> 
+                    <h2><%= outOfStockCount %></h2>
                   </div>
                 </div>
                 <div class="status low-stock">
-                  <i class="fas fa-exclamation-triangle"></i>
+                  <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
                   <div class="status-text">
                     <span class="status-label">Low Stock</span>
-                    <h2><%= lowStockCount %></h2> 
+                    <h2><%= lowStockCount %></h2>
                   </div>
                 </div>
                 <div class="status in-stock">
-                  <i class="fas fa-check-circle"></i>
+                  <i class="fas fa-check-circle" aria-hidden="true"></i>
                   <div class="status-text">
                     <span class="status-label">In Stock</span>
-                    <h2><%= sufficientStockCount %></h2> 
+                    <h2><%= sufficientStockCount %></h2>
                   </div>
                 </div>
-              </section>
-    
+            </section>
+
+            <!-- Inventory Table Section -->
             <section class="inventory-table">
                 <div class="inventory-controls">
-                    <button class="add-item"><i class="fas fa-plus"></i> Add Item</button>
+                    <!-- Add Item Button -->
+                    <button class="add-item" aria-label="Add new item"><i class="fas fa-plus"></i> Add Item</button>
 
-                    <!-- add item modal -->
+                    <!-- Add Item Modal -->
                     <div id="addItemModal" class="modal">
                         <div class="modal-content">
-                          <span class="close">&times;</span>
+                          <span class="close" aria-label="Close modal">&times;</span>
                           <h2>Add New Item</h2>
                           <form id="addItemForm" action="/add-item" method="POST">
                             <label for="name">Item Name</label>
@@ -65,13 +67,13 @@
                             <input type="text" id="category" name="category" required>
                             
                             <label for="price">Price</label>
-                            <input type="number" id="price" name="price" required>
+                            <input type="number" id="price" name="price" min="0" step="0.01" required>
                             
                             <label for="quantityInStock">Quantity In Stock</label>
-                            <input type="number" id="quantity" name="quantity" required>
+                            <input type="number" id="quantity" name="quantity" min="0" required>
                             
                             <label for="lowStockThreshold">Low Stock Threshold</label>
-                            <input type="number" id="lowStockThreshold" name="lowStockThreshold" required>
+                            <input type="number" id="lowStockThreshold" name="lowStockThreshold" min="0" required>
                             
                             <label for="measurementUnit">Measurement Unit</label>
                             <input type="text" id="measurementUnit" name="measurementUnit" required>
@@ -79,39 +81,40 @@
                             <input type="hidden" id="selectedBranch" name="branchStored" value="<%= selectedBranch %>">
                             
                             <button type="submit">Add Item</button>
-                        </form>
-                            </div>
+                          </form>
                         </div>
+                    </div>
 
-
-                        <button class="stock-in">Stock In</button>
-                    <button class="stock-out">Stock Out</button>
+                    <!-- Stock In / Out Buttons -->
+                    <button class="stock-in" aria-label="Stock In">Stock In</button>
+                    <button class="stock-out" aria-label="Stock Out">Stock Out</button>
                     
+                    <!-- Search Bar -->
                     <div class="search-bar">
-                        <input type="text" placeholder="Search items...">
+                        <input type="text" placeholder="Search items..." aria-label="Search inventory">
                         <i class="fas fa-search search-icon"></i>
                     </div>
+
+                    <!-- Sorting and Filtering Controls -->
                     <div class="sorting-controls">
-                        <button class="sort"><i class="fas fa-sort"></i> Sort by</button>
-                        <button class="filter"><i class="fas fa-filter"></i> Filter by</button>
-                        <button class="pagination-btn prev"><i class="fas fa-chevron-left"></i></button>
-                        <button class="pagination-btn next"><i class="fas fa-chevron-right"></i></button>
+                        <button class="sort" aria-label="Sort items"><i class="fas fa-sort"></i> Sort by</button>
+                        <button class="filter" aria-label="Filter items"><i class="fas fa-filter"></i> Filter by</button>
+                        <button class="pagination-btn prev" aria-label="Previous page"><i class="fas fa-chevron-left"></i></button>
+                        <button class="pagination-btn next" aria-label="Next page"><i class="fas fa-chevron-right"></i></button>
                     </div>
                 </div>
-    
+
+                <!-- Inventory Grid -->
                 <div class="inventory-grid" id="inventoryGrid">
                     <% if (inventory && inventory.length > 0) { %>
                       <% inventory.forEach(item => { %>
                         <div class="item-card <%= item.branchStored %>">
                           <div class="card-header">
                             <span class="item-label"><%= item.category %></span>
-                  
-                            <!-- Correct background color handling -->
                             <span class="item-dot 
                                 <%= item.quantity === 0 ? 'red' 
                                 : item.quantity <= item.lowStockThreshold ? 'orange' 
-                                : 'green' %>">
-                            </span>
+                                : 'green' %>"></span>
                           </div>
                           <span class="item-name"><%= item.name %></span>
                           <p>Price: ₱<%= item.price.toFixed(2) %></p>
@@ -125,61 +128,39 @@
                       <p>No items in inventory.</p>
                     <% } %>
                   </div>
-                  
-
             </section>
         </div>
-        </div>
-
     </div>
 
-    
-
-    
-
 <script>
-       // Branch dropdown functionality
-const branchSelect = document.querySelector('.branch-select');
-const branchOptions = document.querySelector('.branch-options');
+    // Branch dropdown functionality
+    const branchSelect = document.querySelector('.branch-select');
+    const branchOptions = document.querySelector('.branch-options');
+    branchSelect.addEventListener('click', () => {
+        branchOptions.classList.toggle('show');
+    });
 
-branchSelect.addEventListener('click', () => {
-    branchOptions.classList.toggle('show');
-});
+    // Modal functionality
+    const modal = document.getElementById("addItemModal");
+    const btn = document.querySelector(".add-item");
+    const span = document.getElementsByClassName("close")[0];
 
-// Modal functionality
-const modal = document.getElementById("addItemModal");
-const btn = document.querySelector(".add-item");
-const span = document.getElementsByClassName("close")[0];
+    // Open the modal when the "Add Item" button is clicked
+    btn.onclick = function() {
+        modal.style.display = "block";
+    }
 
-// Open the modal when the "Add Item" button is clicked
-btn.onclick = function() {
-    modal.style.display = "block";
-}
-
-// Close the modal when the "x" span is clicked
-span.onclick = function() {
-    modal.style.display = "none";
-}
-
-// Close the modal when clicking outside of it
-window.onclick = function(event) {
-    if (event.target == modal) {
+    // Close the modal when the "x" span is clicked
+    span.onclick = function() {
         modal.style.display = "none";
     }
-}
 
-// Ensure the form inside the modal submits properly
-const addItemForm = document.getElementById("addItemForm");
-
-addItemForm.addEventListener('submit', function(event) {
-    // Prevent the form from submitting normally (if you're handling it via JS, otherwise omit this line)
-    // event.preventDefault();
-
-    // Add any additional validation here (optional)
-
-    // The form will now submit to the server
-});
-
-    </script>
+    // Close the modal when clicking outside of it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
 </body>
 </html>
