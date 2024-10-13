@@ -1,0 +1,399 @@
+/* General Styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    background-color: #f4f7fa;
+    display: flex;
+    height: 100vh;
+}
+
+/* Top Bar */
+.top-bar {
+    position: fixed;
+    width: 100%;
+    height: 50px;
+    background-color: #fff;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 30px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+}
+
+.user-avatar {
+    font-size: 25px;
+    margin-right: 10px;
+}
+
+.user-text {
+    font-size: 14px;
+}
+
+.username {
+    font-weight: bold;
+}
+
+.role {
+    font-size: 12px;
+    color: #888;
+}
+
+.profile-dropdown-icon {
+    margin-left: 5px;
+    font-size: 14px;
+}
+
+.profile-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    list-style: none;
+    padding: 10px 0;
+}
+
+.profile-dropdown li {
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+.profile-dropdown li:hover {
+    background-color: #f0f0f0;
+}
+
+.user-info:hover .profile-dropdown {
+    display: block;
+}
+
+
+/* Sidebar */
+.sidebar {
+    width: 25vh;
+    background-color: #f7f7f7;
+    padding: 30px 20px;
+    border-right: 1px solid #ddd;
+    margin-top: 50px; /* To account for the top bar */
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
+
+.logo {
+    font-size: 45px;
+    text-align: center;
+    color: #D9534F;
+    font-weight: bold;
+    margin-bottom: 20px;
+    font-family: 'Dancing Script', cursive;
+}
+
+.branch-info {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.branch-select {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.branch-options {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #fff;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px 0;
+    list-style: none;
+}
+
+.branch-options li {
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+.branch-options li:hover {
+    background-color: #f0f0f0;
+}
+
+.branch-options.show {
+    display: block;
+}
+
+nav ul {
+    list-style: none;
+}
+
+nav ul li {
+    margin: 15px 0;
+}
+
+nav ul li a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    font-size: 16px;
+    color: #333;
+    padding: 12px 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+nav ul li a i {
+    margin-right: 10px;
+}
+
+nav ul li.active a,
+nav ul li a:hover {
+    background-color: #D9534F;
+    color: #fff;
+}
+
+/* Main Content Styling */
+.main-content {
+    flex: 1;
+    padding: 80px 30px 20px 30px; /* Increased top padding to accommodate fixed header */
+    overflow-y: auto;
+}
+
+/* Order Status Section */
+.order-status {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 0 20px; /* Added padding for better alignment with the layout */
+}
+
+.status {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-radius: 10px;
+    background-color: #fff;
+    flex: 1;
+    margin-right: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.status:last-child {
+    margin-right: 0;
+}
+
+.status i {
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+.status-label {
+    font-weight: bold;
+}
+
+.for-approval {
+    background-color: #f8d7da;
+}
+
+.pending {
+    background-color: #fff3cd;
+}
+
+.completed {
+    background-color: #d4edda;
+}
+
+/* Controls for purchase orders */
+.purchase-order-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.create-purchase-order {
+    background-color: #D9534F;
+    color: #fff;
+    border: 1px solid #ddd;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    margin-left: 300px;
+}
+
+.create-purchase-order i {
+    margin-right: 8px;
+}
+
+.create-purchase-order:hover, .stock-in:hover, .stock-out:hover, .stock-move:hover {
+    background-color: #f58686;
+}
+
+.search-bar {
+    position: relative;
+    width: 400px;
+}
+
+.search-bar input {
+    padding: 10px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding-right: 40px;
+}
+
+.search-icon {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    color: #888;
+    cursor: pointer;
+}
+
+.sort, .filter {
+    background-color: #ddd;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.pagination-btn {
+    background-color: #f8f8f8;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.pagination-btn:hover {
+    background-color: #e6e6e6;
+}
+
+.order-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.item-card {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    transition: box-shadow 0.3s;
+}
+
+.item-card:hover {
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.item-label {
+    font-size: 12px;
+    background-color: #f0f0f0;
+    padding: 4px 10px;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+.item-dot {
+    width: 8px;
+    height: 8px;
+    background-color: orange;
+    border-radius: 50%;
+}
+
+/* this is just for sampling (delete this) */
+.item-dot2 {
+    width: 8px;
+    height: 8px;
+    background-color: red;
+    border-radius: 50%;
+}
+
+.item-name {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.card-menu {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+.card-menu i {
+    font-size: 16px;
+    color: #999;
+    cursor: pointer;
+}
+
+.card-menu i:hover {
+    color: #555;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 30%;
+    border-radius: 10px;
+}
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+.close:hover, .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}

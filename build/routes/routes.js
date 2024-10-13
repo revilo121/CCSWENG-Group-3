@@ -96,8 +96,6 @@ router.get('/dashboard', async (req, res) => {
 router.get('/inventory', async (req, res) => {
   if (req.session.isAuthenticated) {
     const branches = await Branch.find({}, 'name');  // Fetch all branch names
-
-    
     
 
     // Set the selected branch, defaulting to 'Main' if none is selected
@@ -154,14 +152,40 @@ router.post('/add-item', async (req, res) => {
 });
 
 
-router.get('/purchaseorder', (req, res) => {
+router.get('/purchaseorder', async (req, res) => {
   if (req.session.isAuthenticated) {
       const store = req.query.store || 'default'; 
-      res.render('purchaseorder', {currentRoute: '/purchaseorder' } ); 
+      const branches = await Branch.find({}, 'name');
+      const selectedBranch = req.session.selectedBranch || 'Main';
+      const inventory = await Item.find({ branchStored: selectedBranch });
+      const outOfStockCount = inventory.filter(item => item.quantity === 0).length;
+      const lowStockCount = inventory.filter(item => item.quantity > 0 && item.quantity <= item.lowStockThreshold).length;
+      const sufficientStockCount = inventory.filter(item => item.quantity > item.lowStockThreshold).length;
+      
+      try {
+          const purchaseOrders = await Item.find({ branchStored: selectedBranch });
+          res.render('purchaseorder', { 
+              currentRoute: '/purchaseorder', 
+              purchaseOrders: purchaseOrders,
+              username: req.session.username, 
+              role: req.session.role, 
+              branches, 
+              selectedBranch,
+              outOfStockCount,
+              lowStockCount,
+              sufficientStockCount
+
+          }); 
+      } catch (error) {
+          console.error(error);
+          res.status(500).send("Error fetching purchase orders.");
+      }
+
   } else {
       res.redirect('/'); 
   }
 });
+
 
 
 router.get('/logout', (req, res) => {
