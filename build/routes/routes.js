@@ -93,10 +93,26 @@ router.get('/dashboard', async (req, res) => {
 });
 
 
+router.get('/api/item/name/:name', async (req, res) => {
+  try {
+      const item = await Item.findOne({ name: req.params.name });
+      if (item) {
+          res.json(item);
+      } else {
+          res.status(404).send('Item not found');
+      }
+  } catch (error) {
+      res.status(500).send('Server error');
+  }
+});
+
 router.get('/inventory', async (req, res) => {
   if (req.session.isAuthenticated) {
     const branches = await Branch.find({}, 'name');  // Fetch all branch names
+<<<<<<< Updated upstream
     
+=======
+>>>>>>> Stashed changes
 
     // Set the selected branch, defaulting to 'Main' if none is selected
     const selectedBranch = req.session.selectedBranch || 'Main';
@@ -151,6 +167,36 @@ router.post('/add-item', async (req, res) => {
   }
 });
 
+router.post('/update-item', async (req, res) => {
+  const { name, category, price, quantity, lowStockThreshold, measurementUnit, branchStored } = req.body;
+
+  try {
+      // Find the item and update it in the database
+      const updatedItem = await Item.findOneAndUpdate(
+          { name: name, branchStored: branchStored }, // Filter to find the item
+          {
+              category: category,
+              price: price,
+              quantity: quantity,
+              lowStockThreshold: lowStockThreshold,
+              measurementUnit: measurementUnit
+          },
+          { new: true }  // Options: `new: true` to return the updated item
+      );
+
+      if (!updatedItem) {
+          return res.status(404).json({ success: false, message: 'Item not found.' });
+      }
+
+      // If successful, return the updated item
+      res.json({ success: true, updatedItem });
+      res.redirect('/inventory');
+
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ success: false, message: 'Error updating item.' });
+  }
+});
 
 router.get('/purchaseorder', async (req, res) => {
   if (req.session.isAuthenticated) {

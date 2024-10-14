@@ -51,8 +51,25 @@
             <!-- Inventory Table Section -->
             <section class="inventory-table">
                 <div class="inventory-controls">
+<<<<<<< Updated upstream
                     <!-- Add Item Button -->
                     <button class="add-item" aria-label="Add new item"><i class="fas fa-plus"></i> Add Item</button>
+=======
+                    <button class="add-item"><i class="fas fa-plus"></i> Add Item</button>
+                    <button class="stock-in">Stock In</button>
+                    <button class="stock-out">Stock Out</button>
+                    
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search items...">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                    <div class="sorting-controls">
+                        <button class="sort"><i class="fas fa-sort"></i> Sort by</button>
+                        <button class="filter"><i class="fas fa-filter"></i> Filter by</button>
+                        <button class="pagination-btn prev"><i class="fas fa-chevron-left"></i></button>
+                        <button class="pagination-btn next"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+>>>>>>> Stashed changes
 
                     <!-- Add Item Modal -->
                     <div id="addItemModal" class="modal">
@@ -85,6 +102,7 @@
                         </div>
                     </div>
 
+<<<<<<< Updated upstream
                     <!-- Stock In / Out Buttons -->
                     <button class="stock-in" aria-label="Stock In">Stock In</button>
                     <button class="stock-out" aria-label="Stock Out">Stock Out</button>
@@ -115,19 +133,90 @@
                                 <%= item.quantity === 0 ? 'red' 
                                 : item.quantity <= item.lowStockThreshold ? 'orange' 
                                 : 'green' %>"></span>
+=======
+                        
+                      </div>
+
+
+                    
+
+                    <div class="inventory-grid" id="inventoryGrid">
+                      <% if (inventory && inventory.length > 0) { %>
+                        <% inventory.forEach(item => { %>
+                          <div class="item-card <%= item.branchStored %>" 
+                               data-name="<%= item.name %>" 
+                               data-category="<%= item.category %>"
+                               data-price="<%= item.price %>"
+                               data-quantity="<%= item.quantity %>"
+                               data-lowstockthreshold="<%= item.lowStockThreshold %>"
+                               data-measurementunit="<%= item.measurementUnit %>"
+                               data-branch="<%= item.branchStored %>">
+                            <div class="card-header">
+                              <span class="item-label"><%= item.category %></span>
+                              
+                              <!-- Correct background color handling -->
+                              <span class="item-dot 
+                                  <%= item.quantity === 0 ? 'red' 
+                                  : item.quantity <= item.lowStockThreshold ? 'orange' 
+                                  : 'green' %>">
+                              </span>
+                            </div>
+                            <span class="item-name"><%= item.name %></span>
+                            <p>Price: ₱<%= item.price.toFixed(2) %></p>
+                            <p>In Stock: <%= item.quantity %> <%= item.measurementUnit %></p>
+                            <div class="card-menu">
+                              <i class="fas fa-ellipsis-h"></i>
+                            </div>
                           </div>
-                          <span class="item-name"><%= item.name %></span>
-                          <p>Price: ₱<%= item.price.toFixed(2) %></p>
-                          <p>In Stock: <%= item.quantity %> <%= item.measurementUnit %></p>
-                          <div class="card-menu">
-                            <i class="fas fa-ellipsis-h"></i>
+                        <% }) %>
+                      <% } else { %>
+                        <p>No items in inventory.</p>
+                      <% } %>
+                    </div>
+                </div>
+                
+                <div id="viewItemModal" class="modal">
+                  <div class="modal-content">
+                      <span class="close">&times;</span>
+                      <h2>Item Details</h2>
+                      <form id="viewItemForm">
+                          <label for="name">Item Name</label>
+                          <input type="text" id="viewName" name="name" readonly>
+                          
+                          <label for="category">Category</label>
+                          <input type="text" id="viewCategory" name="category" readonly>
+                          
+                          <label for="price">Price</label>
+                          <input type="number" id="viewPrice" name="price" readonly>
+                          
+                          <label for="quantityInStock">Quantity In Stock</label>
+                          <input type="number" id="viewQuantity" name="quantity" readonly>
+                          
+                          <label for="lowStockThreshold">Low Stock Threshold</label>
+                          <input type="number" id="viewLowStockThreshold" name="lowStockThreshold" readonly>
+                          
+                          <label for="measurementUnit">Measurement Unit</label>
+                          <input type="text" id="viewMeasurementUnit" name="measurementUnit" readonly>
+                          
+                          <input type="hidden" id="viewSelectedBranch" name="branchStored">
+                          
+                          <!-- Buttons -->
+                          <div class="button-group">
+                              <button type="button" id="editItemBtn">Edit</button>
+                              <button type="button" id="deleteItemBtn">Delete</button>
+                              <button type="button" id="applyChangesBtn" disabled>Apply</button>
+>>>>>>> Stashed changes
                           </div>
-                        </div>
-                      <% }) %>
-                    <% } else { %>
-                      <p>No items in inventory.</p>
-                    <% } %>
+                      </form>
                   </div>
+<<<<<<< Updated upstream
+=======
+              </div>
+                
+                
+                  
+
+>>>>>>> Stashed changes
             </section>
         </div>
     </div>
@@ -155,6 +244,7 @@
         modal.style.display = "none";
     }
 
+<<<<<<< Updated upstream
     // Close the modal when clicking outside of it
     window.onclick = function(event) {
         if (event.target == modal) {
@@ -162,5 +252,133 @@
         }
     }
 </script>
+=======
+// Ensure the form inside the modal submits properly
+const addItemForm = document.getElementById("addItemForm");
+
+addItemForm.addEventListener('submit', function(event) {
+    // Prevent the form from submitting normally (if you're handling it via JS, otherwise omit this line)
+    // event.preventDefault();
+
+    // Add any additional validation here (optional)
+
+    // The form will now submit to the server
+});
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const itemCards = document.querySelectorAll('.item-card');  // Select all item cards
+    const modal = document.getElementById('viewItemModal');      // Modal element
+    const closeModal = modal.querySelector('.close');            // Close button
+
+    // Modal input fields
+    const viewName = document.getElementById('viewName');
+    const viewCategory = document.getElementById('viewCategory');
+    const viewPrice = document.getElementById('viewPrice');
+    const viewQuantity = document.getElementById('viewQuantity');
+    const viewLowStockThreshold = document.getElementById('viewLowStockThreshold');
+    const viewMeasurementUnit = document.getElementById('viewMeasurementUnit');
+    const viewSelectedBranch = document.getElementById('viewSelectedBranch');
+
+    // Buttons
+    const editItemBtn = document.getElementById('editItemBtn');
+    const applyChangesBtn = document.getElementById('applyChangesBtn');
+
+    // Add event listeners to each item card
+    itemCards.forEach(card => {
+        card.addEventListener('click', () => {
+            // Set the modal fields with the clicked item's data
+            viewName.value = card.getAttribute('data-name');
+            viewCategory.value = card.getAttribute('data-category');
+            viewPrice.value = card.getAttribute('data-price');
+            viewQuantity.value = card.getAttribute('data-quantity');
+            viewLowStockThreshold.value = card.getAttribute('data-lowstockthreshold');
+            viewMeasurementUnit.value = card.getAttribute('data-measurementunit');
+            viewSelectedBranch.value = card.getAttribute('data-branch');
+
+            // Make sure the inputs are readonly and Apply button is disabled by default
+            toggleInputFields(false);
+            applyChangesBtn.disabled = true;
+
+            // Display the modal
+            modal.style.display = 'block';
+        });
+    });
+
+    // Close the modal when the close button is clicked
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    // Close the modal when clicking outside the modal content
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    // Edit button functionality: Enable the input fields and Apply button
+    editItemBtn.addEventListener('click', () => {
+        toggleInputFields(true); // Enable editing
+        applyChangesBtn.disabled = false; // Enable Apply button
+    });
+
+    // Apply button functionality: Save the changes (make a POST request)
+    document.getElementById('applyChangesBtn').addEventListener('click', async () => {
+    // Get the updated values from the form inputs
+    const name = document.getElementById('viewName').value;
+    const category = document.getElementById('viewCategory').value;
+    const price = document.getElementById('viewPrice').value;
+    const quantity = document.getElementById('viewQuantity').value;
+    const lowStockThreshold = document.getElementById('viewLowStockThreshold').value;
+    const measurementUnit = document.getElementById('viewMeasurementUnit').value;
+    const branchStored = document.getElementById('viewSelectedBranch').value;
+
+    // Make the POST request to send the updated data to the server
+    try {
+        const response = await fetch('/update-item', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name,
+                category: category,
+                price: price,
+                quantity: quantity,
+                lowStockThreshold: lowStockThreshold,
+                measurementUnit: measurementUnit,
+                branchStored: branchStored
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert('Item updated successfully!');
+            // Optionally, you could refresh the item list or update the UI here
+        } else {
+            alert('Failed to update the item.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('There was an error updating the item.');
+    }
+});
+
+    // Function to toggle readonly state of input fields
+    function toggleInputFields(editable) {
+        viewName.readOnly = !editable;
+        viewCategory.readOnly = !editable;
+        viewPrice.readOnly = !editable;
+        viewQuantity.readOnly = !editable;
+        viewLowStockThreshold.readOnly = !editable;
+        viewMeasurementUnit.readOnly = !editable;
+    }
+});
+
+
+    </script>
+>>>>>>> Stashed changes
 </body>
 </html>
