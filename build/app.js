@@ -25,7 +25,7 @@ const User = require('./models/user');
 const Branch = require('./models/branch');
 const Item = require('./models/item');
 
-
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
     secret: 'secret',

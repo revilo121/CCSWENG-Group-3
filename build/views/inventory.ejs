@@ -16,13 +16,14 @@
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <%- include('partials/topbar')%>
+    <%- include('partials/topbar') %>
 
     <div class="main-fb">
         <%- include('partials/sidebar') %>
 
         <div class="main-content">
           <h1>Inventory</h1>
+
             <!-- Inventory Status Section -->
             <section class="inventory-status">
                 <div class="status out-of-stock">
@@ -51,25 +52,24 @@
             <!-- Inventory Table Section -->
             <section class="inventory-table">
                 <div class="inventory-controls">
-<<<<<<< Updated upstream
                     <!-- Add Item Button -->
-                    <button class="add-item" aria-label="Add new item"><i class="fas fa-plus"></i> Add Item</button>
-=======
                     <button class="add-item"><i class="fas fa-plus"></i> Add Item</button>
                     <button class="stock-in">Stock In</button>
                     <button class="stock-out">Stock Out</button>
                     
+                    <!-- Search Bar -->
                     <div class="search-bar">
-                        <input type="text" placeholder="Search items...">
+                        <input type="text" placeholder="Search items..." aria-label="Search inventory">
                         <i class="fas fa-search search-icon"></i>
                     </div>
+
+                    <!-- Sorting and Filtering Controls -->
                     <div class="sorting-controls">
-                        <button class="sort"><i class="fas fa-sort"></i> Sort by</button>
-                        <button class="filter"><i class="fas fa-filter"></i> Filter by</button>
-                        <button class="pagination-btn prev"><i class="fas fa-chevron-left"></i></button>
-                        <button class="pagination-btn next"><i class="fas fa-chevron-right"></i></button>
+                        <button class="sort" aria-label="Sort items"><i class="fas fa-sort"></i> Sort by</button>
+                        <button class="filter" aria-label="Filter items"><i class="fas fa-filter"></i> Filter by</button>
+                        <button class="pagination-btn prev" aria-label="Previous page"><i class="fas fa-chevron-left"></i></button>
+                        <button class="pagination-btn next" aria-label="Next page"><i class="fas fa-chevron-right"></i></button>
                     </div>
->>>>>>> Stashed changes
 
                     <!-- Add Item Modal -->
                     <div id="addItemModal" class="modal">
@@ -101,135 +101,85 @@
                           </form>
                         </div>
                     </div>
-
-<<<<<<< Updated upstream
-                    <!-- Stock In / Out Buttons -->
-                    <button class="stock-in" aria-label="Stock In">Stock In</button>
-                    <button class="stock-out" aria-label="Stock Out">Stock Out</button>
-                    
-                    <!-- Search Bar -->
-                    <div class="search-bar">
-                        <input type="text" placeholder="Search items..." aria-label="Search inventory">
-                        <i class="fas fa-search search-icon"></i>
-                    </div>
-
-                    <!-- Sorting and Filtering Controls -->
-                    <div class="sorting-controls">
-                        <button class="sort" aria-label="Sort items"><i class="fas fa-sort"></i> Sort by</button>
-                        <button class="filter" aria-label="Filter items"><i class="fas fa-filter"></i> Filter by</button>
-                        <button class="pagination-btn prev" aria-label="Previous page"><i class="fas fa-chevron-left"></i></button>
-                        <button class="pagination-btn next" aria-label="Next page"><i class="fas fa-chevron-right"></i></button>
-                    </div>
                 </div>
 
                 <!-- Inventory Grid -->
                 <div class="inventory-grid" id="inventoryGrid">
                     <% if (inventory && inventory.length > 0) { %>
                       <% inventory.forEach(item => { %>
-                        <div class="item-card <%= item.branchStored %>">
+                        <div class="item-card <%= item.branchStored %>" 
+                             data-name="<%= item.name %>" 
+                             data-category="<%= item.category %>"
+                             data-price="<%= item.price %>"
+                             data-quantity="<%= item.quantity %>"
+                             data-lowstockthreshold="<%= item.lowStockThreshold %>"
+                             data-measurementunit="<%= item.measurementUnit %>"
+                             data-branch="<%= item.branchStored %>">
                           <div class="card-header">
                             <span class="item-label"><%= item.category %></span>
+                            
+                            <!-- Correct background color handling -->
                             <span class="item-dot 
                                 <%= item.quantity === 0 ? 'red' 
                                 : item.quantity <= item.lowStockThreshold ? 'orange' 
-                                : 'green' %>"></span>
-=======
-                        
-                      </div>
-
-
-                    
-
-                    <div class="inventory-grid" id="inventoryGrid">
-                      <% if (inventory && inventory.length > 0) { %>
-                        <% inventory.forEach(item => { %>
-                          <div class="item-card <%= item.branchStored %>" 
-                               data-name="<%= item.name %>" 
-                               data-category="<%= item.category %>"
-                               data-price="<%= item.price %>"
-                               data-quantity="<%= item.quantity %>"
-                               data-lowstockthreshold="<%= item.lowStockThreshold %>"
-                               data-measurementunit="<%= item.measurementUnit %>"
-                               data-branch="<%= item.branchStored %>">
-                            <div class="card-header">
-                              <span class="item-label"><%= item.category %></span>
-                              
-                              <!-- Correct background color handling -->
-                              <span class="item-dot 
-                                  <%= item.quantity === 0 ? 'red' 
-                                  : item.quantity <= item.lowStockThreshold ? 'orange' 
-                                  : 'green' %>">
-                              </span>
-                            </div>
-                            <span class="item-name"><%= item.name %></span>
-                            <p>Price: ₱<%= item.price.toFixed(2) %></p>
-                            <p>In Stock: <%= item.quantity %> <%= item.measurementUnit %></p>
-                            <div class="card-menu">
-                              <i class="fas fa-ellipsis-h"></i>
-                            </div>
+                                : 'green' %>">
+                            </span>
                           </div>
-                        <% }) %>
-                      <% } else { %>
-                        <p>No items in inventory.</p>
-                      <% } %>
-                    </div>
-                </div>
-                
-                <div id="viewItemModal" class="modal">
-                  <div class="modal-content">
-                      <span class="close">&times;</span>
-                      <h2>Item Details</h2>
-                      <form id="viewItemForm">
-                          <label for="name">Item Name</label>
-                          <input type="text" id="viewName" name="name" readonly>
-                          
-                          <label for="category">Category</label>
-                          <input type="text" id="viewCategory" name="category" readonly>
-                          
-                          <label for="price">Price</label>
-                          <input type="number" id="viewPrice" name="price" readonly>
-                          
-                          <label for="quantityInStock">Quantity In Stock</label>
-                          <input type="number" id="viewQuantity" name="quantity" readonly>
-                          
-                          <label for="lowStockThreshold">Low Stock Threshold</label>
-                          <input type="number" id="viewLowStockThreshold" name="lowStockThreshold" readonly>
-                          
-                          <label for="measurementUnit">Measurement Unit</label>
-                          <input type="text" id="viewMeasurementUnit" name="measurementUnit" readonly>
-                          
-                          <input type="hidden" id="viewSelectedBranch" name="branchStored">
-                          
-                          <!-- Buttons -->
-                          <div class="button-group">
-                              <button type="button" id="editItemBtn">Edit</button>
-                              <button type="button" id="deleteItemBtn">Delete</button>
-                              <button type="button" id="applyChangesBtn" disabled>Apply</button>
->>>>>>> Stashed changes
+                          <span class="item-name"><%= item.name %></span>
+                          <p>Price: ₱<%= item.price.toFixed(2) %></p>
+                          <p>In Stock: <%= item.quantity %> <%= item.measurementUnit %></p>
+                          <div class="card-menu">
+                            <i class="fas fa-ellipsis-h"></i>
                           </div>
-                      </form>
+                        </div>
+                      <% }) %>
+                    <% } else { %>
+                      <p>No items in inventory.</p>
+                    <% } %>
                   </div>
-<<<<<<< Updated upstream
-=======
               </div>
-                
-                
-                  
-
->>>>>>> Stashed changes
             </section>
+
+            <!-- Item On Click Modal -->
+            <div id="viewItemModal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Item Details</h2>
+                    
+                    <form id="viewItemForm">
+                        <label for="name">Item Name</label>
+                        <input type="text" id="viewName" name="name" readonly>
+                        
+                        <label for="category">Category</label>
+                        <input type="text" id="viewCategory" name="category" readonly>
+                        
+                        <label for="price">Price</label>
+                        <input type="number" id="viewPrice" name="price" readonly>
+                        
+                        <label for="quantityInStock">Quantity In Stock</label>
+                        <input type="number" id="viewQuantity" name="quantity" readonly>
+                        
+                        <label for="lowStockThreshold">Low Stock Threshold</label>
+                        <input type="number" id="viewLowStockThreshold" name="lowStockThreshold" readonly>
+                        
+                        <label for="measurementUnit">Measurement Unit</label>
+                        <input type="text" id="viewMeasurementUnit" name="measurementUnit" readonly>
+                        
+                        <input type="hidden" id="viewSelectedBranch" name="branchStored">
+                        
+                        <div class="button-group">
+                            <button type="button" id="editItemBtn">Edit</button>
+                            <button type="button" id="deleteItemBtn">Delete</button>
+                            <button type ="button" id="applyBtn">Apply</button>
+                        </div>
+                    </form>
+                </div>
+              </div>
         </div>
     </div>
 
 <script>
-    // Branch dropdown functionality
-    const branchSelect = document.querySelector('.branch-select');
-    const branchOptions = document.querySelector('.branch-options');
-    branchSelect.addEventListener('click', () => {
-        branchOptions.classList.toggle('show');
-    });
-
-    // Modal functionality
+    // ADD Modal functionality
     const modal = document.getElementById("addItemModal");
     const btn = document.querySelector(".add-item");
     const span = document.getElementsByClassName("close")[0];
@@ -244,32 +194,23 @@
         modal.style.display = "none";
     }
 
-<<<<<<< Updated upstream
     // Close the modal when clicking outside of it
     window.onclick = function(event) {
         if (event.target == modal) {
             modal.style.display = "none";
         }
     }
-</script>
-=======
-// Ensure the form inside the modal submits properly
-const addItemForm = document.getElementById("addItemForm");
 
-addItemForm.addEventListener('submit', function(event) {
-    // Prevent the form from submitting normally (if you're handling it via JS, otherwise omit this line)
-    // event.preventDefault();
-
-    // Add any additional validation here (optional)
-
-    // The form will now submit to the server
-});
-
-
-document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
     const itemCards = document.querySelectorAll('.item-card');  // Select all item cards
     const modal = document.getElementById('viewItemModal');      // Modal element
     const closeModal = modal.querySelector('.close');            // Close button
+
+       // Button elements
+    const editItemBtn = document.getElementById('editItemBtn');
+    const applyBtn = document.getElementById('applyBtn');
+    applyBtn.disabled = true;
+    const deleteItemBtn = document.getElementById('deleteItemBtn');
 
     // Modal input fields
     const viewName = document.getElementById('viewName');
@@ -280,105 +221,165 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewMeasurementUnit = document.getElementById('viewMeasurementUnit');
     const viewSelectedBranch = document.getElementById('viewSelectedBranch');
 
-    // Buttons
-    const editItemBtn = document.getElementById('editItemBtn');
-    const applyChangesBtn = document.getElementById('applyChangesBtn');
-
     // Add event listeners to each item card
     itemCards.forEach(card => {
-        card.addEventListener('click', () => {
-            // Set the modal fields with the clicked item's data
-            viewName.value = card.getAttribute('data-name');
-            viewCategory.value = card.getAttribute('data-category');
-            viewPrice.value = card.getAttribute('data-price');
-            viewQuantity.value = card.getAttribute('data-quantity');
-            viewLowStockThreshold.value = card.getAttribute('data-lowstockthreshold');
-            viewMeasurementUnit.value = card.getAttribute('data-measurementunit');
-            viewSelectedBranch.value = card.getAttribute('data-branch');
+      card.addEventListener('click', () => {
+        // Set the modal fields with the clicked item's data
+        viewName.value = card.getAttribute('data-name');
+        viewCategory.value = card.getAttribute('data-category');
+        viewPrice.value = card.getAttribute('data-price');
+        viewQuantity.value = card.getAttribute('data-quantity');
+        viewLowStockThreshold.value = card.getAttribute('data-lowstockthreshold');
+        viewMeasurementUnit.value = card.getAttribute('data-measurementunit');
+        viewSelectedBranch.value = card.getAttribute('data-branch');
 
-            // Make sure the inputs are readonly and Apply button is disabled by default
-            toggleInputFields(false);
-            applyChangesBtn.disabled = true;
+        disableFields();
 
-            // Display the modal
-            modal.style.display = 'block';
-        });
+        // Display the modal
+        modal.style.display = 'block';
+      });
     });
 
     // Close the modal when the close button is clicked
     closeModal.addEventListener('click', () => {
-        modal.style.display = 'none';
+      modal.style.display = 'none';
     });
 
     // Close the modal when clicking outside the modal content
     window.addEventListener('click', (event) => {
-        if (event.target === modal) {
-            modal.style.display = 'none';
-        }
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
     });
 
-    // Edit button functionality: Enable the input fields and Apply button
     editItemBtn.addEventListener('click', () => {
-        toggleInputFields(true); // Enable editing
-        applyChangesBtn.disabled = false; // Enable Apply button
+      enableFields();
+      applyBtn.disabled = false;  // Enable "Apply" button
     });
 
-    // Apply button functionality: Save the changes (make a POST request)
-    document.getElementById('applyChangesBtn').addEventListener('click', async () => {
-    // Get the updated values from the form inputs
-    const name = document.getElementById('viewName').value;
-    const category = document.getElementById('viewCategory').value;
-    const price = document.getElementById('viewPrice').value;
-    const quantity = document.getElementById('viewQuantity').value;
-    const lowStockThreshold = document.getElementById('viewLowStockThreshold').value;
-    const measurementUnit = document.getElementById('viewMeasurementUnit').value;
-    const branchStored = document.getElementById('viewSelectedBranch').value;
+    // Handle the "Apply" button click to send updated data to the server
+    applyBtn.addEventListener('click', async () => {
+      const updatedItem = {
+        name: viewName.value,
+        category: viewCategory.value,
+        price: parseFloat(viewPrice.value),
+        quantity: parseInt(viewQuantity.value),
+        lowStockThreshold: parseInt(viewLowStockThreshold.value),
+        measurementUnit: viewMeasurementUnit.value,
+        branchStored: viewSelectedBranch.value
+      };
 
-    // Make the POST request to send the updated data to the server
-    try {
+      try {
         const response = await fetch('/update-item', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name: name,
-                category: category,
-                price: price,
-                quantity: quantity,
-                lowStockThreshold: lowStockThreshold,
-                measurementUnit: measurementUnit,
-                branchStored: branchStored
-            })
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updatedItem)
         });
 
-        const result = await response.json();
-
-        if (result.success) {
-            alert('Item updated successfully!');
-            // Optionally, you could refresh the item list or update the UI here
+        if (response.ok) {
+          alert('Item updated successfully!');
+          modal.style.display = 'none';
+          location.reload(); // Reload the page to reflect changes
         } else {
-            alert('Failed to update the item.');
+          alert('Failed to update the item.');
+        }
+      } catch (error) {
+        console.error('Error updating item:', error);
+        alert('An error occurred while updating the item.');
+      }
+    });
+
+    // Function to disable input fields
+    function disableFields() {
+      viewName.readOnly = true;
+      viewCategory.readOnly = true;
+      viewPrice.readOnly = true;
+      viewQuantity.readOnly = true;
+      viewLowStockThreshold.readOnly = true;
+      viewMeasurementUnit.readOnly = true;
+    }
+
+    // Function to enable input fields
+    function enableFields() {
+      viewName.readOnly = false;
+      viewCategory.readOnly = false;
+      viewPrice.readOnly = false;
+      viewQuantity.readOnly = false;
+      viewLowStockThreshold.readOnly = false;
+      viewMeasurementUnit.readOnly = false;
+    }
+
+    deleteItemBtn.addEventListener('click', async () => {
+    const name = document.getElementById('viewName').value;
+    const branchStored = document.getElementById('viewSelectedBranch').value;
+
+    const confirmDelete = confirm(`Are you sure you want to delete the item: ${name}?`);
+    if (!confirmDelete) return;
+
+    try {
+      const response = await fetch('/delete-item', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, branchStored }),  // Pass the item name and branch in the request body
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert('Item deleted successfully');
+        window.location.reload();  // Reload the page or update the inventory UI
+      } else {
+        alert('Failed to delete the item: ' + data.message);
+      }
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      alert('An error occurred while trying to delete the item.');
+    }
+  });
+
+  const searchInput = document.getElementById('searchInput');
+
+
+  searchInput.addEventListener('keyup', async () => {
+    const searchTerm = searchInput.value;
+
+    try {
+        const response = await fetch(`/search-item?q=${encodeURIComponent(searchTerm)}`);
+        const items = await response.json();
+
+        // Update the UI to display the search results
+        const inventoryGrid = document.getElementById('inventoryGrid');
+        inventoryGrid.innerHTML = '';  // Clear existing items
+
+        if (items.length > 0) {
+            items.forEach(item => {
+                const itemCard = document.createElement('div');
+                itemCard.classList.add('item-card', item.branchStored);
+                itemCard.innerHTML = `
+                    <div class="card-header">
+                        <span class="item-label">${item.category}</span>
+                        <span class="item-dot ${item.quantity === 0 ? 'red' : item.quantity <= item.lowStockThreshold ? 'orange' : 'green'}"></span>
+                    </div>
+                    <span class="item-name">${item.name}</span>
+                    <p>Price: ₱${item.price.toFixed(2)}</p>
+                    <p>In Stock: ${item.quantity} ${item.measurementUnit}</p>
+                    <div class="card-menu">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </div>
+                `;
+                inventoryGrid.appendChild(itemCard);  // Add the new item cards to the grid
+            });
+        } else {
+            inventoryGrid.innerHTML = '<p>No items found.</p>';
         }
     } catch (error) {
-        console.error('Error:', error);
-        alert('There was an error updating the item.');
+        console.error('Error fetching search results:', error);
     }
 });
-
-    // Function to toggle readonly state of input fields
-    function toggleInputFields(editable) {
-        viewName.readOnly = !editable;
-        viewCategory.readOnly = !editable;
-        viewPrice.readOnly = !editable;
-        viewQuantity.readOnly = !editable;
-        viewLowStockThreshold.readOnly = !editable;
-        viewMeasurementUnit.readOnly = !editable;
-    }
 });
-
-
-    </script>
->>>>>>> Stashed changes
+</script>
 </body>
 </html>

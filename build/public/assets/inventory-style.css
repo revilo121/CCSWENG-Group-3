@@ -241,7 +241,8 @@ body {
   .modal-content {
     background-color: white;
     margin: 10% auto;
-    padding: 20px;
+    margin-top: 4%;
+    padding: 3vh;
     border-radius: 10px;
     width: 50%; /* Width of modal */
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
