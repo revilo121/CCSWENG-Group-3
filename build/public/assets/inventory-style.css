@@ -84,7 +84,7 @@ body {
     margin-bottom: 15px;
 }
 
-.add-item, .stock-in, .stock-out, .stock-move {
+.remove-filters {
     background-color: #f8f8f8;
     color: #333;
     border: 1px solid #ddd;
@@ -96,19 +96,42 @@ body {
     display: flex;
     align-items: center;
     margin-right: 10px;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
 }
+
+.remove-filters:hover {
+    background-color: gray;
+}
+
+.add-item {
+    background-color: #D9534F;
+    color: #fff;
+    border: 1px solid #ddd;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
 
 .add-item i {
     margin-right: 8px;
 }
 
 .add-item:hover, .stock-in:hover, .stock-out:hover, .stock-move:hover {
-    background-color: #e6e6e6;
+    background-color: gray;
 }
 
 .search-bar {
     position: relative;
-    width: 400px;
+    width: 50%;
+    margin-right: 1vh;
 }
 
 .search-bar input {
@@ -278,7 +301,7 @@ body {
 
   form button {
     padding: 10px 15px;
-    background-color: #4CAF50;
+    background-color: #D9534F;
     color: white;
     border: none;
     border-radius: 5px;
@@ -286,6 +309,131 @@ body {
   }
 
   form button:hover {
-    background-color: #45a049;
+    background-color: gray;
   }
 
+
+
+.button-group {
+    display:flex;
+    gap:1vh;
+}
+
+#applyBtn{
+    margin-left: auto;
+}
+
+
+/* Stock In/Out Modal Styles */
+#stockInOutModal {
+    display: none; 
+    position: fixed;
+    z-index: 1000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100vh; 
+    overflow: auto; 
+    background-color: rgba(0, 0, 0, 0.5); 
+}
+
+#stockInOutModal .modal-content {
+    background-color: #fefefe;
+    margin: 10vh auto; 
+    padding: 5vh;
+    padding-bottom: 10vh;
+    border: 1px solid #888;
+    width: 80%; 
+    max-width: 400px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+#stockInOutModal .close {
+    color: #aaa;
+    float: right;
+    font-size: 6vh; /* Responsive font size */
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#stockInOutModal .close:hover,
+#stockInOutModal .close:focus {
+    color: black;
+    text-decoration: none;
+}
+
+.stock-adjustment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5vh 0; /* Responsive margin */
+    margin-top: 10vh;
+}
+
+.stock-adjustment button {
+    width: 8vh; /* Responsive button size */
+    height: 8vh;
+    font-size: 4vh; /* Larger font for better visibility */
+    margin: 0 2vh;
+    cursor: pointer;
+    border: none;
+    border-radius: 4vh;
+    background-color: #D9534F;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+.stock-adjustment button:hover {
+    background-color: gray;
+}
+
+#stockCount {
+    font-size: 5vh; /* Larger font size for better readability */
+    width: 15vh;
+    text-align: center;
+}
+
+#confirmStockBtn {
+    width: 50%;
+    padding: 2vh 0;
+    font-size: 3vh;
+    cursor: pointer;
+    background-color: #D9534F;
+    color: white;
+    border: none;
+    border-radius: 4vh;
+    transition: background-color 0.3s ease;
+    margin-left: 13vh;
+    margin-top: 3vh;
+}
+
+#confirmStockBtn:hover {
+    background-color: gray;
+}
+
+
+#viewItemForm input[readonly] {
+    background-color: #e9ecef; 
+    color: #6c757d;            
+    cursor: not-allowed;       
+    border: 1px solid #ced4da; 
+}
+
+button:disabled {
+    background-color: #d3d3d3; 
+    color: #a9a9a9; 
+    cursor: not-allowed; 
+}
+
+
+#viewItemForm input {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+
+#viewItemForm input:not([readonly]) {
+    background-color: #ffffff; 
+    color: #212529;           
+    cursor: text;              
+}

@@ -14,6 +14,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;400;700&display=swap" rel="stylesheet">
+    
+    
+    
 </head>
 <body>
     <%- include('partials/topbar') %>
@@ -54,12 +57,12 @@
                 <div class="inventory-controls">
                     <!-- Add Item Button -->
                     <button class="add-item"><i class="fas fa-plus"></i> Add Item</button>
-                    <button class="stock-in">Stock In</button>
-                    <button class="stock-out">Stock Out</button>
+                    <button class="remove-filters">Remove Search/Filter</button>
+                    
                     
                     <!-- Search Bar -->
                     <div class="search-bar">
-                        <input type="text" placeholder="Search items..." aria-label="Search inventory">
+                        <input type="text" id="searchInput" placeholder="Search items..." aria-label="Search inventory">
                         <i class="fas fa-search search-icon"></i>
                     </div>
 
@@ -67,8 +70,7 @@
                     <div class="sorting-controls">
                         <button class="sort" aria-label="Sort items"><i class="fas fa-sort"></i> Sort by</button>
                         <button class="filter" aria-label="Filter items"><i class="fas fa-filter"></i> Filter by</button>
-                        <button class="pagination-btn prev" aria-label="Previous page"><i class="fas fa-chevron-left"></i></button>
-                        <button class="pagination-btn next" aria-label="Next page"><i class="fas fa-chevron-right"></i></button>
+                        
                     </div>
 
                     <!-- Add Item Modal -->
@@ -103,6 +105,20 @@
                     </div>
                 </div>
 
+                <!-- Stock In/Out Modal -->
+                <div id="stockInOutModal" class="modal">
+                  <div class="modal-content">
+                      <span class="close" id="stockInOutClose">&times;</span>
+                      <h2>Adjust Stock</h2>
+                      <div class="stock-adjustment">
+                          <button id="decrementBtn">-</button>
+                          <span id="stockCount">0</span>
+                          <button id="incrementBtn">+</button>
+                      </div>
+                      <button id="confirmStockBtn">Confirm</button>
+                  </div>
+                </div>
+
                 <!-- Inventory Grid -->
                 <div class="inventory-grid" id="inventoryGrid">
                     <% if (inventory && inventory.length > 0) { %>
@@ -134,7 +150,7 @@
                         </div>
                       <% }) %>
                     <% } else { %>
-                      <p>No items in inventory.</p>
+                      <p>No items found.</p>
                     <% } %>
                   </div>
               </div>
@@ -170,7 +186,8 @@
                         <div class="button-group">
                             <button type="button" id="editItemBtn">Edit</button>
                             <button type="button" id="deleteItemBtn">Delete</button>
-                            <button type ="button" id="applyBtn">Apply</button>
+                            <button type="button" id="stockInBtn">Stock In/Out</button>
+                            <button type="button" id="applyBtn">Apply</button>
                         </div>
                     </form>
                 </div>
@@ -180,206 +197,343 @@
 
 <script>
     // ADD Modal functionality
-    const modal = document.getElementById("addItemModal");
-    const btn = document.querySelector(".add-item");
-    const span = document.getElementsByClassName("close")[0];
+    const addItemModal = document.getElementById("addItemModal");
+    const addItemBtn = document.querySelector(".add-item");
+    const addItemClose = addItemModal.querySelector(".close");
+    const addItemForm = document.getElementById('addItemForm');
+    const itemNameInput = document.getElementById('name');  
 
-    // Open the modal when the "Add Item" button is clicked
-    btn.onclick = function() {
-        modal.style.display = "block";
+    document.addEventListener('DOMContentLoaded', () => {
+        const removeFiltersButton = document.querySelector('.remove-filters');
+
+        removeFiltersButton.addEventListener('click', () => {
+            // Redirect to the inventory route
+            window.location.href = '/inventory';
+        });
+    });
+
+    addItemForm.addEventListener('submit', (event) => {
+        // Prevent form from submitting immediately
+        event.preventDefault();
+
+        // Get the name entered by the user
+        const newItemName = itemNameInput.value.trim().toLowerCase();
+
+        // Check if an item with the same name exists in the inventory
+        const existingItems = document.querySelectorAll('.item-card');
+        let itemExists = false;
+
+        existingItems.forEach(item => {
+            const existingItemName = item.getAttribute('data-name').toLowerCase();
+            if (existingItemName === newItemName) {
+                itemExists = true;
+            }
+        });
+
+        if (itemExists) {
+            alert('This item already exists in the inventory.');
+        } else {
+            // If the item name is unique, submit the form (or do an AJAX request)
+            addItemForm.submit();  // Or use fetch to submit the form via AJAX
+        }
+    });
+
+    // Open the Add Item modal when the "Add Item" button is clicked
+    addItemBtn.onclick = function() {
+        addItemModal.style.display = "block";
     }
 
-    // Close the modal when the "x" span is clicked
-    span.onclick = function() {
-        modal.style.display = "none";
+    // Close the Add Item modal when the "x" span is clicked
+    addItemClose.onclick = function() {
+        addItemModal.style.display = "none";
     }
 
-    // Close the modal when clicking outside of it
+    // Close the Add Item modal when clicking outside of it
     window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
+        if (event.target == addItemModal) {
+            addItemModal.style.display = "none";
         }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-    const itemCards = document.querySelectorAll('.item-card');  // Select all item cards
-    const modal = document.getElementById('viewItemModal');      // Modal element
-    const closeModal = modal.querySelector('.close');            // Close button
+        const itemCards = document.querySelectorAll('.item-card');  // Select all item cards
+        const viewItemModal = document.getElementById('viewItemModal');      // Modal element
+        const closeViewModal = viewItemModal.querySelector('.close');            // Close button
 
-       // Button elements
-    const editItemBtn = document.getElementById('editItemBtn');
-    const applyBtn = document.getElementById('applyBtn');
-    applyBtn.disabled = true;
-    const deleteItemBtn = document.getElementById('deleteItemBtn');
+        // Button elements
+        const editItemBtn = document.getElementById('editItemBtn');
+        const applyBtn = document.getElementById('applyBtn');
+        applyBtn.disabled = true;
+        const deleteItemBtn = document.getElementById('deleteItemBtn');
 
-    // Modal input fields
-    const viewName = document.getElementById('viewName');
-    const viewCategory = document.getElementById('viewCategory');
-    const viewPrice = document.getElementById('viewPrice');
-    const viewQuantity = document.getElementById('viewQuantity');
-    const viewLowStockThreshold = document.getElementById('viewLowStockThreshold');
-    const viewMeasurementUnit = document.getElementById('viewMeasurementUnit');
-    const viewSelectedBranch = document.getElementById('viewSelectedBranch');
+        // Modal input fields
+        const viewName = document.getElementById('viewName');
+        const viewCategory = document.getElementById('viewCategory');
+        const viewPrice = document.getElementById('viewPrice');
+        const viewQuantity = document.getElementById('viewQuantity');
+        const viewLowStockThreshold = document.getElementById('viewLowStockThreshold');
+        const viewMeasurementUnit = document.getElementById('viewMeasurementUnit');
+        const viewSelectedBranch = document.getElementById('viewSelectedBranch');
 
-    // Add event listeners to each item card
-    itemCards.forEach(card => {
-      card.addEventListener('click', () => {
-        // Set the modal fields with the clicked item's data
-        viewName.value = card.getAttribute('data-name');
-        viewCategory.value = card.getAttribute('data-category');
-        viewPrice.value = card.getAttribute('data-price');
-        viewQuantity.value = card.getAttribute('data-quantity');
-        viewLowStockThreshold.value = card.getAttribute('data-lowstockthreshold');
-        viewMeasurementUnit.value = card.getAttribute('data-measurementunit');
-        viewSelectedBranch.value = card.getAttribute('data-branch');
+        const stockInOutModal = document.getElementById('stockInOutModal');
+        const stockInOutClose = document.getElementById('stockInOutClose');
+        const incrementBtn = document.getElementById('incrementBtn');
+        const decrementBtn = document.getElementById('decrementBtn');
+        const stockCount = document.getElementById('stockCount');
+        const confirmStockBtn = document.getElementById('confirmStockBtn');
+        const stockInOutBtn = document.getElementById('stockInBtn');
 
-        disableFields();
+        let currentItem = {};
 
-        // Display the modal
-        modal.style.display = 'block';
-      });
-    });
+        const disableFields = () => {
+            viewName.readOnly = true;
+            viewCategory.readOnly = true;
+            viewPrice.readOnly = true;
+            viewQuantity.readOnly = true;
+            viewLowStockThreshold.readOnly = true;
+            viewMeasurementUnit.readOnly = true;
 
-    // Close the modal when the close button is clicked
-    closeModal.addEventListener('click', () => {
-      modal.style.display = 'none';
-    });
+            // Add CSS class if needed
+            // document.querySelectorAll('#viewItemForm input').forEach(input => {
+            //     input.classList.add('readonly-input');
+            // });
+        }
 
-    // Close the modal when clicking outside the modal content
-    window.addEventListener('click', (event) => {
-      if (event.target === modal) {
-        modal.style.display = 'none';
-      }
-    });
+        const enableFields = () => {
+            viewName.readOnly = false;
+            viewCategory.readOnly = false;
+            viewPrice.readOnly = false;
+            viewQuantity.readOnly = false;
+            viewLowStockThreshold.readOnly = false;
+            viewMeasurementUnit.readOnly = false;
 
-    editItemBtn.addEventListener('click', () => {
-      enableFields();
-      applyBtn.disabled = false;  // Enable "Apply" button
-    });
+            // Remove CSS class if needed
+            // document.querySelectorAll('#viewItemForm input').forEach(input => {
+            //     input.classList.remove('readonly-input');
+            // });
+        }
 
-    // Handle the "Apply" button click to send updated data to the server
-    applyBtn.addEventListener('click', async () => {
-      const updatedItem = {
-        name: viewName.value,
-        category: viewCategory.value,
-        price: parseFloat(viewPrice.value),
-        quantity: parseInt(viewQuantity.value),
-        lowStockThreshold: parseInt(viewLowStockThreshold.value),
-        measurementUnit: viewMeasurementUnit.value,
-        branchStored: viewSelectedBranch.value
-      };
+        const openStockInOutModal = () => {
+            stockCount.textContent = '0'; // Reset count to zero
+            stockInOutModal.style.display = 'block';
+        };
 
-      try {
-        const response = await fetch('/update-item', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(updatedItem)
+        const closeStockInOutModal = () => {
+            stockInOutModal.style.display = 'none';
+        };
+
+        // Event listener to open Stock In/Out Modal when "Stock In/Out" button is clicked
+        stockInOutBtn.addEventListener('click', () => {
+            // Store the current item's data
+            currentItem = {
+                name: viewName.value,
+                branchStored: viewSelectedBranch.value,
+                currentQuantity: parseInt(viewQuantity.value)
+            };
+            openStockInOutModal();
         });
 
-        if (response.ok) {
-          alert('Item updated successfully!');
-          modal.style.display = 'none';
-          location.reload(); // Reload the page to reflect changes
-        } else {
-          alert('Failed to update the item.');
-        }
-      } catch (error) {
-        console.error('Error updating item:', error);
-        alert('An error occurred while updating the item.');
-      }
-    });
+        // Event listener to close the Stock In/Out Modal when 'x' is clicked
+        stockInOutClose.addEventListener('click', closeStockInOutModal);
 
-    // Function to disable input fields
-    function disableFields() {
-      viewName.readOnly = true;
-      viewCategory.readOnly = true;
-      viewPrice.readOnly = true;
-      viewQuantity.readOnly = true;
-      viewLowStockThreshold.readOnly = true;
-      viewMeasurementUnit.readOnly = true;
-    }
+        // Close the Stock In/Out modal when clicking outside of it
+        window.addEventListener('click', (event) => {
+            if (event.target === stockInOutModal) {
+                closeStockInOutModal();
+            }
+        });
 
-    // Function to enable input fields
-    function enableFields() {
-      viewName.readOnly = false;
-      viewCategory.readOnly = false;
-      viewPrice.readOnly = false;
-      viewQuantity.readOnly = false;
-      viewLowStockThreshold.readOnly = false;
-      viewMeasurementUnit.readOnly = false;
-    }
+        // Increment button functionality
+        incrementBtn.addEventListener('click', () => {
+            let count = parseInt(stockCount.textContent);
+            count += 1;
+            stockCount.textContent = count.toString();
+        });
 
-    deleteItemBtn.addEventListener('click', async () => {
-    const name = document.getElementById('viewName').value;
-    const branchStored = document.getElementById('viewSelectedBranch').value;
+        // Decrement button functionality
+        decrementBtn.addEventListener('click', () => {
+            let count = parseInt(stockCount.textContent);
+            if (count > 0) { // Prevent negative adjustment
+                count -= 1;
+                stockCount.textContent = count.toString();
+            }
+        });
 
-    const confirmDelete = confirm(`Are you sure you want to delete the item: ${name}?`);
-    if (!confirmDelete) return;
+        // Confirm Stock Adjustment
+        confirmStockBtn.addEventListener('click', async () => {
+            const adjustment = parseInt(stockCount.textContent);
+            if (isNaN(adjustment)) {
+                alert('Invalid adjustment number.');
+                return;
+            }
 
-    try {
-      const response = await fetch('/delete-item', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, branchStored }),  // Pass the item name and branch in the request body
-      });
+            // Calculate the new quantity
+            const newQuantity = currentItem.currentQuantity + adjustment;
 
-      const data = await response.json();
-      if (response.ok) {
-        alert('Item deleted successfully');
-        window.location.reload();  // Reload the page or update the inventory UI
-      } else {
-        alert('Failed to delete the item: ' + data.message);
-      }
-    } catch (error) {
-      console.error('Error deleting item:', error);
-      alert('An error occurred while trying to delete the item.');
-    }
-  });
+            // Optional: Prevent negative stock
+            if (newQuantity < 0) {
+                alert('Resulting stock cannot be negative.');
+                return;
+            }
 
-  const searchInput = document.getElementById('searchInput');
+            // Prepare data to send to the server
+            const updateData = {
+                name: currentItem.name,
+                branchStored: currentItem.branchStored,
+                adjustment: adjustment // Positive for stock in, negative for stock out
+            };
 
+            try {
+                const response = await fetch('/stock-adjust', { // Ensure this route exists on your server
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
 
-  searchInput.addEventListener('keyup', async () => {
-    const searchTerm = searchInput.value;
+                if (response.ok) {
+                    const updatedItem = await response.json();
 
-    try {
-        const response = await fetch(`/search-item?q=${encodeURIComponent(searchTerm)}`);
-        const items = await response.json();
+                    // Update the modal with the new quantity
+                    viewQuantity.value = updatedItem.quantity;
 
-        // Update the UI to display the search results
-        const inventoryGrid = document.getElementById('inventoryGrid');
-        inventoryGrid.innerHTML = '';  // Clear existing items
+                    alert('Stock updated successfully!');
+                    window.location.reload();
+                  } else {
+                    const errorData = await response.json();
+                    alert('Failed to update stock: ' + errorData.message);
+                }
+            } catch (error) {
+                console.error('Error updating stock:', error);
+                alert('An error occurred while updating stock.');
+            }
+        });
 
-        if (items.length > 0) {
-            items.forEach(item => {
-                const itemCard = document.createElement('div');
-                itemCard.classList.add('item-card', item.branchStored);
-                itemCard.innerHTML = `
-                    <div class="card-header">
-                        <span class="item-label">${item.category}</span>
-                        <span class="item-dot ${item.quantity === 0 ? 'red' : item.quantity <= item.lowStockThreshold ? 'orange' : 'green'}"></span>
-                    </div>
-                    <span class="item-name">${item.name}</span>
-                    <p>Price: ₱${item.price.toFixed(2)}</p>
-                    <p>In Stock: ${item.quantity} ${item.measurementUnit}</p>
-                    <div class="card-menu">
-                        <i class="fas fa-ellipsis-h"></i>
-                    </div>
-                `;
-                inventoryGrid.appendChild(itemCard);  // Add the new item cards to the grid
+        // Add event listeners to each item card
+        itemCards.forEach(card => {
+          card.addEventListener('click', () => {
+            // Set the modal fields with the clicked item's data
+            viewName.value = card.getAttribute('data-name');
+            viewCategory.value = card.getAttribute('data-category');
+            viewPrice.value = card.getAttribute('data-price');
+            viewQuantity.value = card.getAttribute('data-quantity');
+            viewLowStockThreshold.value = card.getAttribute('data-lowstockthreshold');
+            viewMeasurementUnit.value = card.getAttribute('data-measurementunit');
+            viewSelectedBranch.value = card.getAttribute('data-branch');
+
+            disableFields(); // Ensure fields are readonly when modal opens
+
+            // Display the modal
+            viewItemModal.style.display = 'block';
+          });
+        });
+
+        // Close the View Item modal when the close button is clicked
+        closeViewModal.addEventListener('click', () => {
+          viewItemModal.style.display = 'none';
+        });
+
+        // Close the View Item modal when clicking outside of the modal content
+        window.addEventListener('click', (event) => {
+          if (event.target === viewItemModal) {
+            viewItemModal.style.display = 'none';
+          }
+        });
+
+        // Handle the "Edit" button click to enable fields and enable the "Apply" button
+        editItemBtn.addEventListener('click', () => {
+          enableFields();
+          applyBtn.disabled = false;  // Enable "Apply" button
+        });
+
+        // Handle the "Apply" button click to send updated data to the server
+        applyBtn.addEventListener('click', async () => {
+          const updatedItem = {
+            name: viewName.value,
+            category: viewCategory.value,
+            price: parseFloat(viewPrice.value),
+            quantity: parseInt(viewQuantity.value),
+            lowStockThreshold: parseInt(viewLowStockThreshold.value),
+            measurementUnit: viewMeasurementUnit.value,
+            branchStored: viewSelectedBranch.value
+          };
+
+          try {
+            const response = await fetch('/update-item', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(updatedItem)
             });
-        } else {
-            inventoryGrid.innerHTML = '<p>No items found.</p>';
-        }
-    } catch (error) {
-        console.error('Error fetching search results:', error);
-    }
-});
-});
+
+            if (response.ok) {
+              alert('Item updated successfully!');
+              viewItemModal.style.display = 'none';
+              location.reload(); // Reload the page to reflect changes
+            } else {
+              alert('Failed to update the item.');
+            }
+          } catch (error) {
+            console.error('Error updating item:', error);
+            alert('An error occurred while updating the item.');
+          }
+        });
+
+        // Handle the "Delete" button click to delete the item
+        deleteItemBtn.addEventListener('click', async () => {
+            const name = document.getElementById('viewName').value;
+            const branchStored = document.getElementById('viewSelectedBranch').value;
+
+            const confirmDelete = confirm(`Are you sure you want to delete the item: ${name}?`);
+            if (!confirmDelete) return;
+
+            try {
+              const response = await fetch('/delete-item', {
+                method: 'DELETE',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, branchStored }),  // Pass the item name and branch in the request body
+              });
+
+              const data = await response.json();
+              if (response.ok) {
+                alert('Item deleted successfully');
+                window.location.reload();  // Reload the page or update the inventory UI
+              } else {
+                alert('Failed to delete the item: ' + data.message);
+              }
+            } catch (error) {
+              console.error('Error deleting item:', error);
+              alert('An error occurred while trying to delete the item.');
+            }
+        });
+
+        // Handle search functionality
+        const searchInput = document.querySelector('.search-bar input'); // Assuming this is your search input field
+        const searchIcon = document.querySelector('.search-icon'); // Assuming this is your search icon
+        const searchEnter = document.querySelector('.search-bar');
+
+        searchEnter.addEventListener('keydown', (event) => {
+          const searchTerm = searchInput.value.trim();
+
+          if (event.key === 'Enter') {
+            window.location.href = `/inventory?search=${encodeURIComponent(searchTerm)}`;
+          }
+        });
+
+        searchIcon.addEventListener('click', () => {
+            const searchTerm = searchInput.value.trim();
+
+            if (searchTerm) {
+              // Redirect to the inventory route with the search term as a query parameter
+              window.location.href = `/inventory?search=${encodeURIComponent(searchTerm)}`;
+            }
+        });
+
+    });
 </script>
 </body>
 </html>

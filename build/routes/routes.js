@@ -108,35 +108,51 @@ router.get('/api/item/name/:name', async (req, res) => {
 
 router.get('/inventory', async (req, res) => {
   if (req.session.isAuthenticated) {
-    const branches = await Branch.find({}, 'name');  // Fetch all branch names
+    const branches = await Branch.find({}, 'name'); // Fetch all branch names
 
     // Set the selected branch, defaulting to 'Main' if none is selected
     const selectedBranch = req.session.selectedBranch || 'Main';
-    const inventory = await Item.find({ branchStored: selectedBranch });
+
+    // Get the search query from the request
+    const searchTerm = req.query.search || ''; // Default to empty string if not provided
+
+    // Modify the inventory query to filter by the search term
+    const inventory = await Item.find({
+      branchStored: selectedBranch,
+      name: { $regex: searchTerm, $options: 'i' } // Case-insensitive regex search
+    });
+
     const outOfStockCount = inventory.filter(item => item.quantity === 0).length;
     const lowStockCount = inventory.filter(item => item.quantity > 0 && item.quantity <= item.lowStockThreshold).length;
     const sufficientStockCount = inventory.filter(item => item.quantity > item.lowStockThreshold).length;
-    res.render('inventory', 
-      {currentRoute: '/inventory', 
-        username: req.session.username, 
-        role: req.session.role, 
-        branches, 
-        selectedBranch, 
-        inventory: inventory,
-        outOfStockCount,
-        lowStockCount,
-        sufficientStockCount } ); 
+
+    res.render('inventory', { 
+      currentRoute: '/inventory', 
+      username: req.session.username, 
+      role: req.session.role, 
+      branches, 
+      selectedBranch, 
+      inventory: inventory,
+      outOfStockCount,
+      lowStockCount,
+      sufficientStockCount 
+    });
   } else {
-    res.redirect('/')
+    res.redirect('/');
   }
-  
 });
+
 
 router.post('/add-item', async (req, res) => {
   try {
     // Extract the form data from the request body
     console.log('Form Data: ', req.body)
     const { name, category, quantity, price, lowStockThreshold,  measurementUnit, branchStored} = req.body;
+    const existingItem = await Item.findOne({ name: name, branchStored: branchStored });
+
+        if (existingItem) {
+            return res.status(400).json({ message: 'An item with this name already exists in the inventory.' });
+        }
     
     console.log('Added to Branch: ', branchStored);
     // Create a new Item instance
@@ -204,17 +220,62 @@ router.delete('/delete-item', async (req, res) => {
 });
 
 router.get('/search-item', async (req, res) => {
-  const searchQuery = req.query.q; // Get the search query from URL
+  const searchTerm = req.query.q.toLowerCase();
+  console.log("Searching Item...")
+
   try {
-    const items = await Item.find({
-      name: { $regex: searchQuery, $options: 'i' }  // Case-insensitive search
-    });
-    res.json(items);  // Return matching items as JSON
+     
+      const items = await Inventory.find({
+          $or: [
+              { name: { $regex: searchTerm, $options: 'i' } },
+              { category: { $regex: searchTerm, $options: 'i' } }
+          ]
+      });
+
+      res.json(items);  // Return matched items
   } catch (error) {
-    console.error('Error searching items:', error);
-    res.status(500).json({ message: 'An error occurred while searching items.' });
+      console.error('Error searching items:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
+router.post('/stock-adjust', async (req, res) => {
+  const { name, branchStored, adjustment } = req.body;
+
+  // Validate input
+  if (!name || !branchStored || typeof adjustment !== 'number') {
+      return res.status(400).json({ message: 'Invalid request data.' });
+  }
+
+  try {
+      // Find the item
+      const item = await Item.findOne({ name, branchStored });
+
+      if (!item) {
+          return res.status(404).json({ message: 'Item not found.' });
+      }
+
+      // Calculate the new quantity
+      const newQuantity = item.quantity + adjustment;
+
+      if (newQuantity < 0) {
+          return res.status(400).json({ message: 'Resulting stock cannot be negative.' });
+      }
+
+      // Update the item's quantity
+      item.quantity = newQuantity;
+      await item.save();
+
+      // Respond with the updated item
+      res.status(200).json(item);
+      
+  } catch (error) {
+      console.error('Error adjusting stock:', error);
+      res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+
 
 router.get('/purchaseorder', async (req, res) => {
   if (req.session.isAuthenticated) {
