@@ -68,10 +68,62 @@
 
                     <!-- Sorting and Filtering Controls -->
                     <div class="sorting-controls">
-                        <button class="sort" aria-label="Sort items"><i class="fas fa-sort"></i> Sort by</button>
-                        <button class="filter" aria-label="Filter items"><i class="fas fa-filter"></i> Filter by</button>
+                      <i class="fas fa-sort">
+                        <select id="sortBy" aria-label="Sort items" onchange="applySorting()">
+                          <option value="" <%= sortBy === '' ? 'selected' : '' %>>Sort: Default </option>
+                          <option value="alphabetical" <%= sortBy === 'alphabetical' ? 'selected' : '' %>>Alphabetical (A-Z)</option>
+                          <option value="price-asc" <%= sortBy === 'price-asc' ? 'selected' : '' %>>Price Ascending</option>
+                          <option value="price-desc" <%= sortBy === 'price-desc' ? 'selected' : '' %>>Price Descending</option>
+                        </select>
+                      </i> 
+                    </div>
+
+                      <select id="filterBy" aria-label="Filter items">
+                        <option value="">Filter by</option>
+                        
+                        <option value="out-of-stock">Out of Stock</option>
+                        <option value="low-stock">Low Stock</option>
+                        <option value="in-stock">In Stock</option>
+
+                        
+                    </select>
                         
                     </div>
+
+                    <!-- Inventory Grid -->
+                <div class="inventory-grid" id="inventoryGrid">
+                  <% if (inventory && inventory.length > 0) { %>
+                    <% inventory.forEach(item => { %>
+                      <div class="item-card <%= item.branchStored %>" 
+                           data-name="<%= item.name %>" 
+                           data-category="<%= item.category %>"
+                           data-price="<%= item.price %>"
+                           data-quantity="<%= item.quantity %>"
+                           data-lowstockthreshold="<%= item.lowStockThreshold %>"
+                           data-measurementunit="<%= item.measurementUnit %>"
+                           data-branch="<%= item.branchStored %>">
+                        <div class="card-header">
+                          <span class="item-label"><%= item.category %></span>
+                          
+                          <!-- Correct background color handling -->
+                          <span class="item-dot 
+                              <%= item.quantity === 0 ? 'red' 
+                              : item.quantity <= item.lowStockThreshold ? 'orange' 
+                              : 'green' %>">
+                          </span>
+                        </div>
+                        <span class="item-name"><%= item.name %></span>
+                        <p>Price: ₱<%= item.price.toFixed(2) %></p>
+                        <p>In Stock: <%= item.quantity %> <%= item.measurementUnit %></p>
+                        <div class="card-menu">
+                          <i class="fas fa-ellipsis-h"></i>
+                        </div>
+                      </div>
+                    <% }) %>
+                  <% } else { %>
+                    <p>No items found.</p>
+                  <% } %>
+                </div>
 
                     <!-- Add Item Modal -->
                     <div id="addItemModal" class="modal">
@@ -119,40 +171,7 @@
                   </div>
                 </div>
 
-                <!-- Inventory Grid -->
-                <div class="inventory-grid" id="inventoryGrid">
-                    <% if (inventory && inventory.length > 0) { %>
-                      <% inventory.forEach(item => { %>
-                        <div class="item-card <%= item.branchStored %>" 
-                             data-name="<%= item.name %>" 
-                             data-category="<%= item.category %>"
-                             data-price="<%= item.price %>"
-                             data-quantity="<%= item.quantity %>"
-                             data-lowstockthreshold="<%= item.lowStockThreshold %>"
-                             data-measurementunit="<%= item.measurementUnit %>"
-                             data-branch="<%= item.branchStored %>">
-                          <div class="card-header">
-                            <span class="item-label"><%= item.category %></span>
-                            
-                            <!-- Correct background color handling -->
-                            <span class="item-dot 
-                                <%= item.quantity === 0 ? 'red' 
-                                : item.quantity <= item.lowStockThreshold ? 'orange' 
-                                : 'green' %>">
-                            </span>
-                          </div>
-                          <span class="item-name"><%= item.name %></span>
-                          <p>Price: ₱<%= item.price.toFixed(2) %></p>
-                          <p>In Stock: <%= item.quantity %> <%= item.measurementUnit %></p>
-                          <div class="card-menu">
-                            <i class="fas fa-ellipsis-h"></i>
-                          </div>
-                        </div>
-                      <% }) %>
-                    <% } else { %>
-                      <p>No items found.</p>
-                    <% } %>
-                  </div>
+                
               </div>
             </section>
 
@@ -211,6 +230,14 @@
             window.location.href = '/inventory';
         });
     });
+
+
+    function applySorting() {
+    const sortBy = document.getElementById('sortBy').value;
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('sortBy', sortBy); // Set the sorting option in the query
+    window.location.search = searchParams.toString(); // Reload the page with the updated query
+  }
 
     addItemForm.addEventListener('submit', (event) => {
         // Prevent form from submitting immediately
@@ -282,6 +309,12 @@
         const stockCount = document.getElementById('stockCount');
         const confirmStockBtn = document.getElementById('confirmStockBtn');
         const stockInOutBtn = document.getElementById('stockInBtn');
+
+     
+
+  
+
+    
 
         let currentItem = {};
 
@@ -532,6 +565,8 @@
               window.location.href = `/inventory?search=${encodeURIComponent(searchTerm)}`;
             }
         });
+
+        
 
     });
 </script>
