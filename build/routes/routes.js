@@ -108,70 +108,61 @@ router.get('/api/item/name/:name', async (req, res) => {
 
 router.get('/inventory', async (req, res) => {
   if (req.session.isAuthenticated) {
-    const branches = await Branch.find({}, 'name'); // Fetch all branch names
+    const branches = await Branch.find({}, 'name');
     const selectedBranch = req.session.selectedBranch || 'Main';
-    const searchTerm = req.query.search || ''; // Default to empty string if not provided
-    const sortBy = req.query.sortBy || ''; // Get the sorting option from query parameters
+    const searchTerm = req.query.search || '';
+    const sortBy = req.query.sortBy || '';
+    const filterBy = req.query.filterBy || '';
+    const categoryFilter = req.query.category || ''; // Category filter
 
-    // Build the query with filtering based on branch and search term
+    // Fetch unique categories
+    const categories = await Item.distinct('category');
+
+    // Build query based on search, sorting, and filtering
     let query = {
       branchStored: selectedBranch,
-      name: { $regex: searchTerm, $options: 'i' } // Case-insensitive regex search
+      name: { $regex: searchTerm, $options: 'i' } // Case-insensitive search
     };
 
-    // Define the sorting object
-    let sort = {};
+    if (categoryFilter) {
+      query.category = categoryFilter; // Apply category filter
+    }
+
+    let inventory = await Item.find(query);
+
+    // Sort inventory
     if (sortBy === 'alphabetical') {
-      const inventory = await Item.aggregate([
-        { $match: query },
-        { $addFields: { lowerName: { $toLower: "$name" } } }, // Add lowercase version of name
-        { $sort: { lowerName: 1 } } // Sort by the lowercase name field
-      ]);
-      const outOfStockCount = inventory.filter(item => item.quantity === 0).length;
-      const lowStockCount = inventory.filter(item => item.quantity > 0 && item.quantity <= item.lowStockThreshold).length;
-      const sufficientStockCount = inventory.filter(item => item.quantity > item.lowStockThreshold).length;
-
-      return res.render('inventory', { 
-        currentRoute: '/inventory', 
-        username: req.session.username, 
-        role: req.session.role, 
-        branches, 
-        selectedBranch, 
-        inventory,
-        outOfStockCount,
-        lowStockCount,
-        sufficientStockCount,
-        sortBy // Pass the current sortBy value to the view
-      });
-    }
-
-    if (sortBy === 'price-asc') {
-      sort = { price: 1 }; // Price Ascending
+      inventory.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === 'price-asc') {
+      inventory.sort((a, b) => a.price - b.price);
     } else if (sortBy === 'price-desc') {
-      sort = { price: -1 }; // Price Descending
+      inventory.sort((a, b) => b.price - a.price);
     }
 
-    const inventory = await Item.find(query).sort(sort);
     const outOfStockCount = inventory.filter(item => item.quantity === 0).length;
     const lowStockCount = inventory.filter(item => item.quantity > 0 && item.quantity <= item.lowStockThreshold).length;
     const sufficientStockCount = inventory.filter(item => item.quantity > item.lowStockThreshold).length;
 
-    res.render('inventory', { 
-      currentRoute: '/inventory', 
-      username: req.session.username, 
-      role: req.session.role, 
-      branches, 
-      selectedBranch, 
+    res.render('inventory', {
+      currentRoute: '/inventory',
+      username: req.session.username,
+      role: req.session.role,
+      branches,
+      selectedBranch,
       inventory,
+      categories, // Send categories to the view
+      sortBy,
+      filterBy,
+      categoryFilter,
       outOfStockCount,
       lowStockCount,
-      sufficientStockCount,
-      sortBy // Pass the current sortBy value to the view
+      sufficientStockCount
     });
   } else {
     res.redirect('/');
   }
 });
+
 
 
 router.post('/add-item', async (req, res) => {
