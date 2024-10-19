@@ -8,10 +8,10 @@
     <link rel="stylesheet" href="/assets/purchaseorder-style.css">
     <link rel="stylesheet" href="/assets/sidebar.css">
     <link rel="stylesheet" href="/assets/topbar.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" async>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet" async>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -22,6 +22,7 @@
 
         <div class="main-content">
             <h1>Purchase Order</h1>
+
             <!-- Order Status Section -->
             <section class="order-status">
                 <div class="status for-approval">
@@ -50,7 +51,7 @@
             <!-- Purchase Orders Table Section -->
             <section class="inventory-table">
                 <div class="purchase-order-controls">
-                    <button class="create-purchase-order" onclick="createPurchaseOrder()">
+                    <button class="create-purchase-order" onclick="openItemModal()">
                         <i class="fas fa-plus"></i> Create Purchase Order
                     </button>
                     <div class="search-bar">
@@ -85,17 +86,123 @@
                 </div>
             </section>
         </div>
+
+        <!-- Step 1: Item Modal -->
+        <div id="itemModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeItemModal()">&times;</span>
+                <h2>Add Items to Purchase Order</h2>
+                <form id="itemForm">
+                    <label for="itemName">Item Name</label>
+                    <input type="text" id="itemName" name="itemName" required>
+
+                    <label for="quantity">Quantity</label>
+                    <input type="number" id="quantity" name="quantity" min="1" required>
+
+                    <label for="price">Price</label>
+                    <input type="number" id="price" name="price" min="0" step="0.01" required>
+
+                    <button type="button" onclick="addItem()">Add Item</button>
+                    <button type="button" onclick="openSupplierModal()">Next</button> <!-- Go to next step -->
+                </form>
+
+                <!-- Added Items List -->
+                <h3>Items to Purchase</h3>
+                <ul id="itemsList"></ul>
+            </div>
+        </div>
+
+        <!-- Step 2: Supplier Modal -->
+        <div id="supplierModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeSupplierModal()">&times;</span>
+                <h2>Select Supplier</h2>
+                <form id="supplierForm">
+                    <label for="supplierName">Supplier Name</label>
+                    <input type="text" id="supplierName" name="supplierName" required>
+
+                    <label for="contactPerson">Person to Contact</label>
+                    <input type="text" id="contactPerson" name="contactPerson" required>
+
+                    <label for="contactNumber">Contact Number</label>
+                    <input type="text" id="contactNumber" name="contactNumber" required>
+
+                    <button type="button" onclick="addSupplier()">Add Supplier</button>
+                    <button type="submit">Finish</button>
+                </form>
+
+                <!-- Supplier List -->
+                <h3>Selected Supplier</h3>
+                <p id="selectedSupplier"></p>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // Branch dropdown functionality (if needed)
-        const branchSelect = document.querySelector('.branch-select');
-        const branchOptions = document.querySelector('.branch-options');
+        // Step 1: Item modal functions
+        function openItemModal() {
+            document.getElementById('itemModal').style.display = 'block';
+        }
 
-        if (branchSelect) {
-            branchSelect.addEventListener('click', () => {
-                branchOptions.classList.toggle('show');
-            });
+        function closeItemModal() {
+            document.getElementById('itemModal').style.display = 'none';
+        }
+
+        // Step 2: Supplier modal functions
+        function openSupplierModal() {
+            closeItemModal(); // Close item modal
+            document.getElementById('supplierModal').style.display = 'block'; // Open supplier modal
+        }
+
+        function closeSupplierModal() {
+            document.getElementById('supplierModal').style.display = 'none';
+        }
+
+        // Close modal if user clicks outside of it
+        window.onclick = function(event) {
+            const itemModal = document.getElementById('itemModal');
+            const supplierModal = document.getElementById('supplierModal');
+            if (event.target == itemModal) {
+                itemModal.style.display = "none";
+            }
+            if (event.target == supplierModal) {
+                supplierModal.style.display = "none";
+            }
+        }
+
+        // Store added items
+        let items = [];
+        
+        function addItem() {
+            const itemName = document.getElementById('itemName').value;
+            const quantity = document.getElementById('quantity').value;
+            const price = document.getElementById('price').value;
+
+            const item = { itemName, quantity, price };
+            items.push(item);
+
+            // Update item list display
+            const itemsList = document.getElementById('itemsList');
+            const itemElement = document.createElement('li');
+            itemElement.textContent = `${itemName} - Quantity: ${quantity}, Price: ${price}`;
+            itemsList.appendChild(itemElement);
+
+            // Clear input fields for new item
+            document.getElementById('itemForm').reset();
+        }
+
+        // Store selected supplier
+        function addSupplier() {
+            const supplierName = document.getElementById('supplierName').value;
+            const contactPerson = document.getElementById('contactPerson').value;
+            const contactNumber = document.getElementById('contactNumber').value;
+
+            // Display selected supplier
+            const supplierDisplay = document.getElementById('selectedSupplier');
+            supplierDisplay.textContent = `Supplier: ${supplierName}, Contact: ${contactPerson}, Phone: ${contactNumber}`;
+
+            closeSupplierModal();
         }
     </script>
 

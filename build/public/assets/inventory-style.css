@@ -77,19 +77,13 @@ body {
     margin-bottom: 15px;
 }
 
-.inventory-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
 
 .remove-filters {
     background-color: #f8f8f8;
     color: #333;
     border: 1px solid #ddd;
     padding: 10px 15px;
-    font-size: 16px;
+    font-size: 12px;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
@@ -97,7 +91,6 @@ body {
     align-items: center;
     margin-right: 10px;
     flex: 1;
-    align-items: center;
     justify-content: center;
 }
 
@@ -110,7 +103,7 @@ body {
     color: #fff;
     border: 1px solid #ddd;
     padding: 10px 15px;
-    font-size: 16px;
+    font-size: 12px;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
@@ -159,6 +152,109 @@ body {
     cursor: pointer;
     margin-right: 10px;
 }
+
+.sorting-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 1rem 0;
+}
+
+.sorting-controls select {
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+    margin-right: 1rem;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 0.5em;
+}
+
+.sorting-controls select:focus {
+    outline: none;
+    border-color: #D9534F;
+    background-color: #f0f8ff;
+}
+
+.sorting-controls select:hover {
+    border-color: #D9534F;
+}
+
+.filter-controls {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+    margin-right: 1rem;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 0.5em;
+}
+
+.filter-controls:focus {
+    outline: none;
+    border-color: #D9534F;
+    background-color: #f0f8ff;
+}
+
+.filter-controls:hover {
+    border-color: #D9534F;
+}
+
+.category-controls {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+    margin-left: 1rem;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 0.5em;
+}
+
+.category-controls:focus {
+    outline: none;
+    border-color: #D9534F;
+    background-color: #f0f8ff;
+}
+
+.category-controls:hover {
+    border-color: #D9534F;
+}
+
+@media (max-width: 768px) {
+    .sorting-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sorting-controls select,
+    .filter-controls,
+    .category-controls {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
 
 .pagination-btn {
     background-color: #f8f8f8;
