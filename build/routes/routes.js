@@ -299,7 +299,6 @@ router.post('/stock-adjust', async (req, res) => {
 });
 
 
-
 router.get('/purchaseorder', async (req, res) => {
   if (req.session.isAuthenticated) {
     const branches = await Branch.find({}, 'name'); 

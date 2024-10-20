@@ -122,7 +122,27 @@
         </div>
     </div>
 
-    
+    <div id="editPurchaseOrderModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h2>Edit Purchase Order</h2>
+        <form id="editPurchaseOrderForm" action="/edit-purchase-order" method="POST">
+            <input type="hidden" name="supplier" id="editSupplier" required>
+            <input type="hidden" name="itemName" id="editItemName" required>
+
+            <label for="editQuantity">Quantity:</label>
+            <input type="number" name="quantity" id="editQuantity" min="1" required>
+
+            <label for="editCost">Cost:</label>
+            <input type="number" name="cost" id="editCost" step="0.01" required>
+
+            <label>Branch Stored:</label>
+            <span id="editBranchDisplay">None</span>
+            <input type="hidden" name="branchStored" id="editBranchStored">
+
+            <button type="submit">Update</button>
+        </form>
+    </div>
 </div>
 
     <script>
