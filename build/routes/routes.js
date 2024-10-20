@@ -312,7 +312,7 @@ router.get('/purchaseorder', async (req, res) => {
     };
 
     let items = await Item.find(itemQuery);
-    const purchaseorder = await PurchaseOrder.find({}).populate('item.itemName'); // Adjust this if necessary
+    const purchaseorder = await PurchaseOrder.find({}).populate('item.itemName'); 
 
     if (sortBy === 'alphabetical') {
       items.sort((a, b) => a.name.localeCompare(b.name));
@@ -337,6 +337,7 @@ router.get('/purchaseorder', async (req, res) => {
     res.redirect('/');
   }
 });
+
 
 
 
