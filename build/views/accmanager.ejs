@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/assets/accmanager-style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700&display=swap" rel="stylesheet">
+        <title>Sefina's Login</title>
+        <script>
+            // Confirm role change
+            function confirmRoleChange(event) {
+                const confirmed = confirm("Are you sure you want to change this user's role?");
+                if (!confirmed) {
+                    event.preventDefault(); // Prevent form submission if not confirmed
+                }
+            }
+    
+            // Confirm delete
+            function confirmDelete(event) {
+                const confirmed = confirm("Are you sure you want to delete this user?");
+                if (!confirmed) {
+                    event.preventDefault(); // Prevent form submission if not confirmed
+                }
+            }
+        </script>
+    </head>
+    
+    <body>
+    
+        <div class="container">
+            <!-- Account Creator Form (Left) -->
+            <div class="form-section">
+                <h2>Create Account</h2>
+                <form action="/submit-account" method="POST">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Role</label>
+                        <select id="role" name="role" required>
+                            <option value="">Select Role</option>
+                            <option value="Operations Manager">Operations Manager</option>
+                            <option value="Front Team Member">Front Team Member</option>
+                            <option value="Purchaser">Purchaser</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Create Account">
+                    </div>
+                </form>
+            </div>
+        
+            <!-- User List with Actions (Right) -->
+            <div class="user-list-section">
+                <h2>User Management</h2>
+                <div id="user-list">
+                    <% if (users.length > 0) { %>
+                        <% users.forEach(user => { %>
+                            <div class="user-item">
+                                <span><%= user.username %> (<%= user.role %>)</span>
+                                <div class="actions">
+                                    <!-- Confirm Role Change -->
+                                    <form action="/change-role/<%= user.username %>" method="POST" style="display: inline;" onsubmit="confirmRoleChange(event)">
+                                        <select name="newRole" required>
+                                            <option value="">Change Role</option>
+                                            <option value="Operations Manager">Operations Manager</option>
+                                            <option value="Front Team Member">Front Team Member</option>
+                                            <option value="Purchaser">Purchaser</option>
+                                        </select>
+                                        <button type="submit" class="change-role-btn">Change Role</button>
+                                    </form>
+    
+                                    <!-- Confirm Delete -->
+                                    <form action="/delete-user/<%= user.username %>" method="POST" style="display: inline;" onsubmit="confirmDelete(event)">
+                                        <button type="submit" class="delete-btn">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p>No users found.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    
+    </body>
+    </html>
+</html>

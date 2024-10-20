@@ -1,0 +1,101 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f7f7f7;
+    margin: 0;
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    width: 90%;
+    max-width: 1200px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+}
+
+.form-section, .user-list-section {
+    width: 48%;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-group input, 
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.form-group input[type="submit"] {
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.form-group input[type="submit"]:hover {
+    background-color: #218838;
+}
+
+.form-group input:focus, .form-group select:focus {
+    border-color: #80bdff;
+    outline: none;
+    box-shadow: 0 0 8px rgba(128, 189, 255, 0.5);
+}
+
+.user-list-section {
+    max-height: 400px; /* Adjust this height to fit about 5 users */
+    overflow-y: auto; /* Enable vertical scrolling */
+    border: 1px solid #ccc; /* Optional: Add a border to make it visually distinct */
+    padding: 10px; /* Padding for inner content */
+    margin-left: 20px; /* Space from the left account creation form */
+}
+
+
+.user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.user-item .actions button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.actions .delete-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.actions .change-role-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+.actions .change-role-btn:hover {
+    background-color: #0069d9;
+}
+
+.actions .delete-btn:hover {
+    background-color: #c82333;
+}

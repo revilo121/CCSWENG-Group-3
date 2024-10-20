@@ -97,7 +97,8 @@
                 <div class="inventory-grid" id="inventoryGrid">
                   <% if (inventory && inventory.length > 0) { %>
                     <% inventory.forEach(item => { %>
-                      <div class="item-card <%= item.branchStored %>" 
+                      <div class="item-card <%= item.branchStored %>"
+                          data-id="<%= item._id %>" 
                            data-name="<%= item.name %>" 
                            data-category="<%= item.category %>"
                            data-price="<%= item.price %>"
@@ -207,6 +208,7 @@
                         <input type="text" id="viewMeasurementUnit" name="measurementUnit" readonly>
                         
                         <input type="hidden" id="viewSelectedBranch" name="branchStored">
+                        <input type="hidden" id="viewItemId" name="id">
                         
                         <div class="button-group">
                             <button type="button" id="editItemBtn">Edit</button>
@@ -466,22 +468,21 @@
 
         // Add event listeners to each item card
         itemCards.forEach(card => {
-          card.addEventListener('click', () => {
-            // Set the modal fields with the clicked item's data
-            viewName.value = card.getAttribute('data-name');
-            viewCategory.value = card.getAttribute('data-category');
-            viewPrice.value = card.getAttribute('data-price');
-            viewQuantity.value = card.getAttribute('data-quantity');
-            viewLowStockThreshold.value = card.getAttribute('data-lowstockthreshold');
-            viewMeasurementUnit.value = card.getAttribute('data-measurementunit');
-            viewSelectedBranch.value = card.getAttribute('data-branch');
+        card.addEventListener('click', () => {
+          // Set the modal fields with the clicked item's data
+          viewName.value = card.getAttribute('data-name');
+          viewCategory.value = card.getAttribute('data-category');
+          viewPrice.value = card.getAttribute('data-price');
+          viewQuantity.value = card.getAttribute('data-quantity');
+          viewLowStockThreshold.value = card.getAttribute('data-lowstockthreshold');
+          viewMeasurementUnit.value = card.getAttribute('data-measurementunit');
+          viewSelectedBranch.value = card.getAttribute('data-branch');
+          viewItemId.value = card.getAttribute('data-id'); 
 
-            disableFields(); // Ensure fields are readonly when modal opens
-
-            // Display the modal
-            viewItemModal.style.display = 'block';
-          });
+          disableFields(); // Ensure fields are readonly when modal opens
+          viewItemModal.style.display = 'block';
         });
+      });
 
         // Close the View Item modal when the close button is clicked
         closeViewModal.addEventListener('click', () => {
@@ -503,37 +504,38 @@
 
         // Handle the "Apply" button click to send updated data to the server
         applyBtn.addEventListener('click', async () => {
-          const updatedItem = {
-            name: viewName.value,
-            category: viewCategory.value,
-            price: parseFloat(viewPrice.value),
-            quantity: parseInt(viewQuantity.value),
-            lowStockThreshold: parseInt(viewLowStockThreshold.value),
-            measurementUnit: viewMeasurementUnit.value,
-            branchStored: viewSelectedBranch.value
-          };
+  const updatedItem = {
+    _id: viewItemId.value, // Use the MongoDB _id field
+    name: viewName.value,
+    category: viewCategory.value,
+    price: parseFloat(viewPrice.value),
+    quantity: parseInt(viewQuantity.value),
+    lowStockThreshold: parseInt(viewLowStockThreshold.value),
+    measurementUnit: viewMeasurementUnit.value,
+    branchStored: viewSelectedBranch.value
+  };
 
-          try {
-            const response = await fetch('/update-item', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(updatedItem)
-            });
+  try {
+    const response = await fetch('/update-item', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updatedItem)
+    });
 
-            if (response.ok) {
-              alert('Item updated successfully!');
-              viewItemModal.style.display = 'none';
-              location.reload(); // Reload the page to reflect changes
-            } else {
-              alert('Failed to update the item.');
-            }
-          } catch (error) {
-            console.error('Error updating item:', error);
-            alert('An error occurred while updating the item.');
-          }
-        });
+    if (response.ok) {
+      alert('Item updated successfully!');
+      viewItemModal.style.display = 'none';
+      location.reload(); // Reload the page to reflect changes
+    } else {
+      alert('Failed to update the item.');
+    }
+  } catch (error) {
+    console.error('Error updating item:', error);
+    alert('An error occurred while updating the item.');
+  }
+});
 
         // Handle the "Delete" button click to delete the item
         deleteItemBtn.addEventListener('click', async () => {

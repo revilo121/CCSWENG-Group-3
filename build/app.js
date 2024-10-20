@@ -28,6 +28,7 @@ const PurchaseOrder = require('./models/purchaseorder');
 
 
 app.use(express.json());
+app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
     secret: 'secret',

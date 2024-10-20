@@ -3,8 +3,11 @@ const User = require('../models/user');
 const Branch = require('../models/branch');
 const Item = require('../models/item');
 const PurchaseOrder = require('../models/purchaseorder');
+const History = require('../models/history');
 const router = express.Router(); 
 const bcrypt = require('bcryptjs');
+
+
 
 
 router.get('/', (req, res) => {
@@ -57,6 +60,115 @@ router.post('/login', async (req, res) => {
     return res.status(500).send('Server error');
   }
 
+});
+
+router.get('/manageacc', async (req, res) => {
+  try {
+      // Fetch all users from the database
+      const users = await User.find();
+
+      // Render the 'accmanager' view, passing the users data to the template
+      res.render('accmanager', { users });
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Server error');
+  }
+});
+
+router.post('/submit-account', async (req, res) => {
+  console.log('Creating Account...');
+  const { username, password, role } = req.body;
+
+  try {
+      // Check for existing user
+      const existingUser = await User.findOne({ username });
+      if (existingUser) {
+          return res.status(400).send('Username already exists');
+      }
+
+      // Create new user
+      const newUser = new User({
+          username,
+          password,
+          role
+      });
+
+      // Save to database
+      await newUser.save();
+
+      const historyLog = new History({
+        actionCategory: 'Accounts',
+        actionBy: req.session.username, // Assuming user information is stored in req.user
+        actionType: 'Create',
+        actionDetails: `New User: ${ username }`, // For new item added
+        date: new Date(),
+      });
+      
+      await historyLog.save();
+
+      // Redirect after successful creation
+      res.redirect(req.get(''));
+      
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Server error');
+  }
+});
+
+router.post('/change-role/:username', async (req, res) => {
+  const { username } = req.params;
+  const { newRole } = req.body;
+
+  try {
+      const user = await User.findOne({ username });
+      if (!user) {
+          return res.status(404).send('User not found');
+      }
+
+      user.role = newRole;
+      await user.save();
+
+      const historyLog = new History({
+        actionCategory: 'Accounts',
+        actionBy: req.session.username, // Assuming user information is stored in req.user
+        actionType: 'Update',
+        actionDetails: `Change Role of ${ username } into ${ newRole }`, // For new item added
+        date: new Date(),
+      });
+      
+      await historyLog.save();
+
+      res.redirect('/manageacc'); 
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Server error');
+  }
+});
+
+router.post('/delete-user/:username', async (req, res) => {
+  try {
+
+      const deletedUser = req.params.username;
+
+      await User.findOneAndDelete({ username: req.params.username });
+      
+
+      
+      const historyLog = new History({
+        actionCategory: 'Accounts',
+        actionBy: req.session.username, // Assuming user information is stored in req.user
+        actionType: 'Delete',
+        actionDetails: `Deleted User: ${ deletedUser } `, // For new item added
+        date: new Date(),
+      });
+      await historyLog.save();
+
+
+      res.redirect('/manageacc'); // After deletion, redirect back to account manager
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Server error');
+  }
 });
 
 router.post('/select-branch', (req, res) => {
@@ -165,6 +277,8 @@ router.get('/inventory', async (req, res) => {
 });
 
 
+// Function to log history
+
 
 router.post('/add-item', async (req, res) => {
   try {
@@ -193,6 +307,16 @@ router.post('/add-item', async (req, res) => {
     // Save the item to the database
     await newItem.save();
     console.log('Item successfully added.');
+    
+    const historyLog = new History({
+      actionCategory: 'Inventory',
+      actionBy: req.session.username, // Assuming user information is stored in req.user
+      actionType: 'Create',
+      actionDetails: `New Item: ${name}`, // For new item added
+      date: new Date(),
+    });
+    
+    await historyLog.save();
 
     // Redirect or send a response after successful save
     res.redirect('/inventory'); // Redirect to your inventory page or any relevant page
@@ -203,19 +327,49 @@ router.post('/add-item', async (req, res) => {
 });
 
 router.post('/update-item', async (req, res) => {
-  const { name, category, price, quantity, lowStockThreshold, measurementUnit, branchStored } = req.body;
+  const { _id, name, category, price, quantity, lowStockThreshold, measurementUnit, branchStored } = req.body;
 
   try {
-    // Assuming you are using Mongoose to interact with MongoDB
-    const updatedItem = await Item.findOneAndUpdate(
-      { name: name, branchStored: branchStored }, // Find the item by name and branch
-      { name, category, price, quantity, lowStockThreshold, measurementUnit }, // Fields to update
-      { new: true } // Return the updated document
-    );
+    // Find the existing item by _id and branch
+    const existingItem = await Item.findById(_id);
 
-    if (!updatedItem) {
+    if (!existingItem) {
       return res.status(404).json({ message: 'Item not found.' });
     }
+
+    // Keep track of changes for history logging
+    let actionDetails = `Updated Item: ${existingItem.name} (${existingItem.category})\nChanges:\n`;
+
+    // Compare the fields and log changes
+    if (existingItem.name !== name) actionDetails += `- Name: ${existingItem.name} ➡️ ${name}\n`;
+    if (existingItem.category !== category) actionDetails += `- Category: ${existingItem.category} ➡️ ${category}\n`;
+    if (existingItem.price !== price) actionDetails += `- Price: ₱${existingItem.price} ➡️ ₱${price}\n`;
+    if (existingItem.quantity !== quantity) actionDetails += `- Quantity: ${existingItem.quantity} ➡️ ${quantity}\n`;
+    if (existingItem.lowStockThreshold !== lowStockThreshold) actionDetails += `- Low Stock Threshold: ${existingItem.lowStockThreshold} ➡️ ${lowStockThreshold}\n`;
+    if (existingItem.measurementUnit !== measurementUnit) actionDetails += `- Measurement Unit: ${existingItem.measurementUnit} ➡️ ${measurementUnit}\n`;
+
+    // Update the item with new values
+    existingItem.name = name;
+    existingItem.category = category;
+    existingItem.price = price;
+    existingItem.quantity = quantity;
+    existingItem.lowStockThreshold = lowStockThreshold;
+    existingItem.measurementUnit = measurementUnit;
+
+    // Save the updated item
+    const updatedItem = await existingItem.save();
+
+    // Create a new history log entry
+    const historyLog = new History({
+      actionCategory: 'Inventory',
+      actionBy: req.session.username, // Assuming user information is stored in the session
+      actionType: 'Update',
+      actionDetails: actionDetails,
+      date: new Date(),
+    });
+
+    // Save the history log
+    await historyLog.save();
 
     res.status(200).json({ message: 'Item updated successfully.', item: updatedItem });
   } catch (error) {
@@ -229,11 +383,25 @@ router.delete('/delete-item', async (req, res) => {
   const { name, branchStored } = req.body;  // Assuming you're sending name and branch
 
   try {
-    const deletedItem = await Item.findOneAndDelete({ name: name, branchStored: branchStored });
+    const deletedItem = await Item.findOneAndDelete({ name, branchStored });
 
     if (!deletedItem) {
       return res.status(404).json({ message: 'Item not found.' });
     }
+
+    // Log deletion in history
+    const actionDetails = `Deleted Item: ${deletedItem.name} (${deletedItem.category}) from branch: ${branchStored}`;
+
+    const historyLog = new History({
+      actionCategory: 'Inventory',
+      actionBy: req.session.username, // Assuming user information is stored in the session
+      actionType: 'Delete',
+      actionDetails: actionDetails,
+      date: new Date(),
+    });
+
+    // Save the history log
+    await historyLog.save();
 
     res.status(200).json({ message: 'Item deleted successfully.' });
   } catch (error) {
@@ -286,34 +454,49 @@ router.post('/stock-adjust', async (req, res) => {
 
   // Validate input
   if (!name || !branchStored || typeof adjustment !== 'number') {
-      return res.status(400).json({ message: 'Invalid request data.' });
+    return res.status(400).json({ message: 'Invalid request data.' });
   }
 
   try {
-      // Find the item
-      const item = await Item.findOne({ name, branchStored });
+    // Find the item
+    const item = await Item.findOne({ name, branchStored });
 
-      if (!item) {
-          return res.status(404).json({ message: 'Item not found.' });
-      }
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found.' });
+    }
 
-      // Calculate the new quantity
-      const newQuantity = item.quantity + adjustment;
+    // Calculate the new quantity
+    const newQuantity = item.quantity + adjustment;
 
-      if (newQuantity < 0) {
-          return res.status(400).json({ message: 'Resulting stock cannot be negative.' });
-      }
+    if (newQuantity < 0) {
+      return res.status(400).json({ message: 'Resulting stock cannot be negative.' });
+    }
 
-      // Update the item's quantity
-      item.quantity = newQuantity;
-      await item.save();
+    // Update the item's quantity
+    const oldQuantity = item.quantity;
+    item.quantity = newQuantity;
+    await item.save();
 
-      // Respond with the updated item
-      res.status(200).json(item);
-      
+    // Log stock adjustment in history
+    const actionDetails = `Stock Adjusted for Item: ${item.name} (${item.category})\n`
+      + `Quantity: ${oldQuantity} ➡️ ${newQuantity} (${adjustment > 0 ? '+' : ''}${adjustment})`;
+
+    const historyLog = new History({
+      actionCategory: 'Inventory',
+      actionBy: req.session.username, // Assuming user information is stored in the session
+      actionType: 'Stock Adjustment',
+      actionDetails: actionDetails,
+      date: new Date(),
+    });
+
+    // Save the history log
+    await historyLog.save();
+
+    // Respond with the updated item
+    res.status(200).json(item);
   } catch (error) {
-      console.error('Error adjusting stock:', error);
-      res.status(500).json({ message: 'Server error.' });
+    console.error('Error adjusting stock:', error);
+    res.status(500).json({ message: 'Server error.' });
   }
 });
 
