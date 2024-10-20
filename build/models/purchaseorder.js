@@ -1,13 +1,15 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const purchaseOrderSchema = new mongoose.Schema({
-    orderNumber: { type: String, required: true },
-    fullName: { type: String, required: true },
+const PurchaseOrderSchema = new Schema({
     supplier: { type: String, required: true },
-    cost: { type: Number, required: true },
-    arrivalDate: { type: Date, required: true }
+    item: {
+        itemName: { type: String, required: true }, 
+        quantity: { type: Number, required: true },
+        cost: { type: Number, required: true },
+        branchStored: {type: String, required: true}
+    },
+    createdAt: { type: Date, default: Date.now }
 });
 
-const PurchaseOrder = mongoose.model('PurchaseOrder', purchaseOrderSchema);
-
-module.exports = PurchaseOrder;
+module.exports = mongoose.model('PurchaseOrder', PurchaseOrderSchema); 

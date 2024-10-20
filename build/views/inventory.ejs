@@ -57,7 +57,7 @@
                 <div class="inventory-controls">
                     <!-- Add Item Button -->
                     <button class="add-item"><i class="fas fa-plus"></i> Add Item</button>
-                    <button class="remove-filters">Remove Search</button>
+                    <button class="remove-filters">Remove Search/Filter</button>
                     
                     
                     <!-- Search Bar -->
@@ -69,27 +69,26 @@
                     <!-- Sorting and Filtering Controls -->
                     <div class="sorting-controls">
                         <select id="sortBy" aria-label="Sort items" onchange="applySorting()">
-                          <option value="" <%= sortBy === '' ? 'selected' : '' %>>Sort by:</option>
+                          <option value="" <%= sortBy === '' ? 'selected' : '' %>>Sort: Default </option>
                           <option value="alphabetical" <%= sortBy === 'alphabetical' ? 'selected' : '' %>>Alphabetical (A-Z)</option>
                           <option value="price-asc" <%= sortBy === 'price-asc' ? 'selected' : '' %>>Price Ascending</option>
                           <option value="price-desc" <%= sortBy === 'price-desc' ? 'selected' : '' %>>Price Descending</option>
                         </select>
                     </div>
 
-                    <select class = "filter-controls" id="filterBy" aria-label="Filter items" onchange="applyFilter()">
-                      <option value="" <%= filterBy === '' ? 'selected' : '' %>>Filter by:</option>
+                    <select class="filter-controls" id="filterBy" aria-label="Filter items" onchange="applyFilter()">
+                      <option value="" <%= filterBy === '' ? 'selected' : '' %>>Filter by</option>
                       <option value="out-of-stock" <%= filterBy === 'out-of-stock' ? 'selected' : '' %>>Out of Stock</option>
                       <option value="low-stock" <%= filterBy === 'low-stock' ? 'selected' : '' %>>Low Stock</option>
                       <option value="in-stock" <%= filterBy === 'in-stock' ? 'selected' : '' %>>In Stock</option>
                     </select>
 
-                      <select class = "category-controls" id="categoryFilter" aria-label="Filter by Category" onchange="applyCategoryFilter()">
-                        <option value="">By Categories:</option>
+                      <select class="category-controls" id ="categoryFilter" aria-label="Filter by Category" onchange="applyCategoryFilter()">
+                        <option value="">All Categories</option>
                         <% categories.forEach(category => { %>
                           <option value="<%= category %>" <%= categoryFilter === category ? 'selected' : '' %>><%= category %></option>
                         <% }) %>
                       </select>
-                    
                         
                     </div>
 

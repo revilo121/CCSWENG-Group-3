@@ -159,7 +159,6 @@ body {
     justify-content: flex-start;
     margin: 1rem 0;
 }
-
 .sorting-controls select {
     padding: 10px 12px;
     border: 1px solid #ccc;
@@ -176,17 +175,14 @@ body {
     background-position: right 1rem center;
     background-size: 0.5em;
 }
-
 .sorting-controls select:focus {
     outline: none;
     border-color: #D9534F;
     background-color: #f0f8ff;
 }
-
 .sorting-controls select:hover {
     border-color: #D9534F;
 }
-
 .filter-controls {
     padding: 10px 15px;
     border: 1px solid #ccc;
@@ -203,17 +199,14 @@ body {
     background-position: right 1rem center;
     background-size: 0.5em;
 }
-
 .filter-controls:focus {
     outline: none;
     border-color: #D9534F;
     background-color: #f0f8ff;
 }
-
 .filter-controls:hover {
     border-color: #D9534F;
 }
-
 .category-controls {
     padding: 10px 15px;
     border: 1px solid #ccc;
@@ -230,23 +223,19 @@ body {
     background-position: right 1rem center;
     background-size: 0.5em;
 }
-
 .category-controls:focus {
     outline: none;
     border-color: #D9534F;
     background-color: #f0f8ff;
 }
-
 .category-controls:hover {
     border-color: #D9534F;
 }
-
 @media (max-width: 768px) {
     .sorting-controls {
         flex-direction: column;
         align-items: flex-start;
     }
-
     .sorting-controls select,
     .filter-controls,
     .category-controls {
@@ -254,8 +243,6 @@ body {
         margin-bottom: 0.5rem;
     }
 }
-
-
 .pagination-btn {
     background-color: #f8f8f8;
     border: none;
@@ -310,15 +297,15 @@ body {
     border-radius: 50%;
     display: inline-block;
   }
-  
+
   .item-dot.red {
     background-color: red;
   }
-  
+
   .item-dot.orange {
     background-color: orange;
   }
-  
+
   .item-dot.green {
     background-color: green;
   }

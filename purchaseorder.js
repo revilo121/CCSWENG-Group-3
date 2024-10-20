@@ -1,7 +1,5 @@
 let purchaseOrderCounter = 1; 
 
-document.addEventListener('DOMContentLoaded', fetchAndDisplayOrders); // Fetch existing orders when the page loads
-
 function createPurchaseOrder() {
     const fullName = askForValidInput("Enter Full Name:", isValidName);
     const supplier = askForValidInput("Enter Supplier:", isValidName);
@@ -15,44 +13,6 @@ function createPurchaseOrder() {
     purchaseOrderCounter++;
 
     addNewOrderCard(orderNumber, fullName, supplier, formattedCost, formattedDate);
-
-    const purchaseOrder = {
-        orderNumber: orderNumber,
-        fullName: fullName,
-        supplier: supplier,
-        cost: cost, 
-        arrivalDate: arrivalDate 
-    };
-
-    fetch('/purchaseorders', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(purchaseOrder),
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Success:', data);
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
-}
-
-function fetchAndDisplayOrders() {
-    fetch('/purchaseorders')
-        .then(response => response.json())
-        .then(orders => {
-            orders.forEach(order => {
-                const formattedCost = formatCost(order.cost);
-                const formattedDate = formatDate(order.arrivalDate);
-                addNewOrderCard(order.orderNumber, order.fullName, order.supplier, formattedCost, formattedDate);
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching orders:', error);
-        });
 }
 
 function askForValidInput(promptMessage, validationFunction) {
@@ -107,6 +67,7 @@ function formatDate(dateStr) {
 }
 
 function addNewOrderCard(orderNumber, fullName, supplier, cost, arrivalDate) {
+
     const orderGrid = document.querySelector(".order-grid");
 
     const newCard = document.createElement("div");
