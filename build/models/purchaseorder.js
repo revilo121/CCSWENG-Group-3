@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 
 const PurchaseOrderSchema = new Schema({
     supplier: { type: String, required: true },
