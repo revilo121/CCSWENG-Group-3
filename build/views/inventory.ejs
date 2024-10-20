@@ -68,31 +68,27 @@
 
                     <!-- Sorting and Filtering Controls -->
                     <div class="sorting-controls">
-                      <i class="fas fa-sort">
                         <select id="sortBy" aria-label="Sort items" onchange="applySorting()">
                           <option value="" <%= sortBy === '' ? 'selected' : '' %>>Sort: Default </option>
                           <option value="alphabetical" <%= sortBy === 'alphabetical' ? 'selected' : '' %>>Alphabetical (A-Z)</option>
                           <option value="price-asc" <%= sortBy === 'price-asc' ? 'selected' : '' %>>Price Ascending</option>
                           <option value="price-desc" <%= sortBy === 'price-desc' ? 'selected' : '' %>>Price Descending</option>
                         </select>
-                      </i> 
                     </div>
 
-                    <select id="filterBy" aria-label="Filter items" onchange="applyFilter()">
+                    <select class="filter-controls" id="filterBy" aria-label="Filter items" onchange="applyFilter()">
                       <option value="" <%= filterBy === '' ? 'selected' : '' %>>Filter by</option>
                       <option value="out-of-stock" <%= filterBy === 'out-of-stock' ? 'selected' : '' %>>Out of Stock</option>
                       <option value="low-stock" <%= filterBy === 'low-stock' ? 'selected' : '' %>>Low Stock</option>
                       <option value="in-stock" <%= filterBy === 'in-stock' ? 'selected' : '' %>>In Stock</option>
                     </select>
 
-                    <i class="fas fa-filter">
-                      <select id="categoryFilter" aria-label="Filter by Category" onchange="applyCategoryFilter()">
+                      <select class="category-controls" id ="categoryFilter" aria-label="Filter by Category" onchange="applyCategoryFilter()">
                         <option value="">All Categories</option>
                         <% categories.forEach(category => { %>
                           <option value="<%= category %>" <%= categoryFilter === category ? 'selected' : '' %>><%= category %></option>
                         <% }) %>
                       </select>
-                    </i>
                         
                     </div>
 
