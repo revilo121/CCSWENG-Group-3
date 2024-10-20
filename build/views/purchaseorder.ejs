@@ -50,7 +50,7 @@
             <!-- Purchase Orders Table Section -->
             <section class="inventory-table">
                 <div class="purchase-order-controls">
-                    <button class="create-purchase-order" onclick="createPurchaseOrder()">
+                    <button class="create-purchase-order" onclick="openPurchaseOrderModal()">
                         <i class="fas fa-plus"></i> Create Purchase Order
                     </button>
                     <div class="search-bar">
@@ -67,36 +67,113 @@
 
                 <!-- Order Grid -->
                 <div class="order-grid" id="orderGrid">
-                    <!-- Example of card, can loop this dynamically -->
-                    <div class="item-card">
-                        <div class="card-header">
-                            <span class="item-name">P000X</span>
-                            <span class="item-dot"></span>
+                    <% purchaseorder.forEach(order => { %> 
+                        <div class="item-card" >
+                            <div class="card-header">
+                                <span class="item-name"><%= order.item.itemName %></span>
+                                <span class="item-dot"></span>
+                            </div>
+                            <p>Supplier: <%= order.supplier %></p>
+                            <p>Branch: <%= order.item.branchStored %></p>
+                            <p>Quantity: <%= order.item.quantity %></p>
+                            <p>Cost: P<%= order.item.cost%></p>
+                            <p>Created at: <%= order.createdAt.toDateString() %></p>
+                            <div class="card-menu">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </div>
                         </div>
-                        <p>Created by: Juan</p>
-                        <p>Supplier: Supply Place</p>
-                        <p>Cost: P220.00</p>
-                        <p>Arrival: January 1, 1999</p>
-                        <div class="card-menu">
-                            <i class="fas fa-ellipsis-h"></i>
-                        </div>
-                    </div>
-                    <!-- More item-cards here -->
+                    <% }) %>
                 </div>
+                
             </section>
         </div>
     </div>
 
-    <script>
-        // Branch dropdown functionality (if needed)
-        const branchSelect = document.querySelector('.branch-select');
-        const branchOptions = document.querySelector('.branch-options');
+    <!-- Add Purchase Order Modal -->
+    <div id="addPurchaseOrderModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Create Purchase Order</h2>
+            <form id="addPurchaseOrderForm" action="/add-purchase-order" method="POST">
+            
+                <label for="supplier">Supplier:</label>
+                <input type="text" name="supplier" id="supplier" required>
+    
+                <label for="itemName">Item:</label>
+                <select name="itemName" id="itemName" required onchange="updateBranchAndCost()">
+                    <option value="">Select an item</option>
+                    <% items.forEach(item => { %>
+                        <option value="<%= item.name %>" data-price="<%= item.price %>" data-branch-stored="<%= item.branchStored %>"><%= item.name %></option>
+                    <% }) %>
+                </select>
+    
+                <label for="quantity">Quantity:</label>
+                <input type="number" name="quantity" id="quantity" min="1" required oninput="updateBranchAndCost()">
+    
+                <label for="cost">Cost:</label>
+                <input type="number" name="cost" id="cost" step="0.01" readonly required>
+    
+                <label>Branch Stored:</label>
+                <span id="branchDisplay">None</span> 
+                <input type="hidden" name="branchStored" id="branchStored">
+    
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
 
-        if (branchSelect) {
-            branchSelect.addEventListener('click', () => {
-                branchOptions.classList.toggle('show');
-            });
+    
+</div>
+
+    <script>
+        // Modal open and close functionality
+        const addPurchaseOrderModal = document.getElementById('addPurchaseOrderModal');
+
+        function openPurchaseOrderModal() {
+            addPurchaseOrderModal.style.display = 'block';
         }
+
+        function closePurchaseOrderModal() {
+            addPurchaseOrderModal.style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == addPurchaseOrderModal) {
+                addPurchaseOrderModal.style.display = 'none';
+            }
+        }
+        function updateCost() {
+        const itemSelect = document.getElementById('itemName');
+        const quantityInput = document.getElementById('quantity');
+        const costInput = document.getElementById('cost');
+    
+        const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+        const price = parseFloat(selectedOption.getAttribute('data-price')) || 0;
+        const quantity = parseInt(quantityInput.value) || 0;
+
+        const totalCost = price * quantity;
+        costInput.value = totalCost.toFixed(2); // Update cost field with formatted value
+    }
+        function updateBranch() {
+        const itemSelect = document.getElementById('itemName');
+        const branchStoredInput = document.getElementById('branchStored');
+        const branchDisplay = document.getElementById('branchDisplay');
+
+        const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+    
+        // Update the branch stored value
+        const branchStored = selectedOption.getAttribute('data-branch-stored') || 'None';
+        branchStoredInput.value = branchStored; 
+        branchDisplay.innerText = branchStored; 
+    }
+        function updateBranchAndCost() {
+        updateBranch();
+        updateCost();
+    }
+
+   
+
+    
     </script>
 
     <script src="/assets/purchaseorder.js"></script>

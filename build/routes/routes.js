@@ -2,6 +2,7 @@ const express = require('express');
 const User = require('../models/user');
 const Branch = require('../models/branch');
 const Item = require('../models/item');
+const PurchaseOrder = require('../models/purchaseorder');
 const router = express.Router(); 
 const bcrypt = require('bcryptjs');
 
@@ -301,37 +302,82 @@ router.post('/stock-adjust', async (req, res) => {
 
 router.get('/purchaseorder', async (req, res) => {
   if (req.session.isAuthenticated) {
-      const store = req.query.store || 'default'; 
-      const branches = await Branch.find({}, 'name');
-      const selectedBranch = req.session.selectedBranch || 'Main';
-      const inventory = await Item.find({ branchStored: selectedBranch });
-      const outOfStockCount = inventory.filter(item => item.quantity === 0).length;
-      const lowStockCount = inventory.filter(item => item.quantity > 0 && item.quantity <= item.lowStockThreshold).length;
-      const sufficientStockCount = inventory.filter(item => item.quantity > item.lowStockThreshold).length;
-      
-      try {
-          const purchaseOrders = await Item.find({ branchStored: selectedBranch });
-          res.render('purchaseorder', { 
-              currentRoute: '/purchaseorder', 
-              purchaseOrders: purchaseOrders,
-              username: req.session.username, 
-              role: req.session.role, 
-              branches, 
-              selectedBranch,
-              outOfStockCount,
-              lowStockCount,
-              sufficientStockCount
+    const branches = await Branch.find({}, 'name'); 
+    const selectedBranch = req.session.selectedBranch || 'Main';
+    const searchTerm = req.query.search || ''; 
+    const sortBy = req.query.sortBy || ''; 
 
-          }); 
-      } catch (error) {
-          console.error(error);
-          res.status(500).send("Error fetching purchase orders.");
-      }
+    let itemQuery = {
+      branchStored: selectedBranch, 
+      name: { $regex: searchTerm, $options: 'i' } 
+    };
 
+    let items = await Item.find(itemQuery);
+    const purchaseorder = await PurchaseOrder.find({}).populate('item.itemName'); // Adjust this if necessary
+
+    if (sortBy === 'alphabetical') {
+      items.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === 'price-asc') {
+      items.sort((a, b) => a.price - b.price);
+    } else if (sortBy === 'price-desc') {
+      items.sort((a, b) => b.price - a.price);
+    }
+
+    res.render('purchaseorder', {
+      currentRoute: '/purchaseorder',
+      username: req.session.username,
+      role: req.session.role,
+      branches,
+      selectedBranch,
+      items, 
+      searchTerm,
+      purchaseorder, 
+      sortBy 
+    });
   } else {
-      res.redirect('/'); 
+    res.redirect('/');
   }
 });
+
+
+
+// Add purchase order POST route
+router.post('/add-purchase-order', async (req, res) => {
+  try {
+    // Extract form data from the request body
+    console.log('Form Data: ', req.body);
+    const { supplier, itemName, quantity, cost, branchStored } = req.body;
+
+    // Find the item by name 
+    const item = await Item.findOne({ name: itemName });
+    if (!item) {
+      return res.status(400).json({ message: 'Item not found.' });
+    }
+
+    // Check if the requested quantity exceeds available stock
+    if (quantity > item.quantity) {
+      return res.status(400).json({ message: 'Requested quantity exceeds available stock.' });
+    }
+
+    // Create a new Purchase Order instance
+    const purchaseOrder = new PurchaseOrder({
+      supplier,
+      item: { itemName, quantity, cost, branchStored},
+      createdAt: new Date(), 
+    });
+
+    // Save the purchase order to the database
+    await purchaseOrder.save();
+    console.log('Purchase Order successfully added.');
+
+    // Redirect after successful save
+    res.redirect('/purchaseorder');
+  } catch (err) {
+    console.error('Error adding purchase order:', err);
+    res.status(500).send('Server Error');
+  }
+});
+
 
 
 
