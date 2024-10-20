@@ -337,7 +337,42 @@ router.get('/purchaseorder', async (req, res) => {
     res.redirect('/');
   }
 });
-*/
+
+router.post('/add-purchase-order', async (req, res) => {
+  try {
+    // Extract form data from the request body
+    console.log('Form Data: ', req.body);
+    const { supplier, itemName, quantity, cost, branchStored } = req.body;
+
+    // Find the item by name 
+    const item = await Item.findOne({ name: itemName });
+    if (!item) {
+      return res.status(400).json({ message: 'Item not found.' });
+    }
+
+    // Check if the requested quantity exceeds available stock
+    if (quantity > item.quantity) {
+      return res.status(400).json({ message: 'Requested quantity exceeds available stock.' });
+    }
+
+    // Create a new Purchase Order instance
+    const purchaseOrder = new PurchaseOrder({
+      supplier,
+      item: { itemName, quantity, cost, branchStored},
+      createdAt: new Date(), 
+    });
+
+    // Save the purchase order to the database
+    await purchaseOrder.save();
+    console.log('Purchase Order successfully added.');
+
+    // Redirect after successful save
+    res.redirect('/purchaseorder');
+  } catch (err) {
+    console.error('Error adding purchase order:', err);
+    res.status(500).send('Server Error');
+  }
+});
 
 
 
