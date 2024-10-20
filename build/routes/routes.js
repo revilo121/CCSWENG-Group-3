@@ -374,6 +374,27 @@ router.post('/add-purchase-order', async (req, res) => {
   }
 });
 
+router.post('/edit-purchase-order', async (req, res) => {
+  try {
+      const { purchaseOrder, supplier, itemName, quantity, cost, branchStored } = req.body;
+
+      await PurchaseOrder.findByIdAndUpdate(purchaseOrder, {
+          supplier,
+          item: {
+              itemName,
+              quantity,
+              cost,
+              branchStored,
+          },
+      });
+
+      res.redirect('/purchaseorder'); 
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Error updating purchase order');
+  }
+});
+
 
 
 router.get('/logout', (req, res) => {
