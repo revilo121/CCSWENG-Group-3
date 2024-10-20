@@ -24,6 +24,8 @@ mongoose.connect(dbURL)
 const User = require('./models/user');
 const Branch = require('./models/branch');
 const Item = require('./models/item');
+const PurchaseOrder = require('./models/purchaseorder');
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

@@ -2,6 +2,7 @@ const express = require('express');
 const User = require('../models/user');
 const Branch = require('../models/branch');
 const Item = require('../models/item');
+const PurchaseOrder = require('../models/purchaseorder');
 const router = express.Router(); 
 const bcrypt = require('bcryptjs');
 
@@ -261,6 +262,25 @@ router.get('/search-item', async (req, res) => {
   }
 });
 
+router.post('/purchaseorders', async (req, res) => {
+  const { orderNumber, fullName, supplier, cost, arrivalDate } = req.body;
+
+  try {
+      const newOrder = new PurchaseOrder({
+          orderNumber,
+          fullName,
+          supplier,
+          cost,
+          arrivalDate
+      });
+
+      await newOrder.save();
+      res.status(201).json({ message: 'Purchase Order created successfully!' });
+  } catch (error) {
+      res.status(500).json({ message: 'Failed to create purchase order', error });
+  }
+});
+
 router.post('/stock-adjust', async (req, res) => {
   const { name, branchStored, adjustment } = req.body;
 
@@ -297,8 +317,15 @@ router.post('/stock-adjust', async (req, res) => {
   }
 });
 
-
-
+router.get('/purchaseorders', async (req, res) => {
+  try {
+      const orders = await PurchaseOrder.find();
+      res.json(orders); // Return the orders as JSON
+  } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch purchase orders', error });
+  }
+});
+/*
 router.get('/purchaseorder', async (req, res) => {
   if (req.session.isAuthenticated) {
       const store = req.query.store || 'default'; 
@@ -332,6 +359,7 @@ router.get('/purchaseorder', async (req, res) => {
       res.redirect('/'); 
   }
 });
+*/
 
 
 
