@@ -63,6 +63,7 @@ body {
 .status h2 {
     font-size: 24px;
     margin-top: 5px;
+    text-align: center;
 }
 
 /* Summary section styling */
@@ -178,4 +179,17 @@ body {
 #inv-count {
     text-align: center;
 
+}
+
+.history-list {
+    margin-top: 10px;
+}
+
+.history-item {
+    margin-bottom: 10px; /* Adds space between each history entry */
+    font-size: 14px;
+}
+
+.history-item strong {
+    font-weight: bold;
 }

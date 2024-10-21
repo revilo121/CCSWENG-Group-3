@@ -67,3 +67,18 @@
 .user-info:hover .profile-dropdown {
     display: block;
 }
+
+a {
+    text-decoration: none;
+    font-family: Roboto;
+    color: black;
+    margin: 1vh;
+}
+
+a:visited {
+    color: none;
+}
+
+a:hover{
+    color: gray;
+}

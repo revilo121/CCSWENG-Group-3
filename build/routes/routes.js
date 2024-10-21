@@ -78,6 +78,7 @@ router.get('/manageacc', async (req, res) => {
 router.post('/submit-account', async (req, res) => {
   console.log('Creating Account...');
   const { username, password, role } = req.body;
+  const selectedBranch = req.session.selectedBranch || 'Main';
 
   try {
       // Check for existing user
@@ -102,12 +103,13 @@ router.post('/submit-account', async (req, res) => {
         actionType: 'Create',
         actionDetails: `New User: ${ username }`, // For new item added
         date: new Date(),
+        branch: selectedBranch
       });
       
       await historyLog.save();
 
       // Redirect after successful creation
-      res.redirect(req.get(''));
+      res.redirect('manageacc');
       
   } catch (error) {
       console.error(error);
@@ -127,13 +129,14 @@ router.post('/change-role/:username', async (req, res) => {
 
       user.role = newRole;
       await user.save();
-
+      const selectedBranch = req.session.selectedBranch || 'Main';
       const historyLog = new History({
         actionCategory: 'Accounts',
         actionBy: req.session.username, // Assuming user information is stored in req.user
         actionType: 'Update',
         actionDetails: `Change Role of ${ username } into ${ newRole }`, // For new item added
         date: new Date(),
+        branch: selectedBranch
       });
       
       await historyLog.save();
@@ -153,13 +156,14 @@ router.post('/delete-user/:username', async (req, res) => {
       await User.findOneAndDelete({ username: req.params.username });
       
 
-      
+      const selectedBranch = req.session.selectedBranch || 'Main';
       const historyLog = new History({
         actionCategory: 'Accounts',
         actionBy: req.session.username, // Assuming user information is stored in req.user
         actionType: 'Delete',
         actionDetails: `Deleted User: ${ deletedUser } `, // For new item added
         date: new Date(),
+        branch: selectedBranch
       });
       await historyLog.save();
 
@@ -183,19 +187,68 @@ router.post('/select-branch', (req, res) => {
   res.redirect(req.get('referer'));
 });
 
-
-router.get('/dashboard', async (req, res) => {
+router.get('/history', async (req, res) => {
   try {
-    const branches = await Branch.find({}, 'name');  // Fetch all branch names
+    const page = parseInt(req.query.page) || 1; // Current page
+    const pageSize = 10; // Page size
+    const branches = await Branch.find({}, 'name');
+    const selectedBranch = req.session.selectedBranch || 'Main'; // Default to 'Main' if none selected
 
-    // Set the selected branch, defaulting to 'Main' if none is selected
-    const selectedBranch = req.session.selectedBranch || 'Main';
+    // Fetch filter parameters
+    const selectedUser = req.query.user || ''; // Action By filter
+    const selectedActionType = req.query.actionType || ''; // Action Type filter
+    const selectedDateRange = req.query.dateRange || ''; // Date Range filter
 
-    // Render the dashboard and pass branches and selectedBranch to the sidebar partial
-    res.render('dashboard', {
+    // Build query object for filters
+    const query = { branch: selectedBranch }; // Ensure it only shows actions from the selected branch
+    
+    if (selectedUser) {
+      query.actionBy = selectedUser; // Filter by Action By
+    }
+    if (selectedActionType) {
+      query.actionType = selectedActionType; // Filter by Action Type
+    }
+
+    // Apply Date Range filter
+    const now = new Date();
+    if (selectedDateRange === 'today') {
+      query.date = {
+        $gte: new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      };
+    } else if (selectedDateRange === 'this-week') {
+      const firstDayOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+      query.date = { $gte: firstDayOfWeek };
+    } else if (selectedDateRange === 'this-month') {
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      query.date = { $gte: firstDayOfMonth };
+    }
+
+    // Fetch total actions count for pagination
+    const totalActions = await History.countDocuments(query);
+
+    // Fetch history actions with pagination and sorting
+    const historyActions = await History.find(query)
+                                        .sort({ date: -1 })
+                                        .skip((page - 1) * pageSize)
+                                        .limit(pageSize);
+
+    // Fetch unique usernames for the Action By dropdown
+    const users = await History.distinct('actionBy', { branch: selectedBranch }); // Filter by branch
+
+    // Calculate total pages for pagination
+    const totalPages = Math.ceil(totalActions / pageSize);
+
+    // Render the history page with filters
+    res.render('history', {
       branches,
-      selectedBranch,  // This is the selected branch or default 'Main'
-      currentRoute: '/dashboard',
+      historyActions,
+      currentPage: page,
+      totalPages,
+      users, // Send users to the view for Action By dropdown
+      selectedUser,
+      selectedActionType,
+      selectedDateRange,
+      selectedBranch, // Pass the selected branch to the view
       username: req.session.username,
       role: req.session.role
     });
@@ -204,6 +257,47 @@ router.get('/dashboard', async (req, res) => {
     res.status(500).send('Server Error');
   }
 });
+
+
+router.get('/dashboard', async (req, res) => {
+  try {
+    const branches = await Branch.find({}, 'name');  // Fetch all branch names
+    const selectedBranch = req.session.selectedBranch || 'Main';
+    let query = { branchStored: selectedBranch };
+    let inventory = await Item.find(query);
+
+    // Set the selected branch, defaulting to 'Main' if none is selected
+    
+
+    // For Inventory Summary in Dashboard
+    const outOfStockCount = inventory.filter(item => item.quantity === 0).length;
+    const lowStockCount = inventory.filter(item => item.quantity > 0 && item.quantity <= item.lowStockThreshold).length;
+    const sufficientStockCount = inventory.filter(item => item.quantity > item.lowStockThreshold).length;
+
+    // For History Box in Dashboard
+    const latestHistory = await History.find( {branch: selectedBranch} )
+                                       .sort({ date: -1 })
+                                       .limit(5);
+
+    // Render the dashboard and pass branches and selectedBranch to the sidebar partial
+    res.render('dashboard', {
+      branches,
+      selectedBranch,  // This is the selected branch or default 'Main'
+      currentRoute: '/dashboard',
+      username: req.session.username,
+      role: req.session.role,
+      outOfStockCount,
+      lowStockCount,
+      sufficientStockCount,
+      latestHistory
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
+  }
+});
+
+
 
 
 router.get('/api/item/name/:name', async (req, res) => {
@@ -307,6 +401,7 @@ router.post('/add-item', async (req, res) => {
     // Save the item to the database
     await newItem.save();
     console.log('Item successfully added.');
+    const selectedBranch = req.session.selectedBranch || 'Main';
     
     const historyLog = new History({
       actionCategory: 'Inventory',
@@ -314,6 +409,7 @@ router.post('/add-item', async (req, res) => {
       actionType: 'Create',
       actionDetails: `New Item: ${name}`, // For new item added
       date: new Date(),
+      branch: selectedBranch
     });
     
     await historyLog.save();
@@ -358,6 +454,7 @@ router.post('/update-item', async (req, res) => {
 
     // Save the updated item
     const updatedItem = await existingItem.save();
+    const selectedBranch = req.session.selectedBranch || 'Main';
 
     // Create a new history log entry
     const historyLog = new History({
@@ -366,6 +463,7 @@ router.post('/update-item', async (req, res) => {
       actionType: 'Update',
       actionDetails: actionDetails,
       date: new Date(),
+      branch: selectedBranch
     });
 
     // Save the history log
@@ -391,6 +489,7 @@ router.delete('/delete-item', async (req, res) => {
 
     // Log deletion in history
     const actionDetails = `Deleted Item: ${deletedItem.name} (${deletedItem.category}) from branch: ${branchStored}`;
+    const selectedBranch = req.session.selectedBranch || 'Main';
 
     const historyLog = new History({
       actionCategory: 'Inventory',
@@ -398,6 +497,7 @@ router.delete('/delete-item', async (req, res) => {
       actionType: 'Delete',
       actionDetails: actionDetails,
       date: new Date(),
+      branch: selectedBranch
     });
 
     // Save the history log
@@ -462,12 +562,15 @@ router.post('/stock-adjust', async (req, res) => {
     const actionDetails = `Stock Adjusted for Item: ${item.name} (${item.category})\n`
       + `Quantity: ${oldQuantity} ➡️ ${newQuantity} (${adjustment > 0 ? '+' : ''}${adjustment})`;
 
+    const selectedBranch = req.session.selectedBranch || 'Main';
+
     const historyLog = new History({
       actionCategory: 'Inventory',
       actionBy: req.session.username, // Assuming user information is stored in the session
       actionType: 'Stock Adjustment',
       actionDetails: actionDetails,
       date: new Date(),
+      branch: selectedBranch
     });
 
     // Save the history log

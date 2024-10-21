@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory History</title>
+    <link rel="stylesheet" href="/assets/history-style.css">
+    <link rel="stylesheet" href="/assets/sidebar.css">
+    <link rel="stylesheet" href="/assets/topbar.css">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <div class="header">
+    <a href="/dashboard" class="back-button">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+    <h1>History</h1>
+  </div>
+
+    <!-- Filter Section -->
+    <form method="GET" action="/history">
+      <div class="filters">
+        <!-- Action By Dropdown -->
+        <label for="user">Action By:</label>
+        <select name="user" id="user">
+          <option value="">All Users</option>
+          <% users.forEach(user => { %>
+            <option value="<%= user %>" <%= selectedUser === user ? 'selected' : '' %>><%= user %></option>
+          <% }) %>
+        </select>
+
+        <!-- Action Type Dropdown -->
+        <label for="actionType">Action Type:</label>
+        <select name="actionType" id="actionType">
+          <option value="">All Actions</option>
+          <option value="Create" <%= selectedActionType === 'Create' ? 'selected' : '' %>>Create</option>
+          <option value="Update" <%= selectedActionType === 'Update' ? 'selected' : '' %>>Update</option>
+          <option value="Delete" <%= selectedActionType === 'Delete' ? 'selected' : '' %>>Delete</option>
+        </select>
+
+        <!-- Date Range Dropdown -->
+        <label for="dateRange">Date Range:</label>
+        <select name="dateRange" id="dateRange">
+          <option value="">All Dates</option>
+          <option value="today" <%= selectedDateRange === 'today' ? 'selected' : '' %>>Today</option>
+          <option value="this-week" <%= selectedDateRange === 'this-week' ? 'selected' : '' %>>This Week</option>
+          <option value="this-month" <%= selectedDateRange === 'this-month' ? 'selected' : '' %>>This Month</option>
+        </select>
+
+        <button type="submit">Filter</button>
+      </div>
+    </form>
+
+    <!-- Table to Display History -->
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Action By</th>
+                <th>Action Type</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% historyActions.forEach(action => { %>
+                <tr>
+                    <td><%= new Date(action.date).toLocaleDateString() %></td>
+                    <td><%= action.actionBy %></td>
+                    <td><%= action.actionType %></td>
+                    <td><%= action.actionDetails %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+
+    <!-- Pagination Links -->
+    <div class="pagination">
+        <% if (currentPage > 1) { %>
+            <a href="/history?page=<%= currentPage - 1 %>&user=<%= selectedUser %>&actionType=<%= selectedActionType %>&dateRange=<%= selectedDateRange %>">Previous</a>
+        <% } %>
+
+        <% for (let i = 1; i <= totalPages; i++) { %>
+            <a href="/history?page=<%= i %>&user=<%= selectedUser %>&actionType=<%= selectedActionType %>&dateRange=<%= selectedDateRange %>" class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+        <% } %>
+
+        <% if (currentPage < totalPages) { %>
+            <a href="/history?page=<%= currentPage + 1 %>&user=<%= selectedUser %>&actionType=<%= selectedActionType %>&dateRange=<%= selectedDateRange %>">Next</a>
+        <% } %>
+    </div>
+</body>
+</html>

@@ -6,8 +6,8 @@ const HistorySchema = new Schema({
     actionBy: { type: String, required: true }, //username of user who did the action
     actionType: { type: String, required: true }, //Create, Update, Delete, Approve (For purchase order only) 
     actionDetails: {type: String, required: true}, // 
-    date: {type: Date, required: true}
+    date: {type: Date, required: true},
+    branch: {type: String, required: true}
   });
-  
   
   module.exports = mongoose.model('History', HistorySchema);

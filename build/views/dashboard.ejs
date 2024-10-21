@@ -31,25 +31,25 @@
         <!-- Inventory Overview -->
         <section class="inventory-overview">
             <div class="status out-of-stock">
-                <i class="fas fa-exclamation-circle"></i>
-                <div class="status-text">
-                    <span class="status-label">Out Of Stock</span>
-                    <h2 id="inv-count">5</h2>
-                </div>
+              <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+              <div class="status-text">
+                <span class="status-label">Out Of Stock</span>
+                <h2><%= outOfStockCount %></h2>
+              </div>
             </div>
             <div class="status low-stock">
-                <i class="fas fa-exclamation-triangle"></i>
-                <div class="status-text">
-                    <span class="status-label">Low Stock</span>
-                    <h2 id="inv-count">55</h2>
-                </div>
+              <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+              <div class="status-text">
+                <span class="status-label">Low Stock</span>
+                <h2><%= lowStockCount %></h2>
+              </div>
             </div>
             <div class="status in-stock">
-                <i class="fas fa-check-circle"></i>
-                <div class="status-text">
-                    <span class="status-label">In Stock</span>
-                    <h2 id="inv-count">555</h2>
-                </div>
+              <i class="fas fa-check-circle" aria-hidden="true"></i>
+              <div class="status-text">
+                <span class="status-label">In Stock</span>
+                <h2><%= sufficientStockCount %></h2>
+              </div>
             </div>
         </section>
 
@@ -90,12 +90,24 @@
 
         <!-- Inventory History and Recent Movement -->
         <section class="additional-info">
-            <div class="info-box">
-                <h4>Inventory History</h4>
-            </div>
-            <div class="info-box">
-                <h4>Recent Inventory Movement</h4>
-            </div>
+            <!-- Link to Inventory History page -->
+            <a href="/history" class="info-box-link">
+                <div class="info-box">
+                    <h4>History</h4>
+                    <div class="history-list">
+                        <% if (latestHistory.length) { %>
+                            <% latestHistory.forEach(history => { %>
+                                <div class="history-item">
+                                    <strong><%= history.actionBy %></strong> <%= history.actionDetails %> 
+                                    on <%= new Date(history.date).toLocaleDateString() %>
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <div>No recent actions</div>
+                        <% } %>
+                    </div>
+                </div>
+            </a>
         </section>
         </div>
         
