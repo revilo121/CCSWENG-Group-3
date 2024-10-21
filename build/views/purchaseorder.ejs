@@ -73,94 +73,128 @@
                     <% purchaseorder.forEach(order => { %> 
                         <div class="item-card" data-id="<%= order._id %>">
                             <div class="card-header">
-                                <span class="item-name"><%= order.item.itemName %></span>
+                                <span class="item-name">Order Name: <%= order.orderNumber %></span>
                                 <span class="item-dot"></span>
                             </div>
                             <p>Supplier: <%= order.supplier %></p>
-                            <p>Branch: <%= order.item.branchStored %></p>
-                            <p>Quantity: <%= order.item.quantity %></p>
-                            <p>Cost: P<%= order.item.cost %></p>
                             <p>Created at: <%= order.createdAt.toDateString() %></p>
+                            <p><strong>Status:</strong> <%= order.status %></p> <!-- Added status here -->
+                            <div class="items-list">
+                                <% if (order.items && order.items.length > 0) { %> 
+                                    <% order.items.forEach(item => { %> 
+                                        <div class="item-details">
+                                            <p><strong>Item Name:</strong> <%= item.itemName %></p>
+                                            <p><strong>Branch:</strong> <%= item.branchStored %></p>
+                                            <p><strong>Quantity:</strong> <%= item.quantity %></p>
+                                            <p><strong>Cost:</strong> P<%= item.cost %></p>
+                                            <p><strong>Amount:</strong> P<%= item.amount %></p>
+                                        </div>
+                                    <% }) %>
+                                <% } else { %>
+                                    <p>No items found for this order.</p> 
+                                <% } %>
+                            </div>
                             <div class="card-menu">
                                 <i class="fas fa-ellipsis-h"></i>
                             </div>
                         </div>
                     <% }) %>
                 </div>
-            </section>
-        </div>
-    </div>
 
-    <!-- Add Purchase Order Modal -->
-    <div id="addPurchaseOrderModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closePurchaseOrderModal()">&times;</span>
-            <h2>Create Purchase Order</h2>
-            <form id="addPurchaseOrderForm" action="/add-purchase-order" method="POST">
-                <label for="supplier">Supplier:</label>
-                <input type="text" name="supplier" id="supplier" required>
-
-                <label for="itemName">Item:</label>
-                <select name="itemName" id="itemName" required onchange="updateBranchAndCost()">
-                    <option value="">Select an item</option>
-                    <% items.forEach(item => { %>
-                        <option value="<%= item.name %>" data-price="<%= item.price %>" data-branch-stored="<%= item.branchStored %>"><%= item.name %></option>
-                    <% }) %>
-                </select>
-
-                <label for="quantity">Quantity:</label>
-                <input type="number" name="quantity" id="quantity" min="1" required oninput="updateBranchAndCost()">
-
-                <label for="cost">Cost:</label>
-                <input type="number" name="cost" id="cost" step="0.01" readonly required>
-
-                <label>Branch Stored:</label>
-                <span id="branchDisplay">None</span> 
-                <input type="hidden" name="branchStored" id="branchStored">
-
-                <button type="submit">Submit</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit Purchase Order Modal -->
-    <div id="editPurchaseOrderModal" class="modal">
+<div id="addPurchaseOrderModal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="closeEditPurchaseOrderModal()">&times;</span>
-        <h2>Edit Purchase Order</h2>
-        <form id="editPurchaseOrderForm" action="/edit-purchase-order" method="POST">
-            <label for="purchaseOrderSelect">Select Purchase Order:</label>
-            <select name="purchaseOrder" id="purchaseOrderSelect" required onchange="populateEditForm()">
-                <option value="">Select a purchase order</option>
-                <% purchaseorder.forEach(order => { %>
-                    <option value="<%= order._id %>" data-supplier="<%= order.supplier %>" 
-                            data-item="<%= order.item.itemName %>" 
-                            data-quantity="<%= order.item.quantity %>" 
-                            data-cost="<%= order.item.cost %>" 
-                            data-branch="<%= order.item.branchStored %>" 
-                            data-price="<%= order.item.price %>"><%= order.item.itemName %> - Supplier: <%= order.supplier %></option>
-                <% }) %>
+        <span class="close" onclick="closePurchaseOrderModal()">&times;</span>
+        <h2>Create Purchase Order</h2>
+        <form id="addPurchaseOrderForm" action="/add-purchase-order" method="POST">
+            <label for="supplier">Supplier:</label>
+            <input type="text" name="supplier" id="supplier" required>
+
+            <label for="orderNumber">Order Name:</label>
+            <input type="text" name="orderNumber" id="orderNumber" required>
+
+            <label for="orderStatus">Order Status:</label>
+            <select name="status" id="orderStatus" required>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Completed">Completed</option>
             </select>
 
-            <label for="editSupplier">Supplier:</label>
-            <input type="text" name="supplier" id="editSupplier" required>
+            <table id="itemsTable">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Quantity</th>
+                        <th>Cost</th>
+                        <th>Amount</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="itemsBody">
+                    <tr>
+                        <td>
+                            <select name="items[0][itemName]" onchange="updateCost(this)">
+                                <option value="">Select an item</option>
+                                <% items.forEach(item => { %>
+                                    <option value="<%= item.name %>" data-price="<%= item.price %>" data-branch="<%= item.branchStored %>"><%= item.name %></option>
+                                <% }) %>
+                            </select>
+                        </td>
+                        <td><input type="number" name="items[0][quantity]" min="1" onchange="updateCost(this)"></td>
+                        <td><input type="number" name="items[0][cost]" readonly></td>
+                        <td><input type="number" name="items[0][amount]" readonly></td>
+                        <td>
+                            <input type="hidden" name="items[0][branchStored]" value="">
+                            <button type="button" onclick="removeItemRow(this)">Remove</button>
+                        </td>
+                    </tr>
+                </tbody>
+                
+            </table>
+            <button type="button" onclick="addItemRow()">Add Item</button>
 
-            <label for="editItemName">Item:</label>
-            <input type="text" name="itemName" id="editItemName" required readonly>
-
-            <label for="editQuantity">Quantity:</label>
-            <input type="number" name="quantity" id="editQuantity" min="1" required oninput="updateEditCost()">
-
-            <label for="editCost">Cost:</label>
-            <input type="number" name="cost" id="editCost" step="0.01" required readonly>
-
-            <label>Branch Stored:</label>
-            <input type="text" name="branchStored" id="editBranchStored" required readonly>
-
-            <button type="submit">Update</button>
+            <button type="submit">Submit</button>
         </form>
     </div>
 </div>
+
+    <!-- Edit Purchase Order Modal -->
+    <div id="editPurchaseOrderModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditPurchaseOrderModal()">&times;</span>
+            <h2>Edit Purchase Order</h2>
+            <form id="editPurchaseOrderForm" action="/edit-purchase-order" method="POST">
+                <label for="purchaseOrderSelect">Select Purchase Order:</label>
+                <select name="purchaseOrder" id="purchaseOrderSelect" required onchange="populateEditForm()">
+                    <option value="">Select a purchase order</option>
+                    <% purchaseorder.forEach(order => { %>
+                        <option value="<%= order._id %>" data-supplier="<%= order.supplier %>" 
+                                data-item="<%= order.items.itemName %>" 
+                                data-quantity="<%= order.items.quantity %>" 
+                                data-cost="<%= order.items.cost %>" 
+                                data-branch="<%= order.items.branchStored %>" 
+                                data-price="<%= order.items.price %>"><%= order.items.itemName %> - Supplier: <%= order.supplier %></option>
+                    <% }) %>
+                </select>
+
+                <label for="editSupplier">Supplier:</label>
+                <input type="text" name="supplier" id="editSupplier" required>
+
+                <label for="editItemName">Item:</label>
+                <input type="text" name="itemName" id="editItemName" required readonly>
+
+                <label for="editQuantity">Quantity:</label>
+                <input type="number" name="quantity" id="editQuantity" min="1" required oninput="updateEditCost()">
+
+                <label for="editCost">Cost:</label>
+                <input type="number" name="cost" id="editCost" step="0.01" required readonly>
+
+                <label>Branch Stored:</label>
+                <input type="text" name="branchStored" id="editBranchStored" required readonly>
+
+                <button type="submit">Update</button>
+            </form>
+        </div>
+    </div>
 
     <script>
         // Modal open and close functionality
@@ -191,54 +225,69 @@
             }
         }
 
-        function updateCost() {
-            const itemSelect = document.getElementById('itemName');
-            const quantityInput = document.getElementById('quantity');
-            const costInput = document.getElementById('cost');
+        function updateCost(select) {
+            const row = select.closest('tr');
+            const quantityInput = row.querySelector('input[name*="quantity"]');
+            const costInput = row.querySelector('input[name*="cost"]');
+            const amountInput = row.querySelector('input[name*="amount"]');
+            const branchInput = row.querySelector('input[name*="branchStored"]');
+    
+            const price = parseFloat(select.options[select.selectedIndex].dataset.price) || 0;
+            const branchStored = select.options[select.selectedIndex].dataset.branch;
 
-            const selectedOption = itemSelect.options[itemSelect.selectedIndex];
-            const price = parseFloat(selectedOption.getAttribute('data-price')) || 0;
-
-            costInput.value = (price * quantityInput.value).toFixed(2);
-        }
-
-        function updateBranchAndCost() {
-            const itemSelect = document.getElementById('itemName');
-            const branchDisplay = document.getElementById('branchDisplay');
-            const branchStoredInput = document.getElementById('branchStored');
-
-            const selectedOption = itemSelect.options[itemSelect.selectedIndex];
-            const branch = selectedOption.getAttribute('data-branch-stored') || 'None';
-            branchDisplay.textContent = branch;
-            branchStoredInput.value = branch;
-
-            updateCost();
-        }
-
-        function populateEditForm() {
-            const purchaseOrderSelect = document.getElementById('purchaseOrderSelect');
-            const selectedOption = purchaseOrderSelect.options[purchaseOrderSelect.selectedIndex];
-
-            const supplier = selectedOption.getAttribute('data-supplier');
-            const item = selectedOption.getAttribute('data-item');
-            const quantity = selectedOption.getAttribute('data-quantity');
-            const cost = selectedOption.getAttribute('data-cost');
-            const branch = selectedOption.getAttribute('data-branch');
-            const price = selectedOption.getAttribute('data-price');
-
-            document.getElementById('editSupplier').value = supplier;
-            document.getElementById('editItemName').value = item;
-            document.getElementById('editQuantity').value = quantity;
-            document.getElementById('editCost').value = cost;
-            document.getElementById('editBranchStored').value = branch;
+            costInput.value = price.toFixed(2);
+            amountInput.value = (price * (quantityInput.value || 0)).toFixed(2);
+            branchInput.value = branchStored; 
         }
 
         function updateEditCost() {
-            const quantityInput = document.getElementById('editQuantity');
-            const price = document.querySelector(`#purchaseOrderSelect option:checked`).getAttribute('data-price');
-            const costInput = document.getElementById('editCost');
+            const quantity = document.getElementById('editQuantity').value;
+            const cost = document.getElementById('editCost').value;
+            const total = (quantity * cost).toFixed(2);
+            document.getElementById('editAmount').value = total;
+        }
 
-            costInput.value = (price * quantityInput.value).toFixed(2);
+        function addItemRow() {
+            const itemsBody = document.getElementById('itemsBody');
+            const newRow = document.createElement('tr');
+
+            const rowCount = itemsBody.querySelectorAll('tr').length;
+            newRow.innerHTML = `
+        <td>
+            <select name="items[${rowCount}][itemName]" onchange="updateCost(this)">
+                <option value="">Select an item</option>
+                <% items.forEach(item => { %>
+                    <option value="<%= item.name %>" data-price="<%= item.price %>" data-branch="<%= item.branchStored %>"><%= item.name %></option>
+                <% }) %>
+            </select>
+        </td>
+        <td><input type="number" name="items[${rowCount}][quantity]" min="1" onchange="updateCost(this)"></td>
+        <td><input type="number" name="items[${rowCount}][cost]" readonly></td>
+        <td><input type="number" name="items[${rowCount}][amount]" readonly></td>
+        <td>
+            <input type="hidden" name="items[${rowCount}][branchStored]" value="">
+            <button type="button" onclick="removeItemRow(this)">Remove</button>
+        </td>
+    `;
+
+            itemsBody.appendChild(newRow);
+        }
+
+
+        function removeItemRow(button) {
+            const row = button.closest('tr');
+            row.remove();
+        }
+
+        function populateEditForm() {
+            const select = document.getElementById('purchaseOrderSelect');
+            const selectedOption = select.options[select.selectedIndex];
+
+            document.getElementById('editSupplier').value = selectedOption.dataset.supplier;
+            document.getElementById('editItemName').value = selectedOption.dataset.item;
+            document.getElementById('editQuantity').value = selectedOption.dataset.quantity;
+            document.getElementById('editCost').value = selectedOption.dataset.cost;
+            document.getElementById('editBranchStored').value = selectedOption.dataset.branch;
         }
     </script>
 </body>

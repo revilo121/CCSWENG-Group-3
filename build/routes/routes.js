@@ -598,7 +598,7 @@ router.get('/purchaseorder', async (req, res) => {
     };
 
     let items = await Item.find(itemQuery);
-    const purchaseorder = await PurchaseOrder.find({}).populate('item.itemName'); 
+    const purchaseorder = await PurchaseOrder.find({}).populate('items.itemName'); 
 
     if (sortBy === 'alphabetical') {
       items.sort((a, b) => a.name.localeCompare(b.name));
@@ -628,24 +628,42 @@ router.post('/add-purchase-order', async (req, res) => {
   try {
     // Extract form data from the request body
     console.log('Form Data: ', req.body);
-    const { supplier, itemName, quantity, cost, branchStored } = req.body;
+    const { supplier, orderNumber, items } = req.body; // Extract orderNumber
 
-    // Find the item by name 
-    const item = await Item.findOne({ name: itemName });
-    if (!item) {
-      return res.status(400).json({ message: 'Item not found.' });
-    }
+    // Process each item from the request body
+    const purchaseItems = [];
+    for (let item of items) {
+      const { itemName, quantity, cost } = item;
 
-    // Check if the requested quantity exceeds available stock
-    if (quantity > item.quantity) {
-      return res.status(400).json({ message: 'Requested quantity exceeds available stock.' });
+      // Find the item by name
+      const foundItem = await Item.findOne({ name: itemName });
+      if (!foundItem) {
+        return res.status(400).json({ message: `Item '${itemName}' not found.` });
+      }
+
+      // Check if the requested quantity exceeds available stock
+      if (quantity > foundItem.quantity) {
+        return res.status(400).json({ message: `Requested quantity for '${itemName}' exceeds available stock.` });
+      }
+
+      // Create item entry for the purchase order
+      purchaseItems.push({
+        itemName,
+        quantity,
+        price: cost,
+        amount: (cost * quantity).toFixed(2),
+        quantityReceived: 0,
+        branchStored: foundItem.branchStored,
+      });
     }
 
     // Create a new Purchase Order instance
     const purchaseOrder = new PurchaseOrder({
       supplier,
-      item: { itemName, quantity, cost, branchStored},
-      createdAt: new Date(), 
+      orderNumber, 
+      items: purchaseItems,
+      status,
+      createdAt: new Date(),
     });
 
     // Save the purchase order to the database
@@ -659,6 +677,8 @@ router.post('/add-purchase-order', async (req, res) => {
     res.status(500).send('Server Error');
   }
 });
+
+
 
 router.post('/edit-purchase-order', async (req, res) => {
   try {
