@@ -4,9 +4,20 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #f7f7f7;
+    background-color: #FC4428;
     margin: 0;
+    padding: 0;
 }
+
+.top-image {
+    width: 25%;
+    height: 25%;
+    display: block;
+    position: fixed; /* Stick the image to the top */
+    top: 0;
+    left: 500;
+    z-index: 1; /* Ensure it stays above other elements */
+  }
 
 .container {
     display: flex;
@@ -64,7 +75,8 @@ body {
     overflow-y: auto; /* Enable vertical scrolling */
     border: 1px solid #ccc; /* Optional: Add a border to make it visually distinct */
     padding: 10px; /* Padding for inner content */
-    margin-left: 20px; /* Space from the left account creation form */
+    margin-left: 50px; /* Space from the left account creation form */
+    background-color: rgba(255, 72, 0, 0.5); /* Transparent background */
 }
 
 
