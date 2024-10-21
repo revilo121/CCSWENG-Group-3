@@ -21,8 +21,12 @@ body {
 /* Main Content Styling */
 .main-content {
     flex: 1;
-    padding: 80px 30px 20px 30px; /* Increased top padding to accommodate fixed header */
+    padding: 80px 30px 20px 30px;
     overflow-y: auto;
+}
+
+.main-content h1 {
+    padding-bottom: 30px;
 }
 
 /* Inventory Status Section */
@@ -99,7 +103,7 @@ body {
 }
 
 .add-item {
-    background-color: #D9534F;
+    background-color: #D64832;
     color: #fff;
     border: 1px solid #ddd;
     padding: 10px 15px;
@@ -177,11 +181,11 @@ body {
 }
 .sorting-controls select:focus {
     outline: none;
-    border-color: #D9534F;
+    border-color: #D64832;
     background-color: #f0f8ff;
 }
 .sorting-controls select:hover {
-    border-color: #D9534F;
+    border-color: #D64832;
 }
 .filter-controls {
     padding: 10px 15px;
@@ -201,11 +205,11 @@ body {
 }
 .filter-controls:focus {
     outline: none;
-    border-color: #D9534F;
+    border-color: #D64832;
     background-color: #f0f8ff;
 }
 .filter-controls:hover {
-    border-color: #D9534F;
+    border-color: #D64832;
 }
 .category-controls {
     padding: 10px 15px;
@@ -216,7 +220,7 @@ body {
     color: #333;
     cursor: pointer;
     transition: border-color 0.3s ease, background-color 0.3s ease;
-    margin-left: 1rem;
+    margin-left: 0rem;
     appearance: none;
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>');
     background-repeat: no-repeat;
@@ -225,11 +229,11 @@ body {
 }
 .category-controls:focus {
     outline: none;
-    border-color: #D9534F;
+    border-color: #D64832;
     background-color: #f0f8ff;
 }
 .category-controls:hover {
-    border-color: #D9534F;
+    border-color: #D64832;
 }
 @media (max-width: 768px) {
     .sorting-controls {
@@ -384,7 +388,7 @@ body {
 
   form button {
     padding: 10px 15px;
-    background-color: #D9534F;
+    background-color: #D64832;
     color: white;
     border: none;
     border-radius: 5px;
@@ -462,7 +466,7 @@ body {
     cursor: pointer;
     border: none;
     border-radius: 4vh;
-    background-color: #D9534F;
+    background-color: #D64832;
     color: white;
     transition: background-color 0.3s ease;
 }
@@ -482,7 +486,7 @@ body {
     padding: 2vh 0;
     font-size: 3vh;
     cursor: pointer;
-    background-color: #D9534F;
+    background-color: #D64832;
     color: white;
     border: none;
     border-radius: 4vh;

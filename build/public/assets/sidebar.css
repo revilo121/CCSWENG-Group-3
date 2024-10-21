@@ -11,7 +11,7 @@
 
 nav ul li.active a,
 nav ul li a:hover {
-    background-color: #D9534F;
+    background-color: #D64832;
     color: #fff;
 }
 
@@ -20,7 +20,7 @@ nav ul li a:hover {
 .logo img{
     font-size: 45px;
     text-align: center;
-    color: #D9534F;
+    color: #D64832;
     font-weight: bold;
     margin-bottom: 20px;
     font-family: 'Dancing Script', cursive;
@@ -34,7 +34,7 @@ img{
 .branch-info {
     margin-bottom: 20px;
     position: relative;
-    color: #D9534F;
+    color: #D64832;
 }
 
 .branch-select {
@@ -42,7 +42,7 @@ img{
     justify-content: space-between; /* Space between the branch name and icons */
     align-items: center;
     cursor: pointer;
-    color: #D9534F;
+    color: #D64832;
     text-align: left; /* Align text (branch name) to the left */
 }
 
@@ -68,7 +68,7 @@ img{
     border-radius: 5px;
     padding: 10px 0;
     list-style: none;
-    color: #D9534F;
+    color: #D64832;
 }
 
 .branch-options li {
@@ -109,6 +109,6 @@ nav ul li a i {
 
 nav ul li.active a,
 nav ul li a:hover {
-    background-color: #D9534F;
+    background-color: #D64832;
     color: #fff;
 }

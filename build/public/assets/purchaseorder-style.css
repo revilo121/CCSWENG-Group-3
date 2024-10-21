@@ -19,6 +19,7 @@ body {
 }
 
 
+
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
 
 
@@ -27,6 +28,10 @@ body {
     flex: 1;
     padding: 80px 30px 20px 30px; /* Increased top padding to accommodate fixed header */
     overflow-y: auto;
+}
+
+.main-content h1 {
+    padding-bottom: 30px;
 }
 
 /* Order Status Section */
@@ -82,17 +87,17 @@ body {
 }
 
 .create-purchase-order {
-    background-color: #D9534F;
+    background-color: #D64832;
     color: #fff;
     border: 1px solid #ddd;
     padding: 10px 15px;
-    font-size: 16px;
+    font-size: 13px;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
     display: flex;
     align-items: center;
-    margin-left: 300px;
+    margin-left: 0px;
 }
 
 .create-purchase-order i {
@@ -103,9 +108,11 @@ body {
     background-color: #f58686;
 }
 
+
 .search-bar {
     position: relative;
-    width: 400px;
+    width: 50%;
+    margin-right: 1vh;
 }
 
 .search-bar input {
@@ -132,6 +139,97 @@ body {
     border-radius: 5px;
     cursor: pointer;
     margin-right: 10px;
+}
+
+.sorting-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 1rem 0;
+}
+.sorting-controls select {
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+    margin-right: 1rem;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 0.5em;
+}
+.sorting-controls select:focus {
+    outline: none;
+    border-color: #D64832;
+    background-color: #f0f8ff;
+}
+.sorting-controls select:hover {
+    border-color: #D64832;
+}
+.filter-controls {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+    margin-right: 1rem;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 0.5em;
+}
+.filter-controls:focus {
+    outline: none;
+    border-color: #D64832;
+    background-color: #f0f8ff;
+}
+.filter-controls:hover {
+    border-color: #D64832;
+}
+.category-controls {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+    margin-left: 1rem;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 0.5em;
+}
+.category-controls:focus {
+    outline: none;
+    border-color: #D64832;
+    background-color: #f0f8ff;
+}
+.category-controls:hover {
+    border-color: #D64832;
+}
+@media (max-width: 768px) {
+    .sorting-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .sorting-controls select,
+    .filter-controls,
+    .category-controls {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
 }
 
 .pagination-btn {
