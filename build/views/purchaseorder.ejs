@@ -15,7 +15,7 @@
 </head>
 
 <body>
-    <%- include('partials/topbar') %>
+    <%- include('partials/topbar', {username: username, role: role} )%>
 
     <div class="main-fb">
         <%- include('partials/sidebar') %>
@@ -52,12 +52,14 @@
                 <div class="purchase-order-controls">
                     <button class="create-purchase-order" onclick="openPurchaseOrderModal()">
                         <i class="fas fa-plus"></i> Create Purchase Order
+                        
                     </button>
-                    <button class="edit-purchase-order" onclick="openEditPurchaseOrderModal()">
-                        <i class="fas fa-edit"></i> Edit Purchase Order
+                    <button class="add-supplier" onclick="openSupplierModal()">
+                        <i class="fas fa-edit"></i> Add Supplier
                     </button>
+
                     <div class="search-bar">
-                        <input type="text" placeholder="Search items..." aria-label="Search orders">
+                        <input type="text" placeholder="Search Purchase Orders..." aria-label="Search orders">
                         <i class="fas fa-search search-icon"></i>
                     </div>
                     <div class="sorting-controls">
@@ -157,44 +159,9 @@
     </div>
 </div>
 
-    <!-- Edit Purchase Order Modal -->
-    <div id="editPurchaseOrderModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeEditPurchaseOrderModal()">&times;</span>
-            <h2>Edit Purchase Order</h2>
-            <form id="editPurchaseOrderForm" action="/edit-purchase-order" method="POST">
-                <label for="purchaseOrderSelect">Select Purchase Order:</label>
-                <select name="purchaseOrder" id="purchaseOrderSelect" required onchange="populateEditForm()">
-                    <option value="">Select a purchase order</option>
-                    <% purchaseorder.forEach(order => { %>
-                        <option value="<%= order._id %>" data-supplier="<%= order.supplier %>" 
-                                data-item="<%= order.items.itemName %>" 
-                                data-quantity="<%= order.items.quantity %>" 
-                                data-cost="<%= order.items.cost %>" 
-                                data-branch="<%= order.items.branchStored %>" 
-                                data-price="<%= order.items.price %>"><%= order.items.itemName %> - Supplier: <%= order.supplier %></option>
-                    <% }) %>
-                </select>
-
-                <label for="editSupplier">Supplier:</label>
-                <input type="text" name="supplier" id="editSupplier" required>
-
-                <label for="editItemName">Item:</label>
-                <input type="text" name="itemName" id="editItemName" required readonly>
-
-                <label for="editQuantity">Quantity:</label>
-                <input type="number" name="quantity" id="editQuantity" min="1" required oninput="updateEditCost()">
-
-                <label for="editCost">Cost:</label>
-                <input type="number" name="cost" id="editCost" step="0.01" required readonly>
-
-                <label>Branch Stored:</label>
-                <input type="text" name="branchStored" id="editBranchStored" required readonly>
-
-                <button type="submit">Update</button>
-            </form>
-        </div>
-    </div>
+    
+      
+    
 
     <script>
         // Modal open and close functionality
@@ -209,13 +176,7 @@
             addPurchaseOrderModal.style.display = 'none';
         }
 
-        function openEditPurchaseOrderModal() {
-            editPurchaseOrderModal.style.display = 'block';
-        }
-
-        function closeEditPurchaseOrderModal() {
-            editPurchaseOrderModal.style.display = 'none';
-        }
+        
 
         window.onclick = function(event) {
             if (event.target == addPurchaseOrderModal) {
@@ -289,6 +250,8 @@
             document.getElementById('editCost').value = selectedOption.dataset.cost;
             document.getElementById('editBranchStored').value = selectedOption.dataset.branch;
         }
+
+        
     </script>
 </body>
 
