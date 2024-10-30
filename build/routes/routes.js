@@ -597,6 +597,9 @@ router.get('/purchaseorder', async (req, res) => {
       name: { $regex: searchTerm, $options: 'i' } 
     };
 
+    const latestOrder = await PurchaseOrder.findOne().sort({ orderNumber: -1 });
+    const nextOrderNumber = latestOrder ? Number(latestOrder.orderNumber) + 1 : 1;
+
     let items = await Item.find(itemQuery);
     const purchaseorder = await PurchaseOrder.find({}).populate('items.itemName'); 
 
@@ -617,91 +620,128 @@ router.get('/purchaseorder', async (req, res) => {
       items, 
       searchTerm,
       purchaseorder, 
-      sortBy 
+      sortBy,
+      nextOrderNumber
     });
   } else {
     res.redirect('/');
   }
 });
 
+router.get('/purchaseorder/:id', async (req, res) => {
+  try {
+      const orderId = req.params.id;
+      const order = await PurchaseOrder.findById(orderId).populate('items.itemName');
+      
+      if (!order) {
+          return res.status(404).json({ message: 'Order not found' });
+      }
+      
+      res.json(order);
+  } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+router.put('/purchaseorder/:id', async (req, res) => {
+  try {
+      const orderId = req.params.id;
+      const updatedData = req.body;
+
+      const updatedOrder = await PurchaseOrder.findByIdAndUpdate(orderId, updatedData, { new: true });
+
+      if (!updatedOrder) {
+          return res.status(404).json({ message: 'Order not found' });
+      }
+
+      res.json(updatedOrder);
+  } catch (error) {
+      res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+});
+
+router.put('/purchaseorder/:orderId/items/:itemId/receive', async (req, res) => {
+  try {
+      const { orderId, itemId } = req.params;
+
+      const purchaseOrder = await PurchaseOrder.findById(orderId);
+      if (!purchaseOrder) {
+          return res.status(404).json({ message: 'Purchase Order not found.' });
+      }
+
+      const item = purchaseOrder.items.id(itemId);
+      if (!item) {
+          return res.status(404).json({ message: 'Item not found.' });
+      }
+
+      if (item.received) {
+          return res.status(400).json({ message: 'Item has already been marked as received.' });
+      }
+
+      item.received = true;
+
+      item.quantityReceived = item.quantity; 
+
+      const allReceived = purchaseOrder.items.every(i => i.received);
+      if (allReceived) {
+          purchaseOrder.status = 'Closed'; 
+      }
+
+      await purchaseOrder.save();
+
+      res.json(purchaseOrder); 
+  } catch (err) {
+      console.error('Error marking item as received:', err);
+      res.status(500).send('Server Error');
+  }
+});
+
+
+
 router.post('/add-purchase-order', async (req, res) => {
   try {
-    // Extract form data from the request body
-    console.log('Form Data: ', req.body);
-    const { supplier, orderNumber, items } = req.body; // Extract orderNumber
 
-    // Process each item from the request body
+    console.log('Form Data: ', req.body);
+    const { supplier, orderNumber, items, expectedOn } = req.body; 
+
     const purchaseItems = [];
     for (let item of items) {
       const { itemName, quantity, cost } = item;
 
-      // Find the item by name
       const foundItem = await Item.findOne({ name: itemName });
       if (!foundItem) {
         return res.status(400).json({ message: `Item '${itemName}' not found.` });
       }
 
-      // Check if the requested quantity exceeds available stock
-      if (quantity > foundItem.quantity) {
-        return res.status(400).json({ message: `Requested quantity for '${itemName}' exceeds available stock.` });
-      }
-
-      // Create item entry for the purchase order
       purchaseItems.push({
         itemName,
         quantity,
-        price: cost,
+        cost,
         amount: (cost * quantity).toFixed(2),
+        received: false,
         quantityReceived: 0,
         branchStored: foundItem.branchStored,
       });
     }
 
-    // Create a new Purchase Order instance
     const purchaseOrder = new PurchaseOrder({
       supplier,
       orderNumber, 
       items: purchaseItems,
-      status,
+      status: 'Pending',
       createdAt: new Date(),
+      expectedOn: new Date(expectedOn), 
     });
 
-    // Save the purchase order to the database
     await purchaseOrder.save();
     console.log('Purchase Order successfully added.');
 
-    // Redirect after successful save
     res.redirect('/purchaseorder');
   } catch (err) {
     console.error('Error adding purchase order:', err);
     res.status(500).send('Server Error');
   }
 });
-
-
-
-router.post('/edit-purchase-order', async (req, res) => {
-  try {
-      const { purchaseOrder, supplier, itemName, quantity, cost, branchStored } = req.body;
-
-      await PurchaseOrder.findByIdAndUpdate(purchaseOrder, {
-          supplier,
-          item: {
-              itemName,
-              quantity,
-              cost,
-              branchStored,
-          },
-      });
-
-      res.redirect('/purchaseorder'); 
-  } catch (error) {
-      console.error(error);
-      res.status(500).send('Error updating purchase order');
-  }
-});
-
-
 
 router.get('/logout', (req, res) => {
   req.session.destroy();

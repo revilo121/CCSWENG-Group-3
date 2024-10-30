@@ -328,13 +328,29 @@ body {
     background-color: rgba(0, 0, 0, 0.4);
 }
 .modal-content {
-    background-color: #fff;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 30%;
+    background-color: white;
+    margin: 10% auto;
+    margin-top: 4%;
+    padding: 3vh;
     border-radius: 10px;
+    width: 50%; 
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    height: 30%; 
+    overflow-y: auto; 
+  }
+
+.modal-display {
+    background-color: white;
+    margin: 10% auto;
+    margin-top: 4%;
+    padding: 3vh;
+    border-radius: 10px;
+    width: 50%; 
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    height: 50%; 
+    overflow-y: auto; 
 }
+
 .close {
     color: #aaa;
     float: right;

@@ -50,18 +50,17 @@
             <!-- Purchase Orders Table Section -->
             <section class="inventory-table">
                 <div class="purchase-order-controls">
+
                     <button class="create-purchase-order" onclick="openPurchaseOrderModal()">
                         <i class="fas fa-plus"></i> Create Purchase Order
                     </button>
-                    <button class="edit-purchase-order" onclick="openEditPurchaseOrderModal()">
-                        <i class="fas fa-edit"></i> Edit Purchase Order
-                    </button>
+
                     <div class="search-bar">
                         <input type="text" placeholder="Search items..." aria-label="Search orders">
                         <i class="fas fa-search search-icon"></i>
                     </div>
+
                     <div class="sorting-controls">
-                        <button class="sort"> Sort by</button>
                         <button class="filter"> Filter by</button>
                         <button class="pagination-btn prev"></button>
                         <button class="pagination-btn next"></button>
@@ -71,20 +70,19 @@
                 <!-- Order Grid -->
                 <div class="order-grid" id="orderGrid">
                     <% purchaseorder.forEach(order => { %> 
-                        <div class="item-card" data-id="<%= order._id %>">
+                        <div class="item-card" data-id="<%= order._id %>" style="cursor: pointer;" onclick="openDisplayPurchaseOrderModal('<%= order._id %>')">
                             <div class="card-header">
-                                <span class="item-name">Order Name: <%= order.orderNumber %></span>
+                                <span class="item-name">Order Number: <%= String(order.orderNumber).padStart(5, '0') %></span>
                                 <span class="item-dot"></span>
                             </div>
-                            <p>Supplier: <%= order.supplier %></p>
-                            <p>Created at: <%= order.createdAt.toDateString() %></p>
-                            <p><strong>Status:</strong> <%= order.status %></p> <!-- Added status here -->
+                            <p><strong>Supplier:</strong> <%= order.supplier %></p>
+                            <p><strong>Created at:</strong> <%= order.createdAt.toDateString() %></p>
+                            <p><strong>Status:</strong> <%= order.status %></p> 
                             <div class="items-list">
                                 <% if (order.items && order.items.length > 0) { %> 
                                     <% order.items.forEach(item => { %> 
                                         <div class="item-details">
-                                            <p><strong>Item Name:</strong> <%= item.itemName %></p>
-                                            <p><strong>Branch:</strong> <%= item.branchStored %></p>
+                                            <p><strong>Item Name:</strong> <%= item.itemName %></p>                           
                                             <p><strong>Quantity:</strong> <%= item.quantity %></p>
                                             <p><strong>Cost:</strong> P<%= item.cost %></p>
                                             <p><strong>Amount:</strong> P<%= item.amount %></p>
@@ -94,6 +92,8 @@
                                     <p>No items found for this order.</p> 
                                 <% } %>
                             </div>
+                            <p><strong>Delivery Cost:</strong> <%= order.deliveryCost %></p>
+                            <p><strong>Total Cost:</strong> <%= order.totalCost %></p>
                             <div class="card-menu">
                                 <i class="fas fa-ellipsis-h"></i>
                             </div>
@@ -101,105 +101,108 @@
                     <% }) %>
                 </div>
 
-<div id="addPurchaseOrderModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closePurchaseOrderModal()">&times;</span>
-        <h2>Create Purchase Order</h2>
-        <form id="addPurchaseOrderForm" action="/add-purchase-order" method="POST">
-            <label for="supplier">Supplier:</label>
-            <input type="text" name="supplier" id="supplier" required>
-
-            <label for="orderNumber">Order Name:</label>
-            <input type="text" name="orderNumber" id="orderNumber" required>
-
-            <label for="orderStatus">Order Status:</label>
-            <select name="status" id="orderStatus" required>
-                <option value="Pending">Pending</option>
-                <option value="Approved">Approved</option>
-                <option value="Completed">Completed</option>
-            </select>
-
-            <table id="itemsTable">
-                <thead>
-                    <tr>
-                        <th>Item Name</th>
-                        <th>Quantity</th>
-                        <th>Cost</th>
-                        <th>Amount</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="itemsBody">
-                    <tr>
-                        <td>
-                            <select name="items[0][itemName]" onchange="updateCost(this)">
-                                <option value="">Select an item</option>
-                                <% items.forEach(item => { %>
-                                    <option value="<%= item.name %>" data-price="<%= item.price %>" data-branch="<%= item.branchStored %>"><%= item.name %></option>
-                                <% }) %>
-                            </select>
-                        </td>
-                        <td><input type="number" name="items[0][quantity]" min="1" onchange="updateCost(this)"></td>
-                        <td><input type="number" name="items[0][cost]" readonly></td>
-                        <td><input type="number" name="items[0][amount]" readonly></td>
-                        <td>
-                            <input type="hidden" name="items[0][branchStored]" value="">
-                            <button type="button" onclick="removeItemRow(this)">Remove</button>
-                        </td>
-                    </tr>
-                </tbody>
-                
-            </table>
-            <button type="button" onclick="addItemRow()">Add Item</button>
-
-            <button type="submit">Submit</button>
-        </form>
-    </div>
-</div>
-
-    <!-- Edit Purchase Order Modal -->
-    <div id="editPurchaseOrderModal" class="modal">
+    <div id="addPurchaseOrderModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeEditPurchaseOrderModal()">&times;</span>
-            <h2>Edit Purchase Order</h2>
-            <form id="editPurchaseOrderForm" action="/edit-purchase-order" method="POST">
-                <label for="purchaseOrderSelect">Select Purchase Order:</label>
-                <select name="purchaseOrder" id="purchaseOrderSelect" required onchange="populateEditForm()">
-                    <option value="">Select a purchase order</option>
-                    <% purchaseorder.forEach(order => { %>
-                        <option value="<%= order._id %>" data-supplier="<%= order.supplier %>" 
-                                data-item="<%= order.items.itemName %>" 
-                                data-quantity="<%= order.items.quantity %>" 
-                                data-cost="<%= order.items.cost %>" 
-                                data-branch="<%= order.items.branchStored %>" 
-                                data-price="<%= order.items.price %>"><%= order.items.itemName %> - Supplier: <%= order.supplier %></option>
-                    <% }) %>
-                </select>
+            <span class="close" onclick="closePurchaseOrderModal()">&times;</span>
+            <h2>Create Purchase Order</h2>
+            <form id="addPurchaseOrderForm" action="/add-purchase-order" method="POST">
+                <label for="supplier">Supplier:</label>
+                <input type="text" name="supplier" id="supplier" required>
 
-                <label for="editSupplier">Supplier:</label>
-                <input type="text" name="supplier" id="editSupplier" required>
+                <label for="orderNumber">Order Number:</label>
+                <input type="text" name="orderNumber" id="orderNumber" value="<%= nextOrderNumber %>" readonly required>
 
-                <label for="editItemName">Item:</label>
-                <input type="text" name="itemName" id="editItemName" required readonly>
+                <label for="orderStatus">Order Status:</label>
+                <input type="text" name="status" id="orderStatus" value="Pending" readonly required>
 
-                <label for="editQuantity">Quantity:</label>
-                <input type="number" name="quantity" id="editQuantity" min="1" required oninput="updateEditCost()">
+                <label for="expectedOn">Expected Arrival Date:</label>
+                <input type="date" id="expectedOn" name="expectedOn" required>
 
-                <label for="editCost">Cost:</label>
-                <input type="number" name="cost" id="editCost" step="0.01" required readonly>
+                <table id="itemsTable">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Quantity</th>
+                            <th>Cost</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsBody">
+                        <tr>
+                            <td>
+                                <select name="items[0][itemName]" onchange="updateCost(this)">
+                                    <option value="">Select an item</option>
+                                    <% items.forEach(item => { %>
+                                        <option value="<%= item.name %>" data-price="<%= item.price %>" data-branch="<%= item.branchStored %>"><%= item.name %></option>
+                                    <% }) %>
+                                </select>
+                            </td>
+                            <td><input type="number" name="items[0][quantity]" min="1" onchange="updateCost(this)"></td>
+                            <td><input type="number" name="items[0][cost]" readonly></td>
+                            <td><input type="number" name="items[0][amount]" readonly></td>
+                            <td>
+                                <input type="hidden" name="items[0][branchStored]" value="">
+                                <button type="button" onclick="removeItemRow(this)">Remove</button>
+                            </td>
+                        </tr>
+                    </tbody>
 
-                <label>Branch Stored:</label>
-                <input type="text" name="branchStored" id="editBranchStored" required readonly>
+                <label for="deliveryCost">Delivery Cost:</label>
+                <input type="number" name="deliveryCost" id="deliveryCost" value="" onchange="updateDeliveryCost()">
 
-                <button type="submit">Update</button>
+                <label for="totalCost">Total Cost:</label>
+                <input type="number" name="totalCost" id="totalCost" value="" readonly required>
+                    
+                </table>
+                <button type="button" onclick="addItemRow()">Add Item</button>
+
+                <button type="submit">Submit</button>
             </form>
         </div>
     </div>
 
+    <div id="displayPurchaseOrderModal" class="modal" style="display: none;">
+        <div class="modal-display">
+            <span class="close" onclick="closeDisplayPurchaseOrderModal()">&times;</span>
+            <h2>Purchase Order Details</h2>
+
+            <form id="viewOrderForm">
+                <label for="displayOrderNumber">Order Number:</label>
+                <input type="number" id="displayOrderNumber" name="orderNumber" readonly>
+    
+                <label for="displaySupplier">Supplier:</label>
+                <input type="text" id="displaySupplier" name="supplier" readonly>
+    
+                <label for="displayCreatedAt">Created At:</label>
+                <input type="date" id="displayCreatedAt" name="createdAt" readonly>
+    
+                <label for="displayExpectedOn">Expected On:</label>
+                <input type="date" id="displayExpectedOn" name="expectedOn" readonly>
+    
+                <label for="displayStatus">Status:</label>
+                <input type="text" id="displayStatus" name="status" readonly>
+    
+                <label for="displayDeliveryCost">Delivery Cost:</label>
+                <input type="text" id="displayDeliveryCost" name="deliveryCost" readonly>
+
+                <h3>Items</h3>
+                <ul id="displayItemsList"></ul>
+
+                <button type="button" onclick="enableEditing()">Edit</button>
+                <button type="button" onclick="applyChanges()">Apply</button>
+
+                <label for="displayTotalCost">Total Cost:</label>
+                <input type="number" id="displayTotalCost" name="totalCost" readonly>
+            </form>   
+        </div>
+    </div>
+    
+    
+
     <script>
-        // Modal open and close functionality
+
         const addPurchaseOrderModal = document.getElementById('addPurchaseOrderModal');
-        const editPurchaseOrderModal = document.getElementById('editPurchaseOrderModal');
+        const displayPurchaseOrderModal = document.getElementById('displayPurchaseOrderModal');
 
         function openPurchaseOrderModal() {
             addPurchaseOrderModal.style.display = 'block';
@@ -209,42 +212,57 @@
             addPurchaseOrderModal.style.display = 'none';
         }
 
-        function openEditPurchaseOrderModal() {
-            editPurchaseOrderModal.style.display = 'block';
-        }
-
-        function closeEditPurchaseOrderModal() {
-            editPurchaseOrderModal.style.display = 'none';
+        function closeDisplayPurchaseOrderModal() {
+            displayPurchaseOrderModal.style.display = 'none';
         }
 
         window.onclick = function(event) {
             if (event.target == addPurchaseOrderModal) {
                 closePurchaseOrderModal();
-            } else if (event.target == editPurchaseOrderModal) {
-                closeEditPurchaseOrderModal();
+            } else if(event.target == displayPurchaseOrderModal){
+                closeDisplayPurchaseOrderModal();
             }
         }
 
-        function updateCost(select) {
-            const row = select.closest('tr');
+        function calculateTotalCost() {
+            const itemsBody = document.getElementById('itemsBody');
+            const rows = itemsBody.querySelectorAll('tr');
+            let totalCost = 0;
+
+            rows.forEach(row => {
+                const amountInput = row.querySelector('input[name*="amount"]');
+                const amount = parseFloat(amountInput.value) || 0;
+                totalCost += amount;
+            });
+
+            const deliveryCostInput = document.getElementById('deliveryCost');
+            const deliveryCost = parseFloat(deliveryCostInput.value) || 0;
+
+            const totalCostInput = document.getElementById('totalCost');
+            totalCostInput.value = (totalCost + deliveryCost).toFixed(2);
+        }
+
+        function updateDeliveryCost() {
+            calculateTotalCost();
+        }
+
+        function updateCost(element) {
+            const row = element.closest('tr');
+            const selectElement = row.querySelector('select[name*="itemName"]'); 
             const quantityInput = row.querySelector('input[name*="quantity"]');
             const costInput = row.querySelector('input[name*="cost"]');
             const amountInput = row.querySelector('input[name*="amount"]');
             const branchInput = row.querySelector('input[name*="branchStored"]');
     
-            const price = parseFloat(select.options[select.selectedIndex].dataset.price) || 0;
-            const branchStored = select.options[select.selectedIndex].dataset.branch;
+            const price = parseFloat(selectElement.options[selectElement.selectedIndex].dataset.price) || 0;;
+            const quantity = parseFloat(quantityInput.value) || 0;
+            const branchStored = selectElement.options[selectElement.selectedIndex].dataset.branch;
 
             costInput.value = price.toFixed(2);
-            amountInput.value = (price * (quantityInput.value || 0)).toFixed(2);
+            amountInput.value = (price * quantity).toFixed(2);
             branchInput.value = branchStored; 
-        }
 
-        function updateEditCost() {
-            const quantity = document.getElementById('editQuantity').value;
-            const cost = document.getElementById('editCost').value;
-            const total = (quantity * cost).toFixed(2);
-            document.getElementById('editAmount').value = total;
+            calculateTotalCost();
         }
 
         function addItemRow() {
@@ -271,24 +289,167 @@
     `;
 
             itemsBody.appendChild(newRow);
+            calculateTotalCost();
         }
 
 
         function removeItemRow(button) {
             const row = button.closest('tr');
             row.remove();
+            calculateTotalCost();
         }
 
-        function populateEditForm() {
-            const select = document.getElementById('purchaseOrderSelect');
-            const selectedOption = select.options[select.selectedIndex];
+        function enableEditing() {
+         
+            const inputs = document.querySelectorAll('#viewOrderForm input');
 
-            document.getElementById('editSupplier').value = selectedOption.dataset.supplier;
-            document.getElementById('editItemName').value = selectedOption.dataset.item;
-            document.getElementById('editQuantity').value = selectedOption.dataset.quantity;
-            document.getElementById('editCost').value = selectedOption.dataset.cost;
-            document.getElementById('editBranchStored').value = selectedOption.dataset.branch;
+            inputs.forEach(input => {
+        if (input.id !== 'displayOrderNumber' && input.id !== 'displayCreatedAt' && input.id !== 'displayStatus') {
+            input.removeAttribute('readonly');
         }
+    });
+        }
+
+        function applyChanges() {
+
+            const orderId = currentOrder;
+
+            const orderNumber = document.getElementById('displayOrderNumber').value;
+            const supplier = document.getElementById('displaySupplier').value;
+            const createdAt = document.getElementById('displayCreatedAt').value; 
+            const expectedOn = document.getElementById('displayExpectedOn').value; 
+            const status = document.getElementById('displayStatus').value;
+            const deliveryCost = document.getElementById('displayDeliveryCost').value;
+
+            const updatedData = {
+                orderNumber: orderNumber,
+                supplier: supplier,
+                createdAt: new Date(createdAt), 
+                expectedOn: new Date(expectedOn), 
+                status: status,
+                deliveryCost: deliveryCost,
+                items: []
+            };
+
+            const itemsList = document.getElementById('displayItemsList');
+            const itemsInputs = itemsList.querySelectorAll('li');
+
+            itemsInputs.forEach((li, index) => {
+                const itemName = li.querySelector(`input[name="items[${index}][itemName]"]`).value;
+                const quantity = li.querySelector(`input[name="items[${index}][quantity]"]`).value;
+                const cost = li.querySelector(`input[name="items[${index}][cost]"]`).value;
+                const amount = li.querySelector(`input[name="items[${index}][amount]"]`).value;
+                const branchStored = li.querySelector(`input[name="items[${index}][branchStored]"]`).value;
+
+                updatedData.items.push({
+                    itemName: itemName,
+                    quantity: quantity,
+                    cost: cost,
+                    amount: amount,
+                    branchStored: branchStored,
+                });
+            });
+
+            fetch(`/purchaseorder/${orderId}`, {
+                method: 'PUT', 
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(updatedOrder => {
+                console.log('Successfully updated order:', updatedOrder);
+                closeDisplayPurchaseOrderModal(); 
+            })
+            .catch(err => console.error('Error updating purchase order:', err));
+        }
+
+
+
+        function openDisplayPurchaseOrderModal(orderId) {
+            currentOrder = orderId;
+
+            fetch(`/purchaseorder/${orderId}`)
+                .then(response => response.json())
+                .then(order => {
+
+                    document.getElementById('displayOrderNumber').value = String(order.orderNumber).padStart(5, '0');
+                    document.getElementById('displaySupplier').value = order.supplier;
+                    document.getElementById('displayCreatedAt').value = new Date(order.createdAt).toISOString().split('T')[0];
+                    document.getElementById('displayExpectedOn').value = order.expectedOn ? new Date(order.expectedOn).toISOString().split('T')[0] : 'Not set';
+                    document.getElementById('displayDeliveryCost').value = order.deliveryCost ? `P${order.deliveryCost}` : 'Not set';
+                    document.getElementById('displayStatus').value = order.status;
+                    document.getElementById('displayTotalCost').value = `P${order.totalCost.toFixed(2)}`;
+
+                    const itemsList = document.getElementById('displayItemsList');
+                    itemsList.innerHTML = '';
+                    order.items.forEach((item, index) => {
+                        const li = document.createElement('li');
+
+                        const receivedButton = document.createElement('button');
+                        receivedButton.type = 'button';
+                        receivedButton.textContent = item.received ? 'Received' : 'Mark as Received';
+                        receivedButton.disabled = item.received;
+                        receivedButton.className = item.received ? 'received-btn' : 'mark-received-btn';
+
+                        if (!item.received) {
+                            receivedButton.addEventListener('click', (event) => {
+                            event.preventDefault();
+                            markItemAsReceived(orderId, item);
+                            });
+                        }
+
+                        li.innerHTML = `
+                            <span>
+                                <input type="text" name="items[${index}][itemName]" value="${item.itemName}" readonly>
+                            </span>
+                            <span>
+                                <input type="number" name="items[${index}][quantity]" value="${item.quantity}" min="1" readonly>
+                            </span>
+                            <span>
+                                <input type="number" name="items[${index}][cost]" value="${item.cost}" readonly>
+                            </span>
+                            <span>
+                                <input type="number" name="items[${index}][amount]" value="${item.amount}" readonly>
+                            </span>
+                            <span>
+                                <input type="hidden" name="items[${index}][branchStored]" value="${item.branchStored}">
+                            </span>
+                        `;
+                        li.appendChild(receivedButton);
+                        itemsList.appendChild(li);
+                    });
+
+                    document.getElementById('displayPurchaseOrderModal').style.display = 'block';
+                })
+                .catch(err => console.error('Error fetching purchase order:', err));
+        }
+
+
+        function markItemAsReceived(orderId, item) {
+            fetch(`/purchaseorder/${orderId}/items/${item._id}/receive`, {
+                method: 'PUT'
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to mark item as received');
+                return response.json();
+            })
+            .then(updatedOrder => {
+                openDisplayPurchaseOrderModal(orderId);
+            })
+            .catch(err => console.error('Error updating item status:', err));
+        }
+
+
+
+
+
     </script>
 </body>
 
