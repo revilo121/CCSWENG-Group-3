@@ -15,7 +15,7 @@
 </head>
 
 <body>
-    <%- include('partials/topbar') %>
+    <%- include('partials/topbar', {username: username, role: role} )%>
 
     <div class="main-fb">
         <%- include('partials/sidebar') %>
@@ -53,10 +53,14 @@
 
                     <button class="create-purchase-order" onclick="openPurchaseOrderModal()">
                         <i class="fas fa-plus"></i> Create Purchase Order
+                        
+                    </button>
+                    <button class="add-supplier" onclick="openSupplierModal()">
+                        <i class="fas fa-edit"></i> Add Supplier
                     </button>
 
                     <div class="search-bar">
-                        <input type="text" placeholder="Search items..." aria-label="Search orders">
+                        <input type="text" placeholder="Search Purchase Orders..." aria-label="Search orders">
                         <i class="fas fa-search search-icon"></i>
                     </div>
 

@@ -4,14 +4,173 @@ const Branch = require('../models/branch');
 const Item = require('../models/item');
 const PurchaseOrder = require('../models/purchaseorder');
 const History = require('../models/history');
+const Supplier = require('../models/supplier');
 const router = express.Router(); 
 const bcrypt = require('bcryptjs');
+const { select } = require('cjs');
 
 
 
 
 router.get('/', (req, res) => {
   res.redirect('login')
+});
+
+router.get('/supplier', async (req, res) => {
+
+  const selectedBranch = req.session.selectedBranch || 'Main'; // Default to 'Main' if none selected
+  const branches = await Branch.find({}, 'name');
+  const suppliers = await Supplier.find({});
+  console.log(suppliers);
+  try {
+    res.render('supplier', {
+      currentRoute: '/supplier',
+      username: req.session.username,
+      role: req.session.role,
+      selectedBranch: selectedBranch,
+      branches: branches,
+      suppliers
+    });
+  } catch (error) {
+      console.error('Error fetching suppliers:', error);
+      res.status(500).send('Server Error');
+  }
+});
+
+router.post('/add-supplier', async (req, res) => {
+  try {
+    // Extract form data from request body
+    const { name, address, contactNumber, personToContact } = req.body;
+    const existingSupplier = await Supplier.findOne({ name: name });
+
+    if (existingSupplier) {
+      return res.status(400).json({ message: 'This supplier already exists in the system.' });
+    }
+
+    // Create a new Supplier instance
+    const newSupplier = new Supplier({
+      name,
+      address,
+      contactNumber,
+      personToContact
+    });
+
+    // Save the supplier to the database
+    await newSupplier.save();
+    console.log('Supplier successfully added.');
+
+    // Set branch for the history log
+    const selectedBranch = req.session.selectedBranch || 'Main';
+
+    // Create a new History log entry for adding the supplier
+    const historyLog = new History({
+      actionCategory: 'Suppliers',
+      actionBy: req.session.username, // Assuming user information is stored in req.session
+      actionType: 'Create',
+      actionDetails: `New Supplier: ${name}`, // Log details about the supplier
+      date: new Date(),
+      branch: selectedBranch
+    });
+
+    // Save the history log to the database
+    await historyLog.save();
+
+    
+  } catch (err) {
+    console.error('Error adding supplier:', err);
+    res.status(500).send('Server Error');
+  }
+});
+
+router.post('/update-supplier', async (req, res) => {
+  const { _id, name, address, contactNumber, personToContact } = req.body;
+
+  try {
+    // Find the existing supplier by _id
+    const existingSupplier = await Supplier.findById(_id);
+
+    if (!existingSupplier) {
+      return res.status(404).json({ message: 'Supplier not found.' });
+    }
+
+    // Keep track of changes for history logging
+    let actionDetails = `Updated Supplier: ${existingSupplier.name}\nChanges:\n`;
+
+    // Compare the fields and log changes
+    if (existingSupplier.name !== name) actionDetails += `- Name: ${existingSupplier.name} ➡️ ${name}\n`;
+    if (existingSupplier.address !== address) actionDetails += `- Address: ${existingSupplier.address} ➡️ ${address}\n`;
+    if (existingSupplier.contactNumber !== contactNumber) actionDetails += `- Contact Number: ${existingSupplier.contactNumber} ➡️ ${contactNumber}\n`;
+    if (existingSupplier.personToContact !== personToContact) actionDetails += `- Contact Person: ${existingSupplier.personToContact} ➡️ ${personToContact}\n`;
+
+    // Update the supplier with new values
+    existingSupplier.name = name;
+    existingSupplier.address = address;
+    existingSupplier.contactNumber = contactNumber;
+    existingSupplier.personToContact = personToContact;
+
+    // Save the updated supplier
+    const updatedSupplier = await existingSupplier.save();
+    const selectedBranch = req.session.selectedBranch || 'Main';
+
+    // Create a new history log entry
+    const historyLog = new History({
+      actionCategory: 'Suppliers',
+      actionBy: req.session.username, // Assuming user information is stored in req.session
+      actionType: 'Update',
+      actionDetails: actionDetails,
+      date: new Date(),
+      branch: selectedBranch
+    });
+
+    // Save the history log
+    await historyLog.save();
+
+    res.status(200).json({ message: 'Supplier updated successfully.', supplier: updatedSupplier });
+  } catch (error) {
+    console.error('Error updating supplier:', error);
+    res.status(500).json({ message: 'An error occurred while updating the supplier.' });
+  }
+});
+
+
+router.delete('/delete-supplier', async (req, res) => {
+  const { _id } = req.body;
+
+  try {
+    // Find the existing supplier by _id
+    const existingSupplier = await Supplier.findByIdAndDelete(_id);
+
+    if (!existingSupplier) {
+      return res.status(404).json({ message: 'Supplier not found.' });
+    }
+
+    // Keep track of supplier details for history logging before deletion
+    const actionDetails = `Deleted Supplier: ${existingSupplier.name}\n` +
+                          `- Address: ${existingSupplier.address}\n` +
+                          `- Contact Number: ${existingSupplier.contactNumber}\n` +
+                          `- Contact Person: ${existingSupplier.personToContact}\n`;
+
+    
+    const selectedBranch = req.session.selectedBranch || 'Main';
+
+    // Create a new history log entry
+    const historyLog = new History({
+      actionCategory: 'Suppliers',
+      actionBy: req.session.username, // Assuming user information is stored in req.session
+      actionType: 'Delete',
+      actionDetails: actionDetails,
+      date: new Date(),
+      branch: selectedBranch
+    });
+
+    // Save the history log
+    await historyLog.save();
+
+    res.status(200).json({ message: 'Supplier deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting supplier:', error);
+    res.status(500).json({ message: 'An error occurred while deleting the supplier.' });
+  }
 });
 
 
@@ -370,8 +529,6 @@ router.get('/inventory', async (req, res) => {
   }
 });
 
-
-// Function to log history
 
 
 router.post('/add-item', async (req, res) => {
