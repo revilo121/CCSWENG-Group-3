@@ -435,7 +435,7 @@
                     document.getElementById('displayExpectedOn').value = order.expectedOn ? new Date(order.expectedOn).toISOString().split('T')[0] : 'Not set';
                     document.getElementById('displayDeliveryCost').value = order.deliveryCost ? `P${order.deliveryCost}` : 'Not set';
                     document.getElementById('displayStatus').value = order.status;
-                    document.getElementById('displayTotalCost').value = `P${order.totalCost.toFixed(2)}`;
+                    document.getElementById('displayTotalCost').value = order.totalCost;
 
                     const itemsList = document.getElementById('displayItemsList');
                     itemsList.innerHTML = '';
