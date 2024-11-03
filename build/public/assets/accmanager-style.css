@@ -31,83 +31,90 @@ body {
 }
 
 .form-section, .user-list-section {
-    width: 48%;
+    width: 100%;
+    margin-bottom: 30px;
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
 }
 
 .form-group input, 
 .form-group select {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s;
 }
 
 .form-group input[type="submit"] {
-    background-color: #28a745;
-    color: white;
+    background-color: #ff5722;
+    color: #ffffff;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 700;
+    border: none;
+    transition: background-color 0.3s;
 }
 
 .form-group input[type="submit"]:hover {
-    background-color: #218838;
+    background-color: #e64a19;
 }
 
 .form-group input:focus, .form-group select:focus {
-    border-color: #80bdff;
+    border-color: #ff9800;
     outline: none;
-    box-shadow: 0 0 8px rgba(128, 189, 255, 0.5);
+    box-shadow: 0 0 10px rgba(255, 152, 0, 0.4);
 }
 
 .user-list-section {
-    max-height: 400px; /* Adjust this height to fit about 5 users */
-    overflow-y: auto; /* Enable vertical scrolling */
-    border: 1px solid #ccc; /* Optional: Add a border to make it visually distinct */
-    padding: 10px; /* Padding for inner content */
-    margin-left: 50px; /* Space from the left account creation form */
-    background-color: rgba(255, 72, 0, 0.5); /* Transparent background */
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 15px;
+    background-color: #f9f9f9;
 }
-
 
 .user-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
+    padding: 15px 0;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .user-item .actions button {
-    margin-left: 10px;
-    padding: 5px 10px;
+    margin-left: 15px;
+    padding: 8px 12px;
+    font-size: 14px;
     cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
 }
 
 .actions .delete-btn {
-    background-color: #dc3545;
+    background-color: #f44336;
     color: white;
 }
 
 .actions .change-role-btn {
-    background-color: #007bff;
+    background-color: #3f51b5;
     color: white;
 }
 
 .actions .change-role-btn:hover {
-    background-color: #0069d9;
+    background-color: #303f9f;
 }
 
 .actions .delete-btn:hover {
-    background-color: #c82333;
+    background-color: #d32f2f;
 }
