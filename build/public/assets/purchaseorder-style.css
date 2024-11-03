@@ -316,8 +316,20 @@ body {
     color: #555;
 }
 
+/* Adjusted Modal Styles */
+.modal-content, .modal-display {
+    background-color: white;
+    margin: auto;
+    padding: 3vh;
+    border-radius: 10px;
+    width: auto;
+    max-width: 600px;  /* Reduced width for a compact look */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    overflow-y: visible;
+}
+
 .modal {
-    display: none;
+    display: block;
     position: fixed;
     z-index: 1;
     left: 0;
@@ -326,30 +338,9 @@ body {
     height: 100%;
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.4);
+    padding: 50px 0; /* Added padding for better centering */
 }
-.modal-content {
-    background-color: white;
-    margin: 10% auto;
-    margin-top: 4%;
-    padding: 3vh;
-    border-radius: 10px;
-    width: 50%; 
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    height: 30%; 
-    overflow-y: auto; 
-  }
 
-.modal-display {
-    background-color: white;
-    margin: 10% auto;
-    margin-top: 4%;
-    padding: 3vh;
-    border-radius: 10px;
-    width: 50%; 
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    height: 50%; 
-    overflow-y: auto; 
-}
 
 .close {
     color: #aaa;
@@ -439,4 +430,87 @@ body {
 
 #supplierModal button[type="button"]:hover {
   background-color: #c82333;
+}
+
+#addPurchaseOrderModal .modal-content, #displayPurchaseOrderModal .modal-display {
+    padding: 20px;
+    max-width: 600px;  /* Reduced width */
+    margin: 50px auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#addPurchaseOrderModal label, #displayPurchaseOrderModal label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+#addPurchaseOrderModal input, #displayPurchaseOrderModal input, #addPurchaseOrderModal select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+/* Updated Button Styles */
+button[type="button"], button[type="submit"] {
+    background-color: #D64832; /* Consistent color for action buttons */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 20px; /* Rounded rectangular shape */
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+}
+
+button[type="button"]:hover, button[type="submit"]:hover {
+    background-color: #f58686;
+}
+
+/* Table Styles */
+#itemsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+#itemsTable th, #itemsTable td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+#itemsTable th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+#itemsTable td button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+#itemsTable td button:hover {
+    background-color: #c82333;
+}
+
+ul#displayItemsList {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+ul#displayItemsList li {
+    background-color: #f9f9f9;
+    padding: 10px;
+    border: 1px solid #ddd;
+    margin-bottom: 5px;
+    border-radius: 4px;
 }
