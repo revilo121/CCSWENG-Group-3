@@ -5,6 +5,7 @@ const Item = require('../models/item');
 const PurchaseOrder = require('../models/purchaseorder');
 const History = require('../models/history');
 const Supplier = require('../models/supplier');
+const TransferOrder = require('../models/transferorder');
 const router = express.Router(); 
 const bcrypt = require('bcryptjs');
 const { select } = require('cjs');
@@ -14,6 +15,11 @@ const { select } = require('cjs');
 
 router.get('/', (req, res) => {
   res.redirect('login')
+});
+
+router.get('/logout', (req, res) => {
+  res.redirect('login')
+  req.session.destroy();
 });
 
 router.get('/supplier', async (req, res) => {
@@ -484,7 +490,7 @@ router.get('/inventory', async (req, res) => {
     // Fetch unique categories
     const categories = await Item.distinct('category');
 
-    // Build query based on search, sorting, and filtering
+    // Build query based on search and category
     let query = {
       branchStored: selectedBranch,
       name: { $regex: searchTerm, $options: 'i' } // Case-insensitive search
@@ -494,7 +500,17 @@ router.get('/inventory', async (req, res) => {
       query.category = categoryFilter; // Apply category filter
     }
 
+    // Fetch inventory based on query
     let inventory = await Item.find(query);
+
+    // Apply filterBy logic after fetching the items
+    if (filterBy === 'out-of-stock') {
+      inventory = inventory.filter(item => item.quantity === 0);
+    } else if (filterBy === 'low-stock') {
+      inventory = inventory.filter(item => item.quantity > 0 && item.quantity <= item.lowStockThreshold);
+    } else if (filterBy === 'in-stock') {
+      inventory = inventory.filter(item => item.quantity > item.lowStockThreshold);
+    }
 
     // Sort inventory
     if (sortBy === 'alphabetical') {
@@ -528,6 +544,8 @@ router.get('/inventory', async (req, res) => {
     res.redirect('/');
   }
 });
+
+
 
 
 
@@ -900,9 +918,105 @@ router.post('/add-purchase-order', async (req, res) => {
   }
 });
 
-router.get('/logout', (req, res) => {
-  req.session.destroy();
-  res.redirect('/login');
+
+
+router.post('/edit-purchase-order', async (req, res) => {
+  try {
+      const { purchaseOrder, supplier, itemName, quantity, cost, branchStored } = req.body;
+
+      await PurchaseOrder.findByIdAndUpdate(purchaseOrder, {
+          supplier,
+          item: {
+              itemName,
+              quantity,
+              cost,
+              branchStored,
+          },
+      });
+
+      res.redirect('/purchaseorder'); 
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Error updating purchase order');
+  }
+});
+
+router.get('/transferorder', async (req, res) => {
+
+  const branches = await Branch.find({}, 'name');
+  const selectedBranch = req.session.selectedBranch || 'Main';
+  let query = { branchStored: selectedBranch };
+  let inventory = await Item.find(query);
+  let transferOrders = await TransferOrder.find();
+
+  res.render('transferorder', {
+    currentRoute: '/transferorder',
+    username: req.session.username,
+    role: req.session.role,
+    branches,
+    selectedBranch,
+    inventory,
+    transferOrders
+  });
+
+});
+
+router.post('/create-transfer-order', async (req, res) => {
+  const { sourceBranch, destinationBranch, items } = req.body;
+
+  if (!sourceBranch || !destinationBranch || !items || items.length === 0) {
+    return res.status(400).json({ error: 'All fields are required, including at least one item.' });
+  }
+
+  if (sourceBranch === destinationBranch) {
+    return res.status(400).json({ error: 'Source and destination branches must be different.' });
+  }
+
+  async function generateUniqueOrderNumber() {
+    // Fetch the latest transfer order and determine the new order number
+    const lastOrder = await TransferOrder.findOne().sort({ createdAt: -1 });
+    const lastNumber = lastOrder ? parseInt(lastOrder.orderNumber.slice(1), 10) : 0;
+    return `T${(lastNumber + 1).toString().padStart(4, '0')}`;
+  }
+
+  try {
+    let newOrderNumber = await generateUniqueOrderNumber();
+    let success = false;
+
+    // Retry until success or max attempts reached
+    for (let attempts = 0; attempts < 3 && !success; attempts++) {
+      try {
+        // Try to save the new transfer order with the generated number
+        const newTransferOrder = new TransferOrder({
+          sourceBranch,
+          destinationBranch,
+          items,
+          orderNumber: newOrderNumber,
+          status: 'For Approval',
+          createdAt: new Date()
+        });
+
+        await newTransferOrder.save();
+        success = true;
+        res.status(201).json({ message: 'Transfer order created successfully!', orderNumber: newOrderNumber });
+      } catch (error) {
+        if (error.code === 11000) { // Duplicate key error
+          // Generate a new order number and retry
+          newOrderNumber = await generateUniqueOrderNumber();
+        } else {
+          throw error;
+        }
+      }
+    }
+
+    if (!success) {
+      res.status(500).json({ error: 'Failed to create a unique transfer order after multiple attempts.' });
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to create transfer order.' });
+  }
 });
 
 module.exports = router; 
