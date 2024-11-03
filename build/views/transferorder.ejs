@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Orders</title>
+    <link rel="stylesheet" href="/assets/transferorder-style.css">
+    <link rel="stylesheet" href="/assets/sidebar.css">
+    <link rel="stylesheet" href="/assets/topbar.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    
+</head>
+
+<body>
+
+    <%- include('partials/topbar', {username: username, role: role} )%>
+    <div class = main-fb>
+        
+        <%- include('partials/sidebar', {branches:branches } )%>
+
+        <div class = "main-content">
+            <h1>Transfer Orders</h1>
+            <br>
+            <section class="order-status">
+                <div class="status for-approval">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div class="status-text">
+                        <span class="status-label">For Approval</span>
+                        <h2>5</h2>
+                    </div>
+                </div>
+                <div class="status pending">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div class="status-text">
+                        <span class="status-label">Pending</span>
+                        <h2>55</h2>
+                    </div>
+                </div>
+                <div class="status completed">
+                    <i class="fas fa-check-circle"></i>
+                    <div class="status-text">
+                        <span class="status-label">Completed (This month)</span>
+                        <h2>555</h2>
+                    </div>
+                </div>
+            </section>
+
+            <section class="inventory-table">
+                <div class="purchase-order-controls">
+
+                    <button class="create-transfer-order" onclick="openTransferOrderModal()">
+                        <i class="fas fa-plus"></i> Create Transfer Order
+                        
+                    </button>
+                    
+
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search Transfer Orders..." aria-label="Search orders">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+
+                    <div class="sorting-controls">
+                        <button class="filter"> Filter by</button>
+                        <button class="pagination-btn prev"></button>
+                        <button class="pagination-btn next"></button>
+                    </div>
+                </div>
+
+                <!-- Transfer Orders Grid -->
+            <div class="transfer-order-grid" id="transferOrderGrid">
+                <% if (transferOrders && transferOrders.length > 0) { %>
+                <% transferOrders.forEach(order => { %>
+                    <div class="order-card" onclick="openEditTransferOrderModal()">
+
+                    <div class="card-header">
+                        <span class="order-label">Order #: <%= order.orderNumber %></span>
+                        
+                        <!-- Status dot (color based on status) -->
+                        <span class="status-dot 
+                        <%= order.status === 'Completed' ? 'green' 
+                        : order.status === 'Pending' ? 'orange' 
+                        : 'red' %>">
+                        </span>
+                    </div>
+                    <p>Items in Order: <%= order.items.length %></p>
+                    <p>Status: <%= order.status %></p>
+                    
+            
+                    <div class="card-menu">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </div>
+                    </div>
+                <% }) %>
+                <% } else { %>
+                <p>No transfer orders found.</p>
+                <% } %>
+            </div>
+
+                            
+<!-- Create Transfer Order Modal -->
+<div id="createTransferOrderModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeTransferOrderModal()">&times;</span>
+      <h2>Create Transfer Order</h2>
+      <form id="transferOrderForm">
+        <div class="form-group">
+          <label for="sourceBranch">Source Branch</label>
+          <select id="sourceBranch" name="sourceBranch" required>
+            <% branches.forEach(branch => { %>
+              <option value="<%= branch.name %>"><%= branch.name %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="destinationBranch">Destination Branch</label>
+          <select id="destinationBranch" name="destinationBranch" required>
+            <% branches.forEach(branch => { %>
+              <option value="<%= branch.name %>"><%= branch.name %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="items">Items to Transfer</label>
+          <div id="itemsContainer">
+            <div class="item-entry">
+              <select name="itemName[]" required>
+                <% inventory.forEach(item => { %>
+                  <option value="<%= item.name %>"><%= item.name %> (<%= item.quantity %> in stock)</option>
+                <% }) %>
+              </select>
+              <input type="number" name="quantity[]" placeholder="Quantity" required>
+            </div>
+          </div>
+          <button type="button" onclick="addItemEntry()">Add Another Item</button>
+        </div>
+        <button type="submit">Create Transfer Order</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- View/Edit Transfer Order Modal -->
+<div id="editTransferOrderModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeEditTransferOrderModal()">&times;</span>
+      <h2>Edit Transfer Order</h2>
+      <div id="editModalBody">
+        <!-- Details of the transfer order will be populated here -->
+      </div>
+      <button id="approveOrderBtn">Approve</button>
+      <button id="deleteOrderBtn">Delete</button>
+      <button id="applyChangesBtn" style="display: none;">Apply</button>
+    </div>
+</div>
+
+  
+
+  
+
+        </div>
+        
+    </div>
+
+</body>
+
+<script>
+    function openTransferOrderModal() {
+  document.getElementById('createTransferOrderModal').style.display = 'flex';
+}
+
+function closeTransferOrderModal() {
+  document.getElementById('createTransferOrderModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+  const modal = document.getElementById('createTransferOrderModal');
+  if (event.target === modal) {
+    closeTransferOrderModal();
+  }
+};
+
+function addItemEntry() {
+  const itemContainer = document.getElementById('itemsContainer');
+  const itemEntry = document.createElement('div');
+  itemEntry.classList.add('item-entry');
+  itemEntry.innerHTML = `
+    <select name="itemName[]" required>
+      <% inventory.forEach(item => { %>
+        <option value="<%= item.name %>"><%= item.name %> (<%= item.quantity %> in stock)</option>
+      <% }) %>
+    </select>
+    <input type="number" name="quantity[]" placeholder="Quantity" required>
+    <button type="button" class="remove-item" onclick="removeItemEntry(this)">X</button>
+  `;
+  itemContainer.appendChild(itemEntry);
+}
+
+// Function to remove an item entry
+function removeItemEntry(button) {
+  button.parentElement.remove();
+}
+
+document.getElementById('transferOrderForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const formData = new FormData(e.target);
+  const data = {
+    sourceBranch: formData.get('sourceBranch'),
+    destinationBranch: formData.get('destinationBranch'),
+    items: formData.getAll('itemName[]').map((name, index) => ({
+      itemName: name,
+      quantity: formData.getAll('quantity[]')[index]
+    }))
+  };
+
+  try {
+    const response = await fetch('/create-transfer-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (response.ok) {
+      alert('Transfer order created successfully!');
+      
+      closeTransferOrderModal();
+    } else {
+      alert('Error creating transfer order');
+    }
+  } catch (error) {
+    console.error(error);
+    alert('Error creating transfer order');
+  }
+});
+
+
+function openEditTransferOrderModal(order) {
+  const modal = document.getElementById('editTransferOrderModal');
+  const editModalBody = document.getElementById('editModalBody');
+
+  // Populate modal with order data
+  editModalBody.innerHTML = `
+    <div class="form-group">
+      <label for="sourceBranchEdit">Source Branch</label>
+      <select id="sourceBranchEdit" name="sourceBranch" disabled>
+        <option selected>${order.sourceBranch}</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="destinationBranchEdit">Destination Branch</label>
+      <select id="destinationBranchEdit" name="destinationBranch" disabled>
+        <option selected>${order.destinationBranch}</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Items in Order</label>
+      <div id="editItemsContainer">
+        ${order.items.map((item, index) => `
+          <div class="item-entry" data-index="${index}">
+            <span>${item.itemName}</span>
+            <input type="number" name="quantityEdit[]" value="${item.quantity}" disabled>
+            <button type="button" class="remove-item" onclick="removeItemEntry(this)">X</button>
+          </div>
+        `).join('')}
+      </div>
+      <button type="button" onclick="addItemEntry('editItemsContainer')">Add Another Item</button>
+    </div>
+  `;
+
+  modal.style.display = 'flex';
+
+  // Set up edit functionality
+  document.getElementById('approveOrderBtn').onclick = () => approveOrder(order.id);
+  document.getElementById('deleteOrderBtn').onclick = () => deleteOrder(order.id);
+}
+
+function closeEditTransferOrderModal() {
+  document.getElementById('editTransferOrderModal').style.display = 'none';
+}
+
+function enableEditMode() {
+  document.querySelectorAll('#editModalBody input').forEach(input => input.disabled = false);
+  document.getElementById('applyChangesBtn').style.display = 'block';
+}
+
+async function approveOrder(orderId) {
+  try {
+    const response = await fetch(`/approve-transfer-order/${orderId}`, { method: 'POST' });
+    if (response.ok) {
+      alert('Transfer order approved!');
+      closeEditTransferOrderModal();
+    } else {
+      alert('Error approving order');
+    }
+  } catch (error) {
+    console.error(error);
+    alert('Error approving order');
+  }
+}
+
+async function deleteOrder(orderId) {
+  try {
+    const response = await fetch(`/delete-transfer-order/${orderId}`, { method: 'DELETE' });
+    if (response.ok) {
+      alert('Transfer order deleted!');
+      closeEditTransferOrderModal();
+    } else {
+      alert('Error deleting order');
+    }
+  } catch (error) {
+    console.error(error);
+    alert('Error deleting order');
+  }
+}
+
+async function applyChanges(orderId) {
+  const items = Array.from(document.querySelectorAll('#editItemsContainer .item-entry')).map(entry => ({
+    itemName: entry.querySelector('select').value,
+    quantity: entry.querySelector('input[name="quantity[]"]').value
+  }));
+  
+  const data = { items };
+
+  try {
+    const response = await fetch(`/update-transfer-order/${orderId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (response.ok) {
+      alert('Changes applied successfully!');
+      closeEditTransferOrderModal();
+    } else {
+      alert('Error applying changes');
+    }
+  } catch (error) {
+    console.error(error);
+    alert('Error applying changes');
+  }
+}
+
+</script>
