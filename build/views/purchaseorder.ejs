@@ -103,101 +103,118 @@
                     <% }) %>
                 </div>
 
-    <div id="addPurchaseOrderModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closePurchaseOrderModal()">&times;</span>
-            <h2>Create Purchase Order</h2>
-            <form id="addPurchaseOrderForm" action="/add-purchase-order" method="POST">
-                <label for="supplier">Supplier:</label>
-                <input type="text" name="supplier" id="supplier" required>
+                <div id="addPurchaseOrderModal" class="modal">
+                    <div class="modal-content">
+                      <span class="close" onclick="closePurchaseOrderModal()">&times;</span>
+                      <h2>Create Purchase Order</h2>
+                      <form id="addPurchaseOrderForm" action="/add-purchase-order" method="POST">
 
-                <label for="orderNumber">Order Number:</label>
-                <input type="text" name="orderNumber" id="orderNumber" value="<%= nextOrderNumber %>" readonly required>
+                        <label for="supplier">Supplier:</label>
+                        <select name="supplier" id="supplier" required>
+                          <option value="">Select a supplier</option>
+                          <% suppliers.forEach(supplier => { %>
+                            <option value="<%= supplier.name %>"><%= supplier.name %></option>
+                          <% }) %>
+                        </select>
 
-                <label for="orderStatus">Order Status:</label>
-                <input type="text" name="status" id="orderStatus" value="Pending" readonly required>
+                        <label for="orderNumber">Order Number:</label>
+                        <input type="number" name="orderNumber" id="orderNumber" value="<%= nextOrderNumber %>" readonly required>
+                  
+                        <label for="orderStatus">Order Status:</label>
+                        <input type="text" name="status" id="orderStatus" value="For Approval" readonly required>
 
-                <label for="expectedOn">Expected Arrival Date:</label>
-                <input type="date" id="expectedOn" name="expectedOn" required>
+                        <label for="expectedOn">Expected Arrival Date:</label>
+                        <input type="date" id="expectedOn" name="expectedOn" required>
 
-                <table id="itemsTable">
-                    <thead>
-                        <tr>
-                            <th>Item Name</th>
-                            <th>Quantity</th>
-                            <th>Cost</th>
-                            <th>Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody id="itemsBody">
-                        <tr>
-                            <td>
+                        <label for="branchStored">Branch to be Stored at:</label>
+                        <select name="branchStored" id="branchStored" required>
+                          <option value="">Select a branch</option>
+                          <% branches.forEach(branch => { %>
+                            <option value="<%= branch.name %>"><%= branch.name %></option>
+                          <% }) %>
+                        </select>
+                  
+                        <table id="itemsTable">
+
+                          <thead>
+                            <tr>
+                              <th>Item Name</th>
+                              <th>Quantity</th>
+                              <th>Cost</th>
+                              <th>Amount</th>
+                            </tr>
+                          </thead>
+                          <tbody id="itemsBody">
+                            <tr>
+                              <td>
                                 <select name="items[0][itemName]" onchange="updateCost(this)">
-                                    <option value="">Select an item</option>
-                                    <% items.forEach(item => { %>
-                                        <option value="<%= item.name %>" data-price="<%= item.price %>" data-branch="<%= item.branchStored %>"><%= item.name %></option>
-                                    <% }) %>
+                                  <option value="">Select an item</option>
+                                  <% items.forEach(item => { %>
+                                    <option value="<%= item.name %>" data-price="<%= item.price %>"><%= item.name %></option>
+                                  <% }) %>
                                 </select>
-                            </td>
-                            <td><input type="number" name="items[0][quantity]" min="1" onchange="updateCost(this)"></td>
-                            <td><input type="number" name="items[0][cost]" readonly></td>
-                            <td><input type="number" name="items[0][amount]" readonly></td>
-                            <td>
-                                <input type="hidden" name="items[0][branchStored]" value="">
-                                <button type="button" onclick="removeItemRow(this)">Remove</button>
-                            </td>
-                        </tr>
-                    </tbody>
+                              </td>
+                              <td><input type="number" name="items[0][quantity]" min="1" onchange="updateCost(this)"></td>
+                              <td><input type="number" name="items[0][cost]" readonly></td>
+                              <td><input type="number" name="items[0][amount]" readonly></td>
+                              <td><button type="button" onclick="removeItemRow(this)">Remove</button></td>
+                            </tr>
+                          </tbody>
+                        </table>
 
-                <label for="deliveryCost">Delivery Cost:</label>
-                <input type="number" name="deliveryCost" id="deliveryCost" value="" onchange="updateDeliveryCost()">
+                        <label for="deliveryCost">Delivery Cost:</label>
+                        <input type="number" name="deliveryCost" id="deliveryCost" onchange="updateDeliveryCost()">
+                        
+                        <label for="totalCost">Total Cost:</label>
+                        <input type="number" name="totalCost" id="totalCost" readonly required>
+                        
+                        <button type="button" onclick="addItemRow()">Add Item</button>
+                        <button type="submit">Submit</button>
+                      </form>
+                    </div>
+                  </div>
+                  
 
-                <label for="totalCost">Total Cost:</label>
-                <input type="number" name="totalCost" id="totalCost" value="" readonly required>
-                    
-                </table>
-                <button type="button" onclick="addItemRow()">Add Item</button>
+                  <div id="displayPurchaseOrderModal" class="modal" style="display: none;">
+                    <div class="modal-display">
+                        <span class="close" onclick="closeDisplayPurchaseOrderModal()">&times;</span>
+                        <h2>Purchase Order Details</h2>
+                
+                        <form id="editPurchaseOrderForm" onsubmit="applyChanges(event)">
 
-                <button type="submit">Submit</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="displayPurchaseOrderModal" class="modal" style="display: none;">
-        <div class="modal-display">
-            <span class="close" onclick="closeDisplayPurchaseOrderModal()">&times;</span>
-            <h2>Purchase Order Details</h2>
-
-            <form id="viewOrderForm">
-                <label for="displayOrderNumber">Order Number:</label>
-                <input type="number" id="displayOrderNumber" name="orderNumber" readonly>
-    
-                <label for="displaySupplier">Supplier:</label>
-                <input type="text" id="displaySupplier" name="supplier" readonly>
-    
-                <label for="displayCreatedAt">Created At:</label>
-                <input type="date" id="displayCreatedAt" name="createdAt" readonly>
-    
-                <label for="displayExpectedOn">Expected On:</label>
-                <input type="date" id="displayExpectedOn" name="expectedOn" readonly>
-    
-                <label for="displayStatus">Status:</label>
-                <input type="text" id="displayStatus" name="status" readonly>
-    
-                <label for="displayDeliveryCost">Delivery Cost:</label>
-                <input type="text" id="displayDeliveryCost" name="deliveryCost" readonly>
-
-                <h3>Items</h3>
-                <ul id="displayItemsList"></ul>
-
-                <button type="button" onclick="enableEditing()">Edit</button>
-                <button type="button" onclick="applyChanges()">Apply</button>
-
-                <label for="displayTotalCost">Total Cost:</label>
-                <input type="number" id="displayTotalCost" name="totalCost" readonly>
-            </form>   
-        </div>
-    </div>
+                            <input type="hidden" id="orderID" name="orderID">
+                
+                            <label for="displayOrderNumber">Order Number:</label>
+                            <input type="number" id="displayOrderNumber" name="orderNumber" readonly>
+                
+                            <label for="displaySupplier">Supplier:</label>
+                            <input type="text" id="displaySupplier" name="supplier" readonly>
+                
+                            <label for="displayCreatedAt">Created At:</label>
+                            <input type="date" id="displayCreatedAt" name="createdAt" readonly>
+                
+                            <label for="displayExpectedOn">Expected On:</label>
+                            <input type="date" id="displayExpectedOn" name="expectedOn">
+                
+                            <label for="displayStatus">Status:</label>
+                            <input type="text" id="displayStatus" name="status" readonly>
+                
+                            <label for="displayDeliveryCost">Delivery Cost:</label>
+                            <input type="text" id="displayDeliveryCost" name="deliveryCost">
+                
+                            <h3>Items</h3>
+                            <ul id="displayItemsList"></ul>
+                
+                            <button type="button" onclick="approve()">Approve</button>
+                            <button type="button" onclick="enableEditing()">Edit</button>
+                            <button type="submit">Apply Changes</button>
+                
+                            <label for="displayTotalCost">Total Cost:</label>
+                            <input type="number" id="displayTotalCost" name="totalCost" readonly>
+                        </form>   
+                    </div>
+                </div>
+                
     
     
 
@@ -338,77 +355,72 @@
         }
     }
 
-
         function enableEditing() {
-         
-            const inputs = document.querySelectorAll('#viewOrderForm input');
+        document.getElementById('displaySupplier').readOnly = false;
+        document.getElementById('displayExpectedOn').readOnly = false;
+        document.getElementById('displayDeliveryCost').readOnly = false;
 
-            inputs.forEach(input => {
-        if (input.id !== 'displayOrderNumber' && input.id !== 'displayCreatedAt' && input.id !== 'displayStatus') {
-            input.removeAttribute('readonly');
+        document.querySelectorAll('#displayItemsList input').forEach(input => {
+            input.readOnly = false;
+        });
         }
-    });
-        }
 
-        function applyChanges() {
+        async function applyChanges(event) {
+            event.preventDefault(); 
 
-            const orderId = currentOrder;
+            const orderId = document.getElementById('orderID').value;
 
-            const orderNumber = document.getElementById('displayOrderNumber').value;
-            const supplier = document.getElementById('displaySupplier').value;
-            const createdAt = document.getElementById('displayCreatedAt').value; 
-            const expectedOn = document.getElementById('displayExpectedOn').value; 
-            const status = document.getElementById('displayStatus').value;
-            const deliveryCost = document.getElementById('displayDeliveryCost').value;
-
-            const updatedData = {
-                orderNumber: orderNumber,
-                supplier: supplier,
-                createdAt: new Date(createdAt), 
-                expectedOn: new Date(expectedOn), 
-                status: status,
-                deliveryCost: deliveryCost,
-                items: []
+            const formData = {
+                supplier: document.getElementById('displaySupplier').value,
+                expectedOn: document.getElementById('displayExpectedOn').value,
+                deliveryCost: parseFloat(document.getElementById('displayDeliveryCost').value),
+                items: [] 
             };
 
-            const itemsList = document.getElementById('displayItemsList');
-            const itemsInputs = itemsList.querySelectorAll('li');
+            const itemsList = document.getElementById('displayItemsList').children;
+            for (let item of itemsList) {
 
-            itemsInputs.forEach((li, index) => {
-                const itemName = li.querySelector(`input[name="items[${index}][itemName]"]`).value;
-                const quantity = li.querySelector(`input[name="items[${index}][quantity]"]`).value;
-                const cost = li.querySelector(`input[name="items[${index}][cost]"]`).value;
-                const amount = li.querySelector(`input[name="items[${index}][amount]"]`).value;
-                const branchStored = li.querySelector(`input[name="items[${index}][branchStored]"]`).value;
+                const itemNameElement = item.querySelector('.item-name');
+                const itemQuantityElement = item.querySelector('.item-quantity');
+                const itemCostElement = item.querySelector('.item-cost');
+                const itemReceivedElement = item.querySelector('.item-received');
 
-                updatedData.items.push({
-                    itemName: itemName,
-                    quantity: quantity,
-                    cost: cost,
-                    amount: amount,
-                    branchStored: branchStored,
-                });
-            });
-
-            fetch(`/purchaseorder/${orderId}`, {
-                method: 'PUT', 
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(updatedData)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                if (!itemNameElement || !itemQuantityElement || !itemCostElement) {
+                    console.error('One or more elements are missing in the item:', item);
+                    continue; 
                 }
-                return response.json();
-            })
-            .then(updatedOrder => {
-                console.log('Successfully updated order:', updatedOrder);
-                closeDisplayPurchaseOrderModal(); 
-            })
-            .catch(err => console.error('Error updating purchase order:', err));
+
+                const itemData = {
+                    id: item.getAttribute('data-id'),
+                    name: itemNameElement.textContent, 
+                    quantity: parseInt(itemQuantityElement.value) || 0, 
+                    cost: parseFloat(itemCostElement.value) || 0, 
+                    received: itemReceivedElement ? itemReceivedElement.checked : false 
+                };
+                itemData.amount = itemData.cost * itemData.quantity; 
+                formData.items.push(itemData); 
+            }
+
+            try {
+                const response = await fetch(`/purchaseorder/${orderId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error applying changes: ${response.statusText}`);
+                }
+
+                const updatedOrder = await response.json();
+                console.log('Updated purchase order:', updatedOrder);
+            } catch (error) {
+                console.error('Error applying changes:', error);
+            }
         }
+
 
         function openDisplayPurchaseOrderModal(orderId) {
             currentOrder = orderId;

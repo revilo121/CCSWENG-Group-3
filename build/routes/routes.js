@@ -762,46 +762,107 @@ router.post('/stock-adjust', async (req, res) => {
 
 router.get('/purchaseorder', async (req, res) => {
   if (req.session.isAuthenticated) {
-    const branches = await Branch.find({}, 'name'); 
-    const selectedBranch = req.session.selectedBranch || 'Main';
-    const searchTerm = req.query.search || ''; 
-    const sortBy = req.query.sortBy || ''; 
+    try {
 
-    let itemQuery = {
-      branchStored: selectedBranch, 
-      name: { $regex: searchTerm, $options: 'i' } 
-    };
+      const branches = await Branch.find({}, 'name');
+      const suppliers = await Supplier.find({}, 'name');
+      
+      const selectedBranch = req.session.selectedBranch || 'Main';
+      const searchTerm = req.query.search || ''; 
+      const sortBy = req.query.sortBy || ''; 
 
-    const latestOrder = await PurchaseOrder.findOne().sort({ orderNumber: -1 });
-    const nextOrderNumber = latestOrder ? Number(latestOrder.orderNumber) + 1 : 1;
+      let itemQuery = {
+        branchStored: selectedBranch, 
+        name: { $regex: searchTerm, $options: 'i' } 
+      };
 
-    let items = await Item.find(itemQuery);
-    const purchaseorder = await PurchaseOrder.find({}).populate('items.itemName'); 
+      const latestOrder = await PurchaseOrder.findOne().sort({ orderNumber: -1 });
+      const nextOrderNumber = latestOrder ? Number(latestOrder.orderNumber) + 1 : 1;
 
-    if (sortBy === 'alphabetical') {
-      items.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sortBy === 'price-asc') {
-      items.sort((a, b) => a.price - b.price);
-    } else if (sortBy === 'price-desc') {
-      items.sort((a, b) => b.price - a.price);
+      let items = await Item.find(itemQuery);
+
+      const purchaseorder = await PurchaseOrder.find({}).populate('items.itemName'); 
+
+      if (sortBy === 'alphabetical') {
+        items.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (sortBy === 'price-asc') {
+        items.sort((a, b) => a.price - b.price);
+      } else if (sortBy === 'price-desc') {
+        items.sort((a, b) => b.price - a.price);
+      }
+
+      res.render('purchaseorder', {
+        currentRoute: '/purchaseorder',
+        username: req.session.username,
+        role: req.session.role,
+        branches,
+        suppliers,         
+        selectedBranch,
+        items, 
+        searchTerm,
+        purchaseorder, 
+        sortBy,
+        nextOrderNumber  
+      });
+    } catch (error) {
+      console.error('Error fetching data for purchase order:', error);
+      res.status(500).send('Server Error');
     }
-
-    res.render('purchaseorder', {
-      currentRoute: '/purchaseorder',
-      username: req.session.username,
-      role: req.session.role,
-      branches,
-      selectedBranch,
-      items, 
-      searchTerm,
-      purchaseorder, 
-      sortBy,
-      nextOrderNumber
-    });
   } else {
     res.redirect('/');
   }
 });
+
+router.post('/add-purchase-order', async (req, res) => {
+  try {
+    console.log('Form Data: ', req.body);
+
+    const { supplier, orderNumber, items: formItems, expectedOn, deliveryCost, branchStored } = req.body;
+
+    const purchaseItems = [];
+    const items = await Item.find({});
+
+    for (let item of formItems) {
+      const { itemName, quantity, cost } = item;
+      
+      const foundItem = items.find(dbItem => dbItem.name === itemName);
+      if (!foundItem) {
+        return res.status(400).json({ message: `Item '${itemName}' not found.` });
+      }
+
+      purchaseItems.push({
+        itemName,
+        quantity,
+        cost,
+        amount: (cost * quantity).toFixed(2),
+        received: false,
+        quantityReceived: 0,
+        branchStored: branchStored || foundItem.branchStored,
+      });
+    }
+
+    const purchaseOrder = new PurchaseOrder({
+      supplier,
+      orderNumber,
+      items: purchaseItems,
+      status: 'For Approval',
+      createdAt: new Date(),
+      expectedOn: new Date(expectedOn),
+      branchStored,
+      deliveryCost: parseInt(deliveryCost) || 0, 
+    });
+
+    await purchaseOrder.save();
+    console.log('Purchase Order successfully added.');
+
+    res.redirect('/purchaseorder');
+  } catch (err) {
+    console.error('Error adding purchase order:', err);
+    res.status(500).send('Server Error');
+  }
+});
+
+
 
 router.get('/purchaseorder/:id', async (req, res) => {
   try {
@@ -820,20 +881,50 @@ router.get('/purchaseorder/:id', async (req, res) => {
 
 router.put('/purchaseorder/:id', async (req, res) => {
   try {
-      const orderId = req.params.id;
-      const updatedData = req.body;
+    const purchaseOrderId = req.params.id;
+    const { supplier, expectedOn, deliveryCost, items } = req.body;
 
-      const updatedOrder = await PurchaseOrder.findByIdAndUpdate(orderId, updatedData, { new: true });
+    const existingOrder = await PurchaseOrder.findById(purchaseOrderId);
+    if (!existingOrder) {
+      return res.status(404).json({ message: 'Purchase Order not found' });
+    }
 
-      if (!updatedOrder) {
-          return res.status(404).json({ message: 'Order not found' });
+    if (supplier) {
+      existingOrder.supplier = supplier;
+    }
+    
+    if (expectedOn) {
+      const parsedDate = new Date(expectedOn);
+      if (isNaN(parsedDate.getTime())) {
+        return res.status(400).json({ message: 'Invalid expectedOn date' });
       }
+      existingOrder.expectedOn = parsedDate;
+    }
 
-      res.json(updatedOrder);
+    if (deliveryCost !== undefined) {
+      if (typeof deliveryCost !== 'number' || deliveryCost < 0) {
+        return res.status(400).json({ message: 'Invalid delivery cost' });
+      }
+      existingOrder.deliveryCost = deliveryCost;
+    }
+
+    if (items && Array.isArray(items)) {
+      existingOrder.items = items.map(item => ({
+        ...item,
+        amount: item.cost * item.quantity,
+      }));
+      existingOrder.totalCost = existingOrder.items.reduce((sum, item) => sum + item.amount, 0);
+    }
+
+    const updatedPurchaseOrder = await existingOrder.save();
+    res.json(updatedPurchaseOrder);
+
   } catch (error) {
-      res.status(500).json({ message: 'Internal server error', error: error.message });
+    console.error('Error updating purchase order:', error);
+    res.status(500).json({ message: 'Server Error' });
   }
 });
+
 
 router.put('/purchaseorder/:orderId/items/:itemId/receive', async (req, res) => {
   try {
@@ -870,55 +961,6 @@ router.put('/purchaseorder/:orderId/items/:itemId/receive', async (req, res) => 
       res.status(500).send('Server Error');
   }
 });
-
-
-
-router.post('/add-purchase-order', async (req, res) => {
-  try {
-
-    console.log('Form Data: ', req.body);
-    const { supplier, orderNumber, items, expectedOn } = req.body; 
-
-    const purchaseItems = [];
-    for (let item of items) {
-      const { itemName, quantity, cost } = item;
-
-      const foundItem = await Item.findOne({ name: itemName });
-      if (!foundItem) {
-        return res.status(400).json({ message: `Item '${itemName}' not found.` });
-      }
-
-      purchaseItems.push({
-        itemName,
-        quantity,
-        cost,
-        amount: (cost * quantity).toFixed(2),
-        received: false,
-        quantityReceived: 0,
-        branchStored: foundItem.branchStored,
-      });
-    }
-
-    const purchaseOrder = new PurchaseOrder({
-      supplier,
-      orderNumber, 
-      items: purchaseItems,
-      status: 'Pending',
-      createdAt: new Date(),
-      expectedOn: new Date(expectedOn), 
-    });
-
-    await purchaseOrder.save();
-    console.log('Purchase Order successfully added.');
-
-    res.redirect('/purchaseorder');
-  } catch (err) {
-    console.error('Error adding purchase order:', err);
-    res.status(500).send('Server Error');
-  }
-});
-
-
 
 router.post('/edit-purchase-order', async (req, res) => {
   try {
