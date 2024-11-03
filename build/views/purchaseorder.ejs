@@ -294,12 +294,50 @@
             calculateTotalCost();
         }
 
+        function validateItemRow(row) {
+        const selectElement = row.querySelector('select[name*="itemName"]');
+        const quantityInput = row.querySelector('input[name*="quantity"]');
+        const costInput = row.querySelector('input[name*="cost"]');
+        const amountInput = row.querySelector('input[name*="amount"]');
 
+        const itemNameValid = selectElement.value !== '';
+        const quantityValid = parseInt(quantityInput.value) > 0;
+        const costValid = parseFloat(costInput.value) >= 0;
+        const amountValid = parseFloat(amountInput.value) >= 0;
+
+        row.classList.toggle('invalid', !(itemNameValid && quantityValid && costValid && amountValid));
+
+        return itemNameValid && quantityValid && costValid && amountValid;
+    }
+
+        function validateForm() {
+            const itemsBody = document.getElementById('itemsBody');
+            const rows = itemsBody.querySelectorAll('tr');
+            let allValid = true;
+
+            rows.forEach(row => {
+                if (!validateItemRow(row)) {
+                    allValid = false;
+                }
+            });
+
+            if (!allValid) {
+                alert("Please correct the highlighted errors before submitting the form.");
+            }
+
+            return allValid;
+        }
         function removeItemRow(button) {
+        const itemsBody = document.getElementById('itemsBody');
+        const rows = itemsBody.querySelectorAll('tr');
+        
+        if (rows.length > 1) {
             const row = button.closest('tr');
             row.remove();
             calculateTotalCost();
         }
+    }
+
 
         function enableEditing() {
          
@@ -371,8 +409,6 @@
             })
             .catch(err => console.error('Error updating purchase order:', err));
         }
-
-
 
         function openDisplayPurchaseOrderModal(orderId) {
             currentOrder = orderId;
@@ -448,7 +484,11 @@
             .catch(err => console.error('Error updating item status:', err));
         }
 
-
+        document.getElementById('addPurchaseOrderForm').onsubmit = function(event) {
+        if (!validateForm()) {
+            event.preventDefault(); 
+        }
+    };
 
 
 
