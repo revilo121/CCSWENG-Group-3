@@ -1004,60 +1004,72 @@ router.get('/transferorder', async (req, res) => {
 });
 
 router.post('/create-transfer-order', async (req, res) => {
-  const { sourceBranch, destinationBranch, items } = req.body;
+  const { transfername, sourceBranch, destinationBranch, items } = req.body;
+  
 
-  if (!sourceBranch || !destinationBranch || !items || items.length === 0) {
+  const inventory = await Item.find({ name: { $in: items.map(item => item.itemName) } });
+  
+
+  // Check if any requested quantity exceeds stock
+  const errors = [];
+  const existingOrder = await TransferOrder.findOne({ transfername });
+  if (existingOrder) {
+    errors.push('Please use a unique order name.');
+  }
+  items.forEach(item => {
+    const inventoryItem = inventory.find(invItem => invItem.name === item.itemName);
+    if (inventoryItem && item.quantity > inventoryItem.quantity) {
+      errors.push(`Requested quantity for ${item.itemName} exceeds available stock.`);
+    }
+  });
+
+  if (errors.length > 0) {
+    return res.status(400).json({ errors });
+  }
+
+  if (!transfername || !sourceBranch || !destinationBranch || !items || items.length === 0) {
     return res.status(400).json({ error: 'All fields are required, including at least one item.' });
   }
-
-  if (sourceBranch === destinationBranch) {
-    return res.status(400).json({ error: 'Source and destination branches must be different.' });
-  }
-
-  async function generateUniqueOrderNumber() {
-    // Fetch the latest transfer order and determine the new order number
-    const lastOrder = await TransferOrder.findOne().sort({ createdAt: -1 });
-    const lastNumber = lastOrder ? parseInt(lastOrder.orderNumber.slice(1), 10) : 0;
-    return `T${(lastNumber + 1).toString().padStart(4, '0')}`;
-  }
-
-  try {
-    let newOrderNumber = await generateUniqueOrderNumber();
-    let success = false;
-
-    // Retry until success or max attempts reached
-    for (let attempts = 0; attempts < 3 && !success; attempts++) {
       try {
         // Try to save the new transfer order with the generated number
         const newTransferOrder = new TransferOrder({
           sourceBranch,
           destinationBranch,
           items,
-          orderNumber: newOrderNumber,
+          transfername,
           status: 'For Approval',
           createdAt: new Date()
         });
 
         await newTransferOrder.save();
-        success = true;
-        res.status(201).json({ message: 'Transfer order created successfully!', orderNumber: newOrderNumber });
+        
+        res.status(201).json({ message: 'Transfer order created successfully!'});
       } catch (error) {
-        if (error.code === 11000) { // Duplicate key error
-          // Generate a new order number and retry
-          newOrderNumber = await generateUniqueOrderNumber();
-        } else {
-          throw error;
+        throw(error);
         }
-      }
+});
+
+router.post('/update-transfer-order', async (req, res) => {
+  
+});
+
+router.delete('/delete-transfer-order/:transfername', async (req, res) => {
+  const { transfername } = req.params;  // Get transfername from the URL parameters
+
+  try {
+    // Attempt to delete the order by transfername
+    const result = await TransferOrder.deleteOne({ transfername: transfername });
+
+    if (result.deletedCount === 0) {
+      // If no document was deleted, the order was not found
+      return res.status(404).json({ message: 'Order not found' });
     }
 
-    if (!success) {
-      res.status(500).json({ error: 'Failed to create a unique transfer order after multiple attempts.' });
-    }
-
+    // If order is deleted, return success message
+    return res.json({ message: 'Order deleted successfully' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to create transfer order.' });
+    return res.status(500).json({ message: 'Error deleting order' });
   }
 });
 

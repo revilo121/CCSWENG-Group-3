@@ -78,26 +78,31 @@
             <div class="transfer-order-grid" id="transferOrderGrid">
                 <% if (transferOrders && transferOrders.length > 0) { %>
                 <% transferOrders.forEach(order => { %>
-                    <div class="order-card" onclick="openEditTransferOrderModal()">
-
-                    <div class="card-header">
-                        <span class="order-label">Order #: <%= order.orderNumber %></span>
-                        
-                        <!-- Status dot (color based on status) -->
-                        <span class="status-dot 
-                        <%= order.status === 'Completed' ? 'green' 
-                        : order.status === 'Pending' ? 'orange' 
-                        : 'red' %>">
-                        </span>
-                    </div>
-                    <p>Items in Order: <%= order.items.length %></p>
-                    <p>Status: <%= order.status %></p>
-                    
-            
-                    <div class="card-menu">
-                        <i class="fas fa-ellipsis-h"></i>
-                    </div>
-                    </div>
+                  <div class="order-card" 
+                    onclick="openEditTransferOrderModal(this)"
+                    data-transfer-name="<%= order.transfername %>"
+                    data-source-branch="<%= order.sourceBranch %>"
+                    data-destination-branch="<%= order.destinationBranch %>"
+                    data-status="<%= order.status %>"
+                    data-date="<%= order.date %>"
+                    data-items="<%= encodeURIComponent(JSON.stringify(order.items)) %>"
+                    data-order-id="<%= order._id %>">
+                  
+                  <div class="card-header">
+                     <span class="order-label"><%= order.transfername %></span>
+                     <!-- Status dot with color -->
+                     <span class="status-dot 
+                                 <%= order.status === 'Completed' ? 'green' 
+                                 : order.status === 'Pending' ? 'orange' 
+                                 : 'red' %>">
+                     </span>
+                  </div>
+                 <p>Items in Order: <%= order.items.length %></p>
+                 <p>Status: <%= order.status %></p>
+                 <div class="card-menu">
+                     <i class="fas fa-ellipsis-h"></i>
+                 </div>
+             </div>
                 <% }) %>
                 <% } else { %>
                 <p>No transfer orders found.</p>
@@ -107,62 +112,103 @@
                             
 <!-- Create Transfer Order Modal -->
 <div id="createTransferOrderModal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <span class="close" onclick="closeTransferOrderModal()">&times;</span>
-      <h2>Create Transfer Order</h2>
-      <form id="transferOrderForm">
-        <div class="form-group">
-          <label for="sourceBranch">Source Branch</label>
-          <select id="sourceBranch" name="sourceBranch" required>
-            <% branches.forEach(branch => { %>
-              <option value="<%= branch.name %>"><%= branch.name %></option>
-            <% }) %>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="destinationBranch">Destination Branch</label>
-          <select id="destinationBranch" name="destinationBranch" required>
-            <% branches.forEach(branch => { %>
-              <option value="<%= branch.name %>"><%= branch.name %></option>
-            <% }) %>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="items">Items to Transfer</label>
-          <div id="itemsContainer">
-            <div class="item-entry">
-              <select name="itemName[]" required>
-                <% inventory.forEach(item => { %>
-                  <option value="<%= item.name %>"><%= item.name %> (<%= item.quantity %> in stock)</option>
-                <% }) %>
-              </select>
-              <input type="number" name="quantity[]" placeholder="Quantity" required>
-            </div>
-          </div>
-          <button type="button" onclick="addItemEntry()">Add Another Item</button>
-        </div>
-        <button type="submit">Create Transfer Order</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- View/Edit Transfer Order Modal -->
-<div id="editTransferOrderModal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <span class="close" onclick="closeEditTransferOrderModal()">&times;</span>
-      <h2>Edit Transfer Order</h2>
-      <div id="editModalBody">
-        <!-- Details of the transfer order will be populated here -->
+  <div class="modal-content">
+    <span class="close" onclick="closeTransferOrderModal()">&times;</span>
+    <h2>Create Transfer Order</h2>
+    <form id="transferOrderForm">
+      <!-- Order Name -->
+      <div class="form-group">
+        <label for="orderName">Order Name</label>
+        <input 
+          type="text" 
+          id="orderName" 
+          name="orderName" 
+          placeholder="Enter order name" 
+          required 
+        />
       </div>
-      <button id="approveOrderBtn">Approve</button>
-      <button id="deleteOrderBtn">Delete</button>
-      <button id="applyChangesBtn" style="display: none;">Apply</button>
-    </div>
+
+      <!-- Source Branch (No longer a dropdown) -->
+      <div class="form-group">
+        <label for="sourceBranch">Source Branch</label>
+        <input 
+          type="text" 
+          id="sourceBranch" 
+          name="sourceBranch" 
+          value="<%= selectedBranch %>" 
+          readonly 
+          required
+        />
+      </div>
+
+      <!-- Destination Branch -->
+      <div class="form-group">
+        <label for="destinationBranch">Destination Branch</label>
+        <select id="destinationBranch" name="destinationBranch" required>
+          <option value="" disabled selected>Select</option> <!-- Placeholder option -->
+          <% branches.forEach(branch => { %>
+            <% if (branch.name !== selectedBranch) { %> <!-- Exclude the current branch -->
+              <option value="<%= branch.name %>"><%= branch.name %></option>
+            <% } %>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Items to Transfer -->
+      <div class="form-group">
+        <label for="items">Items to Transfer</label>
+        <div id="itemsContainer">
+          <div class="item-entry">
+            <select name="itemName[]" required>
+              <% inventory.forEach(item => { %>
+                <option value="<%= item.name %>"><%= item.name %> (<%= item.quantity %> in stock)</option>
+              <% }) %>
+            </select>
+            <input type="number" name="quantity[]" placeholder="Quantity" required>
+          </div>
+        </div>
+        <button type="button" onclick="addItemEntry()">Add Another Item</button>
+      </div>
+      
+      <!-- Submit Button -->
+      <button type="submit">Create Transfer Order</button>
+    </form>
+  </div>
 </div>
 
-  
-
-  
+<!-- Order Details Modal -->
+<div id="orderDetailsModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close" onclick="closeOrderDetailsModal()">&times;</span>
+    <h2>Order Details</h2>
+    
+    <!-- Order Information -->
+    <div class="order-info">
+      <p><strong>Order Name:</strong> <span id="modalOrderName"></span></p>
+      <p><strong>Source Branch:</strong> <span id="modalSourceBranch"></span></p>
+      <p><strong>Destination Branch:</strong> <span id="modalDestinationBranch"></span></p>
+      <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+      <p><strong>Date:</strong> <span id="modalDate"></span></p>
+    
+      
+      <!-- Items List -->
+      <h3>Items in Order</h3>
+      <ul id="modalItemsList">
+        <% inventory.forEach(item => { %>
+          <li><%= item.name %> - Quantity: <%= item.quantity %></li>
+        <% }) %>
+      </ul>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="modal-buttons">
+      <button onclick="editOrder()">Edit</button>
+      <button onclick="deleteOrder()">Delete</button>
+      <button onclick="approveOrder()">Approve</button>
+      <button onclick="saveChanges()">Save Changes</button>
+    </div>
+  </div>
+</div>
 
         </div>
         
@@ -212,6 +258,7 @@ document.getElementById('transferOrderForm').addEventListener('submit', async (e
   
   const formData = new FormData(e.target);
   const data = {
+    transfername: formData.get('orderName'),
     sourceBranch: formData.get('sourceBranch'),
     destinationBranch: formData.get('destinationBranch'),
     items: formData.getAll('itemName[]').map((name, index) => ({
@@ -229,10 +276,17 @@ document.getElementById('transferOrderForm').addEventListener('submit', async (e
 
     if (response.ok) {
       alert('Transfer order created successfully!');
-      
       closeTransferOrderModal();
+      location.reload()
     } else {
-      alert('Error creating transfer order');
+      const errorData = await response.json();
+      console.error('Error:', response.status, errorData);
+
+      if (errorData.errors && errorData.errors.length > 0) {
+        alert('Error: ' + errorData.errors.join(', ')); 
+      } else {
+        alert('Error creating transfer order');
+      }
     }
   } catch (error) {
     console.error(error);
@@ -240,111 +294,82 @@ document.getElementById('transferOrderForm').addEventListener('submit', async (e
   }
 });
 
-
-function openEditTransferOrderModal(order) {
-  const modal = document.getElementById('editTransferOrderModal');
-  const editModalBody = document.getElementById('editModalBody');
-
-  // Populate modal with order data
-  editModalBody.innerHTML = `
-    <div class="form-group">
-      <label for="sourceBranchEdit">Source Branch</label>
-      <select id="sourceBranchEdit" name="sourceBranch" disabled>
-        <option selected>${order.sourceBranch}</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label for="destinationBranchEdit">Destination Branch</label>
-      <select id="destinationBranchEdit" name="destinationBranch" disabled>
-        <option selected>${order.destinationBranch}</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Items in Order</label>
-      <div id="editItemsContainer">
-        ${order.items.map((item, index) => `
-          <div class="item-entry" data-index="${index}">
-            <span>${item.itemName}</span>
-            <input type="number" name="quantityEdit[]" value="${item.quantity}" disabled>
-            <button type="button" class="remove-item" onclick="removeItemEntry(this)">X</button>
-          </div>
-        `).join('')}
-      </div>
-      <button type="button" onclick="addItemEntry('editItemsContainer')">Add Another Item</button>
-    </div>
-  `;
-
-  modal.style.display = 'flex';
-
-  // Set up edit functionality
-  document.getElementById('approveOrderBtn').onclick = () => approveOrder(order.id);
-  document.getElementById('deleteOrderBtn').onclick = () => deleteOrder(order.id);
-}
-
-function closeEditTransferOrderModal() {
-  document.getElementById('editTransferOrderModal').style.display = 'none';
-}
-
-function enableEditMode() {
-  document.querySelectorAll('#editModalBody input').forEach(input => input.disabled = false);
-  document.getElementById('applyChangesBtn').style.display = 'block';
-}
-
-async function approveOrder(orderId) {
-  try {
-    const response = await fetch(`/approve-transfer-order/${orderId}`, { method: 'POST' });
-    if (response.ok) {
-      alert('Transfer order approved!');
-      closeEditTransferOrderModal();
-    } else {
-      alert('Error approving order');
-    }
-  } catch (error) {
-    console.error(error);
-    alert('Error approving order');
-  }
-}
-
-async function deleteOrder(orderId) {
-  try {
-    const response = await fetch(`/delete-transfer-order/${orderId}`, { method: 'DELETE' });
-    if (response.ok) {
-      alert('Transfer order deleted!');
-      closeEditTransferOrderModal();
-    } else {
-      alert('Error deleting order');
-    }
-  } catch (error) {
-    console.error(error);
-    alert('Error deleting order');
-  }
-}
-
-async function applyChanges(orderId) {
-  const items = Array.from(document.querySelectorAll('#editItemsContainer .item-entry')).map(entry => ({
-    itemName: entry.querySelector('select').value,
-    quantity: entry.querySelector('input[name="quantity[]"]').value
-  }));
+function openEditTransferOrderModal(orderCard) {
+  currentOrderName = orderCard.getAttribute('data-transfer-name');
   
-  const data = { items };
+  document.getElementById('modalOrderName').textContent = orderCard.getAttribute('data-transfer-name');
+  document.getElementById('modalSourceBranch').textContent = orderCard.getAttribute('data-source-branch');
+  document.getElementById('modalDestinationBranch').textContent = orderCard.getAttribute('data-destination-branch');
+  document.getElementById('modalStatus').textContent = orderCard.getAttribute('data-status');
+  document.getElementById('modalDate').textContent = orderCard.getAttribute('data-date');
+  
+  // Populate items
+  const itemsList = JSON.parse(decodeURIComponent(orderCard.getAttribute('data-items')));
+  const modalItemsList = document.getElementById('modalItemsList');
+  modalItemsList.innerHTML = '';
+  itemsList.forEach(item => {
+    const listItem = document.createElement('li');
+    listItem.textContent = `${item.itemName} - Quantity: ${item.quantity}`;
+    modalItemsList.appendChild(listItem);
+  });
 
-  try {
-    const response = await fetch(`/update-transfer-order/${orderId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-
-    if (response.ok) {
-      alert('Changes applied successfully!');
-      closeEditTransferOrderModal();
-    } else {
-      alert('Error applying changes');
-    }
-  } catch (error) {
-    console.error(error);
-    alert('Error applying changes');
-  }
+  // Display the modal
+  document.getElementById('orderDetailsModal').style.display = 'flex';
 }
+
+function closeOrderDetailsModal() {
+  document.getElementById('orderDetailsModal').style.display = 'none';
+}
+
+// Implement further actions for edit, delete, approve, save changes
+function editOrder() { /* Add edit functionality */ }
+function deleteOrder() { /* Add delete functionality */ }
+function approveOrder() { /* Add approve functionality */ }
+function saveChanges() { /* Add save functionality */ }
+
+// Combined window.onclick event listener
+window.onclick = function(event) {
+  const createTransferOrderModal = document.getElementById('createTransferOrderModal');
+  const orderDetailsModal = document.getElementById('orderDetailsModal');
+
+  // Close Transfer Order modal if clicking outside of it
+  if (event.target === createTransferOrderModal) {
+    closeTransferOrderModal();
+  }
+  
+  // Close Order Details modal if clicking outside of it
+  if (event.target === orderDetailsModal) {
+    closeOrderDetailsModal();
+  }
+};
+
+async function deleteOrder() {
+    
+
+    if (confirm('Are you sure you want to delete this order?')) {
+        try {
+            const response = await fetch(`/delete-transfer-order/${currentOrderName}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                alert('Transfer order deleted successfully.');
+                closeOrderDetailsModal();
+                location.reload(); // Refresh to update the list
+            } else {
+                const errorData = await response.json();
+                alert('Error: ' + errorData.message);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('An error occurred while deleting the transfer order.');
+        }
+    }
+}
+
+
 
 </script>

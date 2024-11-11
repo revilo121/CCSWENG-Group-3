@@ -8,7 +8,7 @@ const TransferOrderSchema = new Schema({
         itemName: { type: String, required: true }, 
         quantity: { type: Number, required: true },
     }], 
-    orderNumber: { type: String, required: true, unique: true },
+    transfername: { type: String, required: true, unique: true },
     status: { type: String },
     date: { type: Date, default: Date.now },
     
