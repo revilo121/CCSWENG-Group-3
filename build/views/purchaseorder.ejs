@@ -63,10 +63,20 @@
                     </div>
 
                     <div class="sorting-controls">
-                        <button class="filter"> Filter by</button>
-                        <button class="pagination-btn prev"></button>
-                        <button class="pagination-btn next"></button>
-                    </div>
+                        <select id="filterBy" aria-label="Filter items" onchange="applyFilter()">
+                          <option value="for-approval" <%= filterBy === 'for-approval' ? 'selected' : '' %>>For Approval</option>
+                          <option value="pending" <%= filterBy === '' || filterBy === '' ? 'selected' : '' %>>Pending</option>
+                          <option value="approved" <%= filterBy === 'approved' ? 'selected' : '' %>>Approved</option>
+                        </select>
+                      </div>
+
+                    <div class="sorting-controls">
+                        <select id="sortBy" aria-label="Sort items" onchange="applySorting()">
+                            <option value="by-number" <%= sortBy === 'by-number' ? 'selected' : '' %>>By Number</option>
+                            <option value="cost-asc" <%= sortBy === 'cost-asc' ? 'selected' : '' %>>Cost (Ascending)</option>
+                            <option value="cost-desc" <%= sortBy === 'cost-desc' ? 'selected' : '' %>>Cost (Descending)</option>
+                        </select>
+                      </div>
                 </div>
 
                 <!-- Order Grid -->
@@ -75,7 +85,11 @@
                         <div class="item-card" data-id="<%= order._id %>" style="cursor: pointer;" onclick="openDisplayPurchaseOrderModal('<%= order._id %>')">
                             <div class="card-header">
                                 <span class="item-name">Order Number: <%= String(order.orderNumber).padStart(5, '0') %></span>
-                                <span class="item-dot"></span>
+                                <span class="item-dot 
+                                    <%= order.status === 'For Approval' ? 'red' 
+                                    : order.status === 'Pending' ? 'orange' 
+                                    : 'green' %>">
+                            </span>
                             </div>
                             <p><strong>Supplier:</strong> <%= order.supplier %></p>
                             <p><strong>Created at:</strong> <%= order.createdAt.toDateString() %></p>
@@ -205,7 +219,7 @@
                             <h3>Items</h3>
                             <ul id="displayItemsList"></ul>
                 
-                            <button type="button" onclick="approve()">Approve</button>
+
                             <button type="button" onclick="enableEditing()">Edit</button>
                             <button type="submit">Apply Changes</button>
                 
@@ -439,6 +453,13 @@
 
                     const itemsList = document.getElementById('displayItemsList');
                     itemsList.innerHTML = '';
+                    let approveButtonCreated = false;
+                    // Remove the previous "Approve Order" button (if any)
+                    const modal = document.getElementById('displayPurchaseOrderModal');
+                    const existingApproveButton = modal.querySelector('.approve-btn');
+                    if (existingApproveButton) {
+                    existingApproveButton.remove();
+                    }
                     order.items.forEach((item, index) => {
                         const li = document.createElement('li');
 
@@ -454,6 +475,7 @@
                             markItemAsReceived(orderId, item);
                             });
                         }
+
 
                         li.innerHTML = `
                             <span>
@@ -474,8 +496,22 @@
                         `;
                         li.appendChild(receivedButton);
                         itemsList.appendChild(li);
+                        if (!approveButtonCreated) {
+                    const approveButton = document.createElement('button');
+                    approveButton.type = 'button';
+                    approveButton.textContent = 'Approve Order';
+                    approveButton.className = 'approve-btn';
+                    approveButton.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        approve(orderId, item); // Pass the current item to the approve function
                     });
 
+                    const modal = document.getElementById('displayPurchaseOrderModal');
+                    modal.appendChild(approveButton);
+                    approveButtonCreated = true; 
+                }
+                    });
+                    
                     document.getElementById('displayPurchaseOrderModal').style.display = 'block';
                 })
                 .catch(err => console.error('Error fetching purchase order:', err));
@@ -501,6 +537,67 @@
             event.preventDefault(); 
         }
     };
+
+    
+    
+
+    function approve(orderId, item) {
+
+        
+        fetch(`/purchaseorder/${orderId}/items/${item._id}/approve`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to approve order');
+            return response.json();
+        })
+        .then(updatedOrder => {
+            console.log('Order status updated to Pending:', updatedOrder);
+
+            
+            openDisplayPurchaseOrderModal(orderId);  
+        })
+        .catch(err => console.error('Error updating order status:', err));
+}
+
+        const searchInput = document.querySelector('.search-bar input'); 
+        const searchIcon = document.querySelector('.search-icon'); 
+        const searchEnter = document.querySelector('.search-bar');
+
+        searchEnter.addEventListener('keydown', (event) => {
+          const searchTerm = searchInput.value.trim();
+
+          if (event.key === 'Enter') {
+            window.location.href = `/purchaseorder?search=${encodeURIComponent(searchTerm)}`;
+          }
+        });
+
+        searchIcon.addEventListener('click', () => {
+            const searchTerm = searchInput.value.trim();
+
+            if (searchTerm) {
+              
+              window.location.href = `/purchaseorder?search=${encodeURIComponent(searchTerm)}`;
+            }
+        });
+
+    function applySorting() {
+    const sortBy = document.getElementById('sortBy').value;
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('sortBy', sortBy); // Set the sorting option in the query
+    window.location.search = searchParams.toString(); // Reload the page with the updated query
+    }
+
+    function applyFilter() {
+    const filterBy = document.getElementById('filterBy').value;
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('filterBy', filterBy); // Set the filter option in the query
+    window.location.search = searchParams.toString(); // Reload the page with the updated query
+    }
+
 
 
 

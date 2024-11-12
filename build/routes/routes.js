@@ -764,26 +764,41 @@ router.get('/purchaseorder', async (req, res) => {
       const selectedBranch = req.session.selectedBranch || 'Main';
       const searchTerm = req.query.search || ''; 
       const sortBy = req.query.sortBy || ''; 
+      const filterBy = req.query.filterBy || '';
 
-      let itemQuery = {
-        branchStored: selectedBranch, 
-        name: { $regex: searchTerm, $options: 'i' } 
-      };
+       // Query for purchase orders based on the search term
+       let purchaseorderQuery = {};
+       if (searchTerm) {
+         const searchNumber = Number(searchTerm);
+         if (!isNaN(searchNumber)) {
+           purchaseorderQuery.orderNumber = searchNumber;
+         }
+       }
+ 
+       const latestOrder = await PurchaseOrder.findOne().sort({ orderNumber: -1 });
+       const nextOrderNumber = latestOrder ? Number(latestOrder.orderNumber) + 1 : 1;
+ 
+       let items = await Item.find({ branchStored: selectedBranch, name: { $regex: searchTerm, $options: 'i' } });
+ 
+       // Fetch purchase orders based on the query
+       let purchaseorder = await PurchaseOrder.find(purchaseorderQuery).populate('items.itemName');
 
-      const latestOrder = await PurchaseOrder.findOne().sort({ orderNumber: -1 });
-      const nextOrderNumber = latestOrder ? Number(latestOrder.orderNumber) + 1 : 1;
-
-      let items = await Item.find(itemQuery);
-
-      const purchaseorder = await PurchaseOrder.find({}).populate('items.itemName'); 
-
-      if (sortBy === 'alphabetical') {
-        items.sort((a, b) => a.name.localeCompare(b.name));
-      } else if (sortBy === 'price-asc') {
-        items.sort((a, b) => a.price - b.price);
-      } else if (sortBy === 'price-desc') {
-        items.sort((a, b) => b.price - a.price);
+      if (filterBy === 'for-approval') {
+        purchaseorder = purchaseorder.filter(purchaseorder => purchaseorder.status === 'For Approval');
+      } else if (filterBy === 'pending') {
+        purchaseorder = purchaseorder.filter(purchaseorder => purchaseorder.status === 'Pending');
+      } else if (filterBy === 'approved') {
+        purchaseorder = purchaseorder.filter(purchaseorder => purchaseorder.status === 'Closed');
       }
+      
+      if (sortBy === 'by-number') {
+        purchaseorder.sort((a, b) => a.orderNumber - b.orderNumber);
+      } else if (sortBy === 'cost-asc') {
+        purchaseorder.sort((a, b) => a.totalCost - b.totalCost);
+      } else if (sortBy === 'cost-desc') {
+        purchaseorder.sort((a, b) => b.totalCost - a.totalCost);
+      }
+      
 
       res.render('purchaseorder', {
         currentRoute: '/purchaseorder',
@@ -796,6 +811,7 @@ router.get('/purchaseorder', async (req, res) => {
         searchTerm,
         purchaseorder, 
         sortBy,
+        filterBy,
         nextOrderNumber  
       });
     } catch (error) {
@@ -955,6 +971,42 @@ router.put('/purchaseorder/:orderId/items/:itemId/receive', async (req, res) => 
       res.status(500).send('Server Error');
   }
 });
+
+router.put('/purchaseorder/:orderId/items/:itemId/approve', async (req, res) => {
+  try {
+      const { orderId, itemId } = req.params;
+
+      
+      const purchaseOrder = await PurchaseOrder.findById(orderId);
+      if (!purchaseOrder) {
+          return res.status(404).json({ message: 'Purchase Order not found.' });
+      }
+
+      const item = purchaseOrder.items.id(itemId);
+      if (!item) {
+        return res.status(404).json({ message: 'Item not found.' });
+    }
+      
+      if (purchaseOrder.status !== 'For Approval') {
+          return res.status(400).json({ message: 'Order is not in "For Approval" status.' });
+      }
+
+     
+      purchaseOrder.status = 'Pending';
+
+    
+      await purchaseOrder.save();
+
+      
+      res.json(purchaseOrder);
+
+  } catch (err) {
+      console.error('Error approving order:', err);
+      res.status(500).send('Server Error');
+  }
+});
+
+
 
 router.post('/edit-purchase-order', async (req, res) => {
   try {

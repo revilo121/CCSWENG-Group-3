@@ -286,13 +286,17 @@ body {
     border-radius: 50%;
 }
 
-/* this is just for sampling (delete this) */
-.item-dot2 {
-    width: 8px;
-    height: 8px;
+.item-dot.red {
     background-color: red;
-    border-radius: 50%;
-}
+  }
+
+  .item-dot.orange {
+    background-color: orange;
+  }
+
+  .item-dot.green {
+    background-color: green;
+  }
 
 .item-name {
     font-weight: bold;
