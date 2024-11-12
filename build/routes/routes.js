@@ -9,6 +9,7 @@ const TransferOrder = require('../models/transferorder');
 const router = express.Router(); 
 const bcrypt = require('bcryptjs');
 const { select } = require('cjs');
+const transferorder = require('../models/transferorder');
 
 
 
@@ -490,6 +491,12 @@ router.get('/inventory', async (req, res) => {
     // Fetch unique categories
     const categories = await Item.distinct('category');
 
+    let summary = {
+      branchStored: selectedBranch
+    }
+
+    let summaryCounts = await Item.find(summary);
+
     // Build query based on search and category
     let query = {
       branchStored: selectedBranch,
@@ -521,9 +528,9 @@ router.get('/inventory', async (req, res) => {
       inventory.sort((a, b) => b.price - a.price);
     }
 
-    const outOfStockCount = inventory.filter(item => item.quantity === 0).length;
-    const lowStockCount = inventory.filter(item => item.quantity > 0 && item.quantity <= item.lowStockThreshold).length;
-    const sufficientStockCount = inventory.filter(item => item.quantity > item.lowStockThreshold).length;
+    const outOfStockCount = summaryCounts.filter(item => item.quantity === 0).length;
+    const lowStockCount = summaryCounts.filter(item => item.quantity > 0 && item.quantity <= item.lowStockThreshold).length;
+    const sufficientStockCount = summaryCounts.filter(item => item.quantity > item.lowStockThreshold).length;
 
     res.render('inventory', {
       currentRoute: '/inventory',
@@ -599,6 +606,7 @@ router.post('/add-item', async (req, res) => {
 
 router.post('/update-item', async (req, res) => {
   const { _id, name, category, price, quantity, lowStockThreshold, measurementUnit, branchStored } = req.body;
+  
 
   try {
     // Find the existing item by _id and branch
@@ -652,22 +660,25 @@ router.post('/update-item', async (req, res) => {
 });
 
 // DELETE route for deleting an item
-router.delete('/delete-item', async (req, res) => {
-  const { name, branchStored } = req.body;  // Assuming you're sending name and branch
+router.delete('/delete-transfer-order/:transfername', async (req, res) => {
+  const { transfername } = req.params;  // Get transfername from the URL parameters
+  const selectedBranch = req.session.selectedBranch || 'Main';
 
   try {
-    const deletedItem = await Item.findOneAndDelete({ name, branchStored });
+    // Find and delete the transfer order by transfername
+    const deletedOrder = await TransferOrder.findOneAndDelete({ transfername });
 
-    if (!deletedItem) {
-      return res.status(404).json({ message: 'Item not found.' });
+    if (!deletedOrder) {
+      // If no document was deleted, the order was not found
+      return res.status(404).json({ message: 'Order not found' });
     }
 
-    // Log deletion in history
-    const actionDetails = `Deleted Item: ${deletedItem.name} (${deletedItem.category}) from branch: ${branchStored}`;
+    // Log the deletion in history
+    const actionDetails = `Deleted Transfer Order: ${deletedOrder.transfername} (Destination: ${deletedOrder.destinationBranch})`;
     const selectedBranch = req.session.selectedBranch || 'Main';
 
     const historyLog = new History({
-      actionCategory: 'Inventory',
+      actionCategory: 'Transfer Order',
       actionBy: req.session.username, // Assuming user information is stored in the session
       actionType: 'Delete',
       actionDetails: actionDetails,
@@ -678,32 +689,15 @@ router.delete('/delete-item', async (req, res) => {
     // Save the history log
     await historyLog.save();
 
-    res.status(200).json({ message: 'Item deleted successfully.' });
+    // Return success message
+    return res.json({ message: 'Order deleted successfully' });
   } catch (error) {
-    console.error('Error deleting item:', error);
-    res.status(500).json({ message: 'An error occurred while deleting the item.' });
+    console.error('Error deleting order:', error);
+    return res.status(500).json({ message: 'Error deleting order' });
   }
 });
 
-router.get('/search-item', async (req, res) => {
-  const searchTerm = req.query.q.toLowerCase();
-  console.log("Searching Item...")
 
-  try {
-     
-      const items = await Inventory.find({
-          $or: [
-              { name: { $regex: searchTerm, $options: 'i' } },
-              { category: { $regex: searchTerm, $options: 'i' } }
-          ]
-      });
-
-      res.json(items);  // Return matched items
-  } catch (error) {
-      console.error('Error searching items:', error);
-      res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
 
 router.post('/stock-adjust', async (req, res) => {
   const { name, branchStored, adjustment } = req.body;
@@ -989,7 +983,34 @@ router.get('/transferorder', async (req, res) => {
   const selectedBranch = req.session.selectedBranch || 'Main';
   let query = { branchStored: selectedBranch };
   let inventory = await Item.find(query);
-  let transferOrders = await TransferOrder.find();
+  const sortBy = req.query.sortBy || '';
+  const searchTerm = req.query.search || '';
+  const filterBy = req.query.filterBy || '';
+
+  let allOrders = await TransferOrder.find();
+  const forApproval = allOrders.filter(transferorder => transferorder.status === 'For Approval').length;
+  const Approved = allOrders.filter(transferorder => transferorder.status === 'Approved').length;
+  
+  let transferOrderQuery = {
+    transfername: { $regex: searchTerm, $options: 'i'}
+  }
+
+  let transferOrders = await TransferOrder.find(transferOrderQuery);
+  
+
+  if (filterBy === 'for-approval') {
+    transferOrders = transferOrders.filter(transferorder => transferorder.status === 'For Approval');
+  } else if (filterBy === 'approved') {
+    transferOrders = transferOrders.filter(transferorder => transferorder.status === 'Approved');
+  }
+  
+  if (sortBy === 'alphabetical') {
+    transferOrders.sort((a, b) => a.transfername.localeCompare(b.transfername));
+  } else if (sortBy === 'date-asc') {
+    transferOrders.sort((a, b) => new Date(a.date) - new Date(b.date)); // Earliest first
+  } else if (sortBy === 'date-desc') {
+    transferOrders.sort((a, b) => new Date(b.date) - new Date(a.date)); // Latest first
+  }
 
   res.render('transferorder', {
     currentRoute: '/transferorder',
@@ -998,14 +1019,18 @@ router.get('/transferorder', async (req, res) => {
     branches,
     selectedBranch,
     inventory,
-    transferOrders
+    transferOrders,
+    forApproval,
+    Approved,
+    sortBy,
+    filterBy
   });
 
 });
 
 router.post('/create-transfer-order', async (req, res) => {
   const { transfername, sourceBranch, destinationBranch, items } = req.body;
-  
+  const selectedBranch = req.session.selectedBranch || 'Main';
 
   const inventory = await Item.find({ name: { $in: items.map(item => item.itemName) } });
   
@@ -1042,23 +1067,89 @@ router.post('/create-transfer-order', async (req, res) => {
         });
 
         await newTransferOrder.save();
+
+        const historyLog = new History({
+          actionCategory: 'Transfer Order',
+          actionBy: req.session.username, // Assuming user information is stored in req.user
+          actionType: 'Create',
+          actionDetails: `New TO: ${transfername}`, // For new item added
+          date: new Date(),
+          branch: selectedBranch
+        });
         
+        await historyLog.save();
+
         res.status(201).json({ message: 'Transfer order created successfully!'});
       } catch (error) {
         throw(error);
         }
 });
 
-router.post('/update-transfer-order', async (req, res) => {
-  
+router.put('/update-transfer-order/:id', async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const { transfername, destinationBranch, items } = req.body;
+    const selectedBranch = req.session.selectedBranch || 'Main';
+    // Validate incoming data
+    if (!transfername || !destinationBranch || !items || !Array.isArray(items)) {
+      return res.status(400).json({ message: 'Invalid data provided' });
+    }
+
+    // Find the existing transfer order
+    const existingOrder = await TransferOrder.findById(orderId);
+    if (!existingOrder) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Keep track of changes for history logging
+    let actionDetails = `Updated Transfer Order: ${existingOrder.transfername}\nChanges:\n`;
+
+    // Compare fields and log changes
+    if (existingOrder.transfername !== transfername) 
+      actionDetails += `- Transfer Name: ${existingOrder.transfername} ➡️ ${transfername}\n`;
+    if (existingOrder.destinationBranch !== destinationBranch) 
+      actionDetails += `- Destination Branch: ${existingOrder.destinationBranch} ➡️ ${destinationBranch}\n`;
+
+    // Check for changes in items array
+    const existingItems = JSON.stringify(existingOrder.items);
+    const newItems = JSON.stringify(items);
+    if (existingItems !== newItems) 
+      actionDetails += `- Items updated\n`;
+
+    // Update the transfer order
+    existingOrder.transfername = transfername;
+    existingOrder.destinationBranch = destinationBranch;
+    existingOrder.items = items;
+    const updatedOrder = await existingOrder.save();
+
+    // Log the update action in history
+    const historyLog = new History({
+      actionCategory: 'Transfer Order',
+      actionBy: req.session.username, // Assuming user information is stored in the session
+      actionType: 'Update',
+      actionDetails: actionDetails,
+      date: new Date(),
+      branch: req.session.selectedBranch || 'Main'
+    });
+
+    // Save the history log
+    await historyLog.save();
+
+    res.json({ message: 'Order updated successfully', order: updatedOrder });
+  } catch (error) {
+    console.error('Error updating order:', error);
+    res.status(500).json({ message: 'An error occurred while updating the order' });
+  }
 });
 
 router.delete('/delete-transfer-order/:transfername', async (req, res) => {
   const { transfername } = req.params;  // Get transfername from the URL parameters
-
+  const selectedBranch = req.session.selectedBranch || 'Main';
   try {
     // Attempt to delete the order by transfername
     const result = await TransferOrder.deleteOne({ transfername: transfername });
+
+    
 
     if (result.deletedCount === 0) {
       // If no document was deleted, the order was not found
@@ -1070,6 +1161,86 @@ router.delete('/delete-transfer-order/:transfername', async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Error deleting order' });
+  }
+});
+
+router.post('/approve-transfer-order/:id', async (req, res) => {
+  try {
+    const orderId = req.params.id;
+
+    // Find the transfer order by ID
+    const order = await TransferOrder.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: 'Transfer order not found' });
+    }
+
+    const { sourceBranch, destinationBranch, items } = order;
+    
+
+    // Process each item in the transfer order
+    for (const item of items) {
+      const { itemName, quantity } = item;
+
+      // Find the item in the source branch
+      const sourceItem = await Item.findOne({
+        branchStored: sourceBranch,
+        name: itemName
+      });
+
+      
+
+      // Check if item exists in source branch with enough quantity
+      console.log('Source Branch:', sourceBranch);
+      console.log('Item Name:', itemName);
+      console.log('Finding item with:', { branchStored: sourceBranch, name: itemName });
+      console.log(sourceItem);
+
+      if (!sourceItem || sourceItem.quantity < quantity) {
+        return res.status(400).json({
+          message: `Insufficient stock for item ${itemName} in source branch`
+        });
+      }
+
+      
+
+      // Adjust quantity in source branch
+      sourceItem.quantity -= quantity;
+      await sourceItem.save();
+
+      // Check if the item exists in the destination branch
+      let destinationItem = await Item.findOne({
+        branchStored: destinationBranch,
+        name: itemName
+      });
+
+      if (destinationItem) {
+        // If item exists in destination branch, add to its quantity
+        destinationItem.quantity += quantity;
+        await destinationItem.save();
+      } else {
+        // If item does not exist in destination branch, create it with same attributes except for branch and quantity
+        const newItem = new Item({
+          name: sourceItem.name,
+          description: sourceItem.description,
+          price: sourceItem.price,
+          category: sourceItem.category,
+          branchStored: destinationBranch,
+          quantity: quantity, // Set quantity to that in transfer order
+          lowStockThreshold: sourceItem.lowStockThreshold,
+          measurementUnit: sourceItem.measurementUnit
+        });
+        await newItem.save();
+      }
+    }
+
+    // Update order status to approved (or completed) if required
+    order.status = 'Approved';
+    await order.save();
+
+    res.json({ message: 'Transfer order approved successfully' });
+  } catch (error) {
+    console.error('Error approving order:', error);
+    res.status(500).json({ message: 'An error occurred while approving the order' });
   }
 });
 

@@ -34,21 +34,15 @@
                     <i class="fas fa-exclamation-circle"></i>
                     <div class="status-text">
                         <span class="status-label">For Approval</span>
-                        <h2>5</h2>
+                        <h2><%= forApproval %></h2>
                     </div>
                 </div>
-                <div class="status pending">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <div class="status-text">
-                        <span class="status-label">Pending</span>
-                        <h2>55</h2>
-                    </div>
-                </div>
+                
                 <div class="status completed">
                     <i class="fas fa-check-circle"></i>
                     <div class="status-text">
-                        <span class="status-label">Completed (This month)</span>
-                        <h2>555</h2>
+                        <span class="status-label">Approved</span>
+                        <h2><%= Approved %></h2>
                     </div>
                 </div>
             </section>
@@ -66,11 +60,22 @@
                         <input type="text" placeholder="Search Transfer Orders..." aria-label="Search orders">
                         <i class="fas fa-search search-icon"></i>
                     </div>
+                    
 
                     <div class="sorting-controls">
-                        <button class="filter"> Filter by</button>
-                        <button class="pagination-btn prev"></button>
-                        <button class="pagination-btn next"></button>
+                      <select id="sortBy" aria-label="Sort items" onchange="applySorting()">
+                        <option value="alphabetical" <%= sortBy === '' || sortBy === 'alphabetical' ? 'selected' : '' %>>Alphabetical (A-Z)</option>
+                        <option value="date-asc" <%= sortBy === 'date-asc' ? 'selected' : '' %>>Date (Ascending)</option>
+                        <option value="date-desc" <%= sortBy === 'date-desc' ? 'selected' : '' %>>Date (Descending)</option>
+                      </select>
+                    </div>
+
+                    <div class="sorting-controls">
+                      <select id="filterBy" aria-label="Filter items" onchange="applyFilter()">
+                        <option value="" <%= filterBy === '' || filterBy === '' ? 'selected' : '' %>>Filter: Default</option>
+                        <option value="for-approval" <%= filterBy === 'for-approval' ? 'selected' : '' %>>For Approval</option>
+                        <option value="approved" <%= filterBy === 'approved' ? 'selected' : '' %>>Approved</option>
+                      </select>
                     </div>
                 </div>
 
@@ -92,8 +97,7 @@
                      <span class="order-label"><%= order.transfername %></span>
                      <!-- Status dot with color -->
                      <span class="status-dot 
-                                 <%= order.status === 'Completed' ? 'green' 
-                                 : order.status === 'Pending' ? 'orange' 
+                                 <%= order.status === 'Approved' ? 'green'  
                                  : 'red' %>">
                      </span>
                   </div>
@@ -202,10 +206,10 @@
     
     <!-- Action Buttons -->
     <div class="modal-buttons">
-      <button onclick="editOrder()">Edit</button>
+      <button id="editOrderButton" onclick="enableEditMode()">Edit</button>
       <button onclick="deleteOrder()">Delete</button>
-      <button onclick="approveOrder()">Approve</button>
-      <button onclick="saveChanges()">Save Changes</button>
+      <button id="approveButton" onclick="approveOrder()">Approve</button> <!-- Added id -->
+      <button id="saveChangesButton" onclick="saveChanges()" disabled>Save Changes</button>
     </div>
   </div>
 </div>
@@ -217,6 +221,9 @@
 </body>
 
 <script>
+
+let isEditMode = false;
+
     function openTransferOrderModal() {
   document.getElementById('createTransferOrderModal').style.display = 'flex';
 }
@@ -225,12 +232,7 @@ function closeTransferOrderModal() {
   document.getElementById('createTransferOrderModal').style.display = 'none';
 }
 
-window.onclick = function(event) {
-  const modal = document.getElementById('createTransferOrderModal');
-  if (event.target === modal) {
-    closeTransferOrderModal();
-  }
-};
+
 
 function addItemEntry() {
   const itemContainer = document.getElementById('itemsContainer');
@@ -296,6 +298,11 @@ document.getElementById('transferOrderForm').addEventListener('submit', async (e
 
 function openEditTransferOrderModal(orderCard) {
   currentOrderName = orderCard.getAttribute('data-transfer-name');
+  currentOrderId = orderCard.getAttribute('data-order-id');
+  currentOrderStatus = orderCard.getAttribute('data-status');
+
+  isEditMode = false;  // Reset edit mode on opening the modal
+  document.getElementById('saveChangesButton').disabled = true; // Disable Save button by default
   
   document.getElementById('modalOrderName').textContent = orderCard.getAttribute('data-transfer-name');
   document.getElementById('modalSourceBranch').textContent = orderCard.getAttribute('data-source-branch');
@@ -313,12 +320,21 @@ function openEditTransferOrderModal(orderCard) {
     modalItemsList.appendChild(listItem);
   });
 
+  const approveButton = document.getElementById('approveButton');
+    if (currentOrderStatus === 'Approved') {
+      approveButton.disabled = true;
+    } else {
+      approveButton.disabled = false;
+    }
+
   // Display the modal
   document.getElementById('orderDetailsModal').style.display = 'flex';
 }
 
 function closeOrderDetailsModal() {
   document.getElementById('orderDetailsModal').style.display = 'none';
+  isEditMode = false;
+  document.getElementById('saveChangesButton').disabled = true;
 }
 
 // Implement further actions for edit, delete, approve, save changes
@@ -371,5 +387,131 @@ async function deleteOrder() {
 }
 
 
+function enableEditMode() {
+  isEditMode = true;
+  document.getElementById('saveChangesButton').disabled = false;
 
+  // Make the fields editable by switching them from <span> to <input> elements
+  const orderName = document.getElementById('modalOrderName');
+  const destinationBranch = document.getElementById('modalDestinationBranch');
+
+  // Convert text elements to inputs
+  orderName.innerHTML = `<input type="text" value="${orderName.textContent}" id="editOrderName" />`;
+  destinationBranch.innerHTML = `
+    <select id="editDestinationBranch">
+      <option value="" disabled>Select</option>
+      <% branches.forEach(branch => { %>
+        <% if (branch.name !== selectedBranch) { %>
+          <option value="<%= branch.name %>"><%= branch.name %></option>
+        <% } %>
+      <% }) %>
+    </select>
+  `;
+
+  // Set items as editable
+  document.querySelectorAll('#modalItemsList li').forEach((li, index) => {
+    const quantity = li.textContent.split(' - Quantity: ')[1];
+    li.innerHTML = `${li.textContent.split(' - Quantity: ')[0]} - Quantity: <input type="number" value="${quantity}" id="editItemQuantity${index}" />`;
+  });
+}
+
+// Save changes function to handle submission of edited data
+async function saveChanges() {
+  if (!isEditMode) return;
+
+  // Gather data from edited inputs
+  const updatedData = {
+    transfername: document.getElementById('editOrderName').value,
+    destinationBranch: document.getElementById('editDestinationBranch').value,
+    items: Array.from(document.querySelectorAll('#modalItemsList li')).map((li, index) => ({
+      itemName: li.textContent.split(' - Quantity: ')[0],
+      quantity: document.getElementById(`editItemQuantity${index}`).value
+    }))
+  };
+
+
+  // Send updated data to the server
+  try {
+    const response = await fetch(`/update-transfer-order/${currentOrderId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedData)
+    });
+
+    if (response.ok) {
+      alert('Changes saved successfully!');
+      closeOrderDetailsModal();
+      location.reload();
+    } else {
+      const errorData = await response.json();
+      alert('Error: ' + errorData.message);
+    }
+  } catch (error) {
+    console.error('Save error:', error);
+    alert('An error occurred while saving changes.');
+  }
+
+  // Disable edit mode after saving changes
+  isEditMode = false;
+  document.getElementById('saveChangesButton').disabled = true;
+}
+
+async function approveOrder() {
+  if (confirm('Are you sure you want to approve this transfer order?')) {
+    try {
+      const response = await fetch(`/approve-transfer-order/${currentOrderId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (response.ok) {
+        alert('Order approved successfully.');
+        closeOrderDetailsModal();
+        location.reload(); // Refresh to show updated inventory
+      } else {
+        const errorData = await response.json();
+        alert('Error: ' + errorData.message);
+      }
+    } catch (error) {
+      console.error('Error approving order:', error);
+      alert('An error occurred while approving the order.');
+    }
+  }
+}
+
+        const searchInput = document.querySelector('.search-bar input'); 
+        const searchIcon = document.querySelector('.search-icon'); 
+        const searchEnter = document.querySelector('.search-bar');
+
+        searchEnter.addEventListener('keydown', (event) => {
+          const searchTerm = searchInput.value.trim();
+
+          if (event.key === 'Enter') {
+            window.location.href = `/transferorder?search=${encodeURIComponent(searchTerm)}`;
+          }
+        });
+
+        searchIcon.addEventListener('click', () => {
+            const searchTerm = searchInput.value.trim();
+
+            if (searchTerm) {
+              // Redirect to the inventory route with the search term as a query parameter
+              window.location.href = `/transferorder?search=${encodeURIComponent(searchTerm)}`;
+            }
+        });
+
+    function applySorting() {
+    const sortBy = document.getElementById('sortBy').value;
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('sortBy', sortBy); // Set the sorting option in the query
+    window.location.search = searchParams.toString(); // Reload the page with the updated query
+    }
+
+    function applyFilter() {
+    const filterBy = document.getElementById('filterBy').value;
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set('filterBy', filterBy); // Set the filter option in the query
+    window.location.search = searchParams.toString(); // Reload the page with the updated query
+    }
+  
 </script>
