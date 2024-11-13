@@ -84,7 +84,7 @@
                     <% purchaseorder.forEach(order => { %> 
                         <div class="item-card" data-id="<%= order._id %>" style="cursor: pointer;" onclick="openDisplayPurchaseOrderModal('<%= order._id %>')">
                             <div class="card-header">
-                                <span class="item-name">Order Number: <%= String(order.orderNumber).padStart(5, '0') %></span>
+                                <span class="item-name">Order: <%= String(order.orderNumber).padStart(5, '0') %></span>
                                 <span class="item-dot 
                                     <%= order.status === 'For Approval' ? 'red' 
                                     : order.status === 'Pending' ? 'orange' 

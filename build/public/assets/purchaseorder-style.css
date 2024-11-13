@@ -255,9 +255,9 @@ body {
     background-color: #f9f9f9;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     position: relative;
-    transition: box-shadow 0.3s;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .item-card:hover {
@@ -273,6 +273,16 @@ body {
 
 .item-name {
     font-size: 5px;
+    background-color: #f0f0f0;
+    padding: 4px 10px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+/* Status Label */
+.order-label {
+    font-size: 12px;
     background-color: #f0f0f0;
     padding: 4px 10px;
     border-radius: 12px;
@@ -314,9 +324,9 @@ body {
   }
 
 .item-name {
-    font-weight: bold;
-    font-size: 18px;
-    margin-bottom: 10px;
+    font-weight: normal;
+    font-size: 12px;
+    margin-bottom: 5px;
 }
 
 .card-menu {
