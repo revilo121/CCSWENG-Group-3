@@ -376,3 +376,49 @@ body {
 .close-btn:hover {
     color: #FC4428; /* Optional: Change hover color */
 }
+
+/* ORDER DETAILS */
+.order-info {
+background-color: white;
+    margin-left: -10px;
+    padding: 3vh;
+    border-radius: 10px;
+    width: 80%; /* Added width for a consistent size */
+    height: 80%;
+    max-width: 800px; /* Increased max-width for a longer horizontal appearance */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    overflow-y: visible;
+}
+
+.order-info p {
+    margin: 10px 0; /* Adds vertical spacing between each item */
+    line-height: 1.5; /* Increases line height for better readability */
+}
+
+h3 {
+    margin-top: 10px; /* Items in order */
+}
+
+#modalItemsList {
+    margin-left: 15px;
+}
+
+/* Updated Button Styles */
+.modal-buttons button {
+    background-color: #D64832; /* Consistent color for action buttons */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 20px; /* Rounded rectangular shape */
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.modal-buttons button:hover {
+    background-color: #f58686;
+}
+
+.modal-buttons button:disabled {
+    background-color: #ccc; /* Light grey for disabled buttons */
+    cursor: not-allowed; /* Changes cursor to indicate non-clickable */
+}
