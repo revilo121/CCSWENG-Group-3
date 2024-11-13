@@ -659,7 +659,7 @@ router.post('/update-item', async (req, res) => {
   }
 });
 
-// DELETE route for deleting an item
+// DELETE route for deleting a transfer order
 router.delete('/delete-transfer-order/:transfername', async (req, res) => {
   const { transfername } = req.params;  // Get transfername from the URL parameters
   const selectedBranch = req.session.selectedBranch || 'Main';
@@ -697,7 +697,70 @@ router.delete('/delete-transfer-order/:transfername', async (req, res) => {
   }
 });
 
+// DELETE Route for deleting an item
+router.delete('/delete-item', async (req, res) => {
 
+  const { name, branchStored } = req.body;  
+
+
+
+  try {
+
+    const deletedItem = await Item.findOneAndDelete({ name, branchStored });
+
+
+
+    if (!deletedItem) {
+
+      return res.status(404).json({ message: 'Item not found.' });
+
+    }
+
+
+
+    // Log deletion in history
+
+    const actionDetails = `Deleted Item: ${deletedItem.name} (${deletedItem.category}) from branch: ${branchStored}`;
+
+    const selectedBranch = req.session.selectedBranch || 'Main';
+
+
+
+    const historyLog = new History({
+
+      actionCategory: 'Inventory',
+
+      actionBy: req.session.username, // Assuming user information is stored in the session
+
+      actionType: 'Delete',
+
+      actionDetails: actionDetails,
+
+      date: new Date(),
+
+      branch: selectedBranch
+
+    });
+
+
+
+    // Save the history log
+
+    await historyLog.save();
+
+
+
+    res.status(200).json({ message: 'Item deleted successfully.' });
+
+  } catch (error) {
+
+    console.error('Error deleting item:', error);
+
+    res.status(500).json({ message: 'An error occurred while deleting the item.' });
+
+  }
+
+});
 
 router.post('/stock-adjust', async (req, res) => {
   const { name, branchStored, adjustment } = req.body;
