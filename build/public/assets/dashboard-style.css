@@ -81,6 +81,13 @@ body {
     border-radius: 8px;
 }
 
+.must-stock-fb {
+    display: flex;
+    gap: 5vh;
+    
+    justify-content: center;
+}
+
 .out-of-stock {
     background-color: #f8d7da;
 }
@@ -93,15 +100,8 @@ body {
     background-color: #d4edda;
 }
 
-.chart-container {
-    width: 100%;
-    height: 200px; /* Fixed height */
-    position: relative;
-}
-
-#mostStockedChart {
-    width: 100%;
-    height: 100%;
+.summary-card.chart-card{
+    max-height: 30vh;
 }
 
 .summary-card h4 {

@@ -56,35 +56,75 @@
         <!-- Summary Section -->
         <section class="summary">
             <div class="summary-card chart-card">
-                <h4>Most Stocked Items</h4>
-                <div class="chart-container">
+                <h4>Most Stocked Categories</h4>
+                
+                <div id="chartContainer" style="max-width: 50vh; height: 30vh; display: flex; align-items: center; justify-content: center;">
                     <canvas id="mostStockedChart"></canvas>
                 </div>
+            
+                <!-- Hidden div for data storage -->
+                <div id="chartData" 
+                     data-most-stocked='<%= JSON.stringify(mostStockedCategories) %>' 
+                     style="display: none;">
+                </div>
             </div>
+
+            
             <div class="summary-card">
-                <h4>Recently Stocked Items</h4>
-                <ul>
-                    <li><span class="dot" style="background-color: #f8c471;"></span> Egg</li>
-                    <li><span class="dot" style="background-color: #f39c12;"></span> Bread</li>
-                    <li><span class="dot" style="background-color: #7dcea0;"></span> Milk</li>
-                </ul>
+                <h4>Must Stock Items</h4>
+                <div class = must-stock-fb>
+                    <div class = out-of-stock-list>
+                        <ul>
+                            <h4>Out of Stock</h4>
+                        <% lowStockItems.forEach(item => { %>
+                            <li>
+                                <span class="dot" style="background-color: #f39c12;"></span> 
+                                <%= item.name %>
+                            </li>
+                        <% }) %>
+                        </ul>
+                        
+                    
+                    </div>
+
+                    <div class = low-stock-list>
+                        <ul>
+                            <h4>Low Stock</h4>
+                            <% zeroStockItems.forEach(item => { %>
+                                <li>
+                                    <span class="dot" style="background-color: #e74c3c;"></span> 
+                                    <%= item.name %>
+                                </li>
+                            <% }) %>
+                        </ul>
+                    </div>
+                </div>
+                    
+                    
+                
+                    
+                    
+
+                    <ul>
+                        
+                
             </div>
             <div class="summary-card">
                 <h4>Inventory Value</h4>
-                <p>12,345,678 Php</p>
+                <p><%= inventoryCost %> Php</p>
             </div>
             <div class="summary-card">
                 <h4>Purchase Orders Expense</h4>
-                <p>12,345 Php</p>
+                <p><%= totalExpenses %> Php</p>
             </div>
             <div class="summary-card">
                 <h4>Delivery</h4>
-                <p>12,345 Php</p>
+                <p><%= totalDelivery %> Php</p>
             </div>
             <div class="summary-card">
                 <h4>Orders</h4>
-                <p>6 Pending Purchase Orders</p>
-                <p>0 Orders for Approval</p>
+                <p><%= pending %> Pending Purchase Orders</p>
+                <p><%= forApproval %> Orders for Approval</p>
             </div>
         </section>
 
@@ -118,28 +158,54 @@
     <!-- Add a script for the chart -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        // Get the data from the hidden div
+        const chartDataElement = document.getElementById('chartData');
+        const mostStockedCategories = JSON.parse(chartDataElement.getAttribute('data-most-stocked'));
+    
+        // Extract categories and counts from mostStockedCategories
+        const categories = mostStockedCategories.map(item => item.category);
+        const counts = mostStockedCategories.map(item => item.count);
+    
+        // Create the Pie Chart
         const ctx = document.getElementById('mostStockedChart').getContext('2d');
         const mostStockedChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Egg', 'Bread', 'Milk'],
+                labels: categories,
                 datasets: [{
-                    label: 'Most Stocked Items',
-                    data: [30, 20, 50],
-                    backgroundColor: ['#f8c471', '#f39c12', '#7dcea0'],
+                    data: counts,
+                    backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"],
+                    borderColor: "#fff",
+                    
+                    hoverBackgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"],
+                    hoverBorderColor: "#ccc"
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                
                 plugins: {
                     legend: {
                         display: true,
-                        position: 'bottom'
-                    }
-                }
+                        position: 'right',  // Position the legend on the right side
+                        labels: {
+                            color: "#333",
+                            font: {
+                                size: 12,
+                                family: 'Arial, sans-serif'
+                            },
+                            
+                        }
+                    },
+                },
+                animation: {
+                    animateRotate: true,
+                    animateScale: true
+                },
+                cutout: "70%"
             }
         });
     </script>
+    
 </body>
 </html>

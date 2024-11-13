@@ -2,6 +2,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
+    "chart.js": "^4.4.6",
     "cjs": "^0.0.11",
     "cookie-parser": "^1.4.7",
     "csurf": "^1.10.0",

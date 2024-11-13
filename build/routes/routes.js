@@ -432,18 +432,54 @@ router.get('/dashboard', async (req, res) => {
     let query = { branchStored: selectedBranch };
     let inventory = await Item.find(query);
 
-    // Set the selected branch, defaulting to 'Main' if none is selected
     
+    const inventoryCost = inventory.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
+    const zeroStockItems = inventory
+    .filter(item => item.quantity === 0)
+    .slice(0, 5);
+
+// Get top 5 items below lowStockThreshold
+    const lowStockItems = inventory
+    .filter(item => item.quantity > 0 && item.quantity < item.lowStockThreshold)
+    .slice(0, 5);
+    
     // For Inventory Summary in Dashboard
     const outOfStockCount = inventory.filter(item => item.quantity === 0).length;
     const lowStockCount = inventory.filter(item => item.quantity > 0 && item.quantity <= item.lowStockThreshold).length;
     const sufficientStockCount = inventory.filter(item => item.quantity > item.lowStockThreshold).length;
 
+    // Count items by category
+    const categoryCounts = inventory.reduce((counts, item) => {
+      counts[item.category] = (counts[item.category] || 0) + 1;
+      return counts;
+    }, {});
+
+// Convert the counts object to an array of category objects, then sort and get the top 5
+    const mostStockedCategories = Object.entries(categoryCounts)
+      .map(([category, count]) => ({ category, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    
+
+
     // For History Box in Dashboard
     const latestHistory = await History.find( {branch: selectedBranch} )
                                        .sort({ date: -1 })
                                        .limit(5);
+
+    const purchaseorders = await PurchaseOrder.find ( {branchStored: selectedBranch} );
+
+    const pending = purchaseorders.filter(transferorder => transferorder.status === 'Pending').length;
+    const forApproval = purchaseorders.filter(transferorder => transferorder.status === 'For Approval').length;
+    
+
+    const totalExpenses = purchaseorders.reduce((sum, order) => sum + order.totalCost, 0);
+
+    const totalDelivery = purchaseorders.reduce((sum, order) => sum + order.deliveryCost, 0);
+
+
 
     // Render the dashboard and pass branches and selectedBranch to the sidebar partial
     res.render('dashboard', {
@@ -455,7 +491,15 @@ router.get('/dashboard', async (req, res) => {
       outOfStockCount,
       lowStockCount,
       sufficientStockCount,
-      latestHistory
+      latestHistory,
+      totalExpenses,
+      totalDelivery,
+      pending,
+      forApproval,
+      inventoryCost,
+      mostStockedCategories,
+      zeroStockItems,
+      lowStockItems
     });
   } catch (err) {
     console.error(err);
