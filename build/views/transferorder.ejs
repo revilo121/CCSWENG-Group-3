@@ -114,109 +114,105 @@
             </div>
 
                             
-<!-- Create Transfer Order Modal -->
-<div id="createTransferOrderModal" class="modal" style="display: none;">
-  <div class="modal-content">
-    <span class="close" onclick="closeTransferOrderModal()">&times;</span>
-    <h2>Create Transfer Order</h2>
-    <form id="transferOrderForm">
-      <!-- Order Name -->
-      <div class="form-group">
-        <label for="orderName">Order Name</label>
-        <input 
-          type="text" 
-          id="orderName" 
-          name="orderName" 
-          placeholder="Enter order name" 
-          required 
-        />
-      </div>
-
-      <!-- Source Branch (No longer a dropdown) -->
-      <div class="form-group">
-        <label for="sourceBranch">Source Branch</label>
-        <input 
-          type="text" 
-          id="sourceBranch" 
-          name="sourceBranch" 
-          value="<%= selectedBranch %>" 
-          readonly 
-          required
-        />
-      </div>
-
-      <!-- Destination Branch -->
-      <div class="form-group">
-        <label for="destinationBranch">Destination Branch</label>
-        <select id="destinationBranch" name="destinationBranch" required>
-          <option value="" disabled selected>Select</option> <!-- Placeholder option -->
-          <% branches.forEach(branch => { %>
-            <% if (branch.name !== selectedBranch) { %> <!-- Exclude the current branch -->
-              <option value="<%= branch.name %>"><%= branch.name %></option>
-            <% } %>
-          <% }) %>
-        </select>
-      </div>
-
-      <!-- Items to Transfer -->
-      <div class="form-group">
-        <label for="items">Items to Transfer</label>
-        <div id="itemsContainer">
-          <div class="item-entry">
-            <select name="itemName[]" required>
-              <% inventory.forEach(item => { %>
-                <option value="<%= item.name %>"><%= item.name %> (<%= item.quantity %> in stock)</option>
-              <% }) %>
-            </select>
-            <input type="number" name="quantity[]" placeholder="Quantity" required>
-          </div>
+  <!-- Create Transfer Order Modal -->
+  <div id="createTransferOrderModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeTransferOrderModal()">&times;</span>
+      <h2>Create Transfer Order</h2>
+      <form id="transferOrderForm">
+        <!-- Order Name -->
+        <div class="form-group">
+          <label for="orderName">Order Name</label>
+          <input 
+            type="text" 
+            id="orderName" 
+            name="orderName" 
+            placeholder="Enter order name" 
+            required 
+          />
         </div>
-        <button type="button" onclick="addItemEntry()">Add Another Item</button>
-      </div>
-      
-      <!-- Submit Button -->
-      <button type="submit">Create Transfer Order</button>
-    </form>
-  </div>
-</div>
 
-<!-- Order Details Modal -->
-<div id="orderDetailsModal" class="modal" style="display: none;">
-  <div class="modal-content">
-    <span class="close" onclick="closeOrderDetailsModal()">&times;</span>
-    <h2>Order Details</h2>
-    
-    <!-- Order Information -->
-    <div class="order-info">
-      <p><strong>Order Name:</strong> <span id="modalOrderName"></span></p>
-      <p><strong>Source Branch:</strong> <span id="modalSourceBranch"></span></p>
-      <p><strong>Destination Branch:</strong> <span id="modalDestinationBranch"></span></p>
-      <p><strong>Status:</strong> <span id="modalStatus"></span></p>
-      <p><strong>Date:</strong> <span id="modalDate"></span></p>
-    
-      
-      <!-- Items List -->
-      <h3>Items in Order</h3>
-      <ul id="modalItemsList">
-        <% inventory.forEach(item => { %>
-          <li><%= item.name %> - Quantity: <%= item.quantity %></li>
-        <% }) %>
-      </ul>
-    </div>
-    
-    <!-- Action Buttons -->
-    <div class="modal-buttons">
-      <button id="editOrderButton" type="button" onclick="enableEditMode()">Edit</button>
-      <button type="button" onclick="deleteOrder()">Delete</button>
-      <button id="approveButton" type="button" onclick="approveOrder()">Approve</button> <!-- Added id -->
-      <button id="saveChangesButton" type="button" onclick="saveChanges()" disabled>Save Changes</button>
-    </div>
-  </div>
-</div>
+        <!-- Source Branch (No longer a dropdown) -->
+        <div class="form-group">
+          <label for="sourceBranch">Source Branch</label>
+          <input 
+            type="text" 
+            id="sourceBranch" 
+            name="sourceBranch" 
+            value="<%= selectedBranch %>" 
+            readonly 
+            required
+          />
+        </div>
 
+        <!-- Destination Branch -->
+        <div class="form-group">
+          <label for="destinationBranch">Destination Branch</label>
+          <select id="destinationBranch" name="destinationBranch" required>
+            <option value="" disabled selected>Select</option> <!-- Placeholder option -->
+            <% branches.forEach(branch => { %>
+              <% if (branch.name !== selectedBranch) { %> <!-- Exclude the current branch -->
+                <option value="<%= branch.name %>"><%= branch.name %></option>
+              <% } %>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Items to Transfer -->
+        <div class="form-group">
+          <label for="items">Items to Transfer</label>
+          <div id="itemsContainer">
+            <div class="item-entry">
+              <select name="itemName[]" required>
+                <% inventory.forEach(item => { %>
+                  <option value="<%= item.name %>"><%= item.name %> (<%= item.quantity %> in stock)</option>
+                <% }) %>
+              </select>
+              <input type="number" name="quantity[]" placeholder="Quantity" required>
+            </div>
+          </div>
+          <button type="button" onclick="addItemEntry()">Add Another Item</button>
         </div>
         
+        <!-- Submit Button -->
+        <button type="submit">Create Transfer Order</button>
+      </form>
     </div>
+  </div>
+
+  <!-- Order Details Modal -->
+  <div id="orderDetailsModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeOrderDetailsModal()">&times;</span>
+      <h2>Order Details</h2>
+      
+      <!-- Order Information -->
+      <div class="order-info">
+        <p><strong>Order Name:</strong> <span id="modalOrderName"></span></p>
+        <p><strong>Source Branch:</strong> <span id="modalSourceBranch"></span></p>
+        <p><strong>Destination Branch:</strong> <span id="modalDestinationBranch"></span></p>
+        <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+        <p><strong>Date:</strong> <span id="modalDate"></span></p>
+      
+        
+        <!-- Items List -->
+        <h3>Items in Order</h3>
+        <ul id="modalItemsList">
+          <% inventory.forEach(item => { %>
+            <li><%= item.name %> - Quantity: <%= item.quantity %></li>
+          <% }) %>
+        </ul>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div class="modal-buttons">
+        <button id="editOrderButton" type="button" onclick="enableEditMode()">Edit</button>
+        <button type="button" onclick="deleteOrder()">Delete</button>
+        <button id="approveButton" type="button" onclick="approveOrder()">Approve</button> <!-- Added id -->
+        <button id="saveChangesButton" type="button" onclick="saveChanges()" disabled>Save Changes</button>
+      </div>
+    </div>
+  </div>
 
 </body>
 
