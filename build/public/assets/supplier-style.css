@@ -274,14 +274,14 @@ input[readonly] {
 /* Search Bar Styling */
 .search-bar {
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 0px;
 }
 
 .search-bar input {
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 20px;
+    border-radius: 10px;
     padding-right: 40px;
 }
 

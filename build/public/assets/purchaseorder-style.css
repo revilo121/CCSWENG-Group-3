@@ -271,8 +271,8 @@ body {
     margin-bottom: 10px;
 }
 
-.item-label {
-    font-size: 12px;
+.item-name {
+    font-size: 5px;
     background-color: #f0f0f0;
     padding: 4px 10px;
     border-radius: 12px;
@@ -282,8 +282,23 @@ body {
 .item-dot {
     width: 8px;
     height: 8px;
-    background-color: orange;
     border-radius: 50%;
+    display: inline-block;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.order-label {
+    font-size: 12px;
+    background-color: #f0f0f0;
+    padding: 4px 10px;
+    border-radius: 12px;
+    text-transform: uppercase;
 }
 
 .item-dot.red {
