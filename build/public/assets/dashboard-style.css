@@ -92,12 +92,24 @@ body {
     background-color: #f8d7da;
 }
 
+.out-of-stock:hover{
+    cursor:pointer;
+}
+
 .low-stock {
     background-color: #fff3cd;
 }
 
+.low-stock:hover{
+    cursor:pointer;
+}
+
 .in-stock {
     background-color: #d4edda;
+}
+
+.in-stock:hover{
+    cursor:pointer;
 }
 
 .summary-card.chart-card{
@@ -192,4 +204,61 @@ body {
 
 .history-item strong {
     font-weight: bold;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.table-container {
+    max-height: calc(5 * 40px); /* Adjust row height (40px) as needed */
+    overflow-y: auto;
+    border: 1px solid #ddd; /* Optional: add border for visual distinction */
+    margin-top: 10px;
+    padding-right: 5px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th, table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+table th {
+    background-color: #f2f2f2;
+}
+
+table tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
 }

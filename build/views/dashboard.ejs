@@ -30,29 +30,29 @@
 
         <!-- Inventory Overview -->
         <section class="inventory-overview">
-            <div class="status out-of-stock">
-              <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
-              <div class="statusx-text">
-                <span class="status-label">Out Of Stock</span>
-                <h2><%= outOfStockCount %></h2>
-              </div>
+            <div class="status out-of-stock" data-filter="out-of-stock" onclick="navigateToInventory(this)">
+                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                <div class="status-text">
+                    <span class="status-label">Out Of Stock</span>
+                    <h2><%= outOfStockCount %></h2>
+                </div>
             </div>
-            <div class="status low-stock">
-              <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
-              <div class="status-text">
-                <span class="status-label">Low Stock</span>
-                <h2><%= lowStockCount %></h2>
-              </div>
+            <div class="status low-stock" data-filter="low-stock" onclick="navigateToInventory(this)">
+                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                <div class="status-text">
+                    <span class="status-label">Low Stock</span>
+                    <h2><%= lowStockCount %></h2>
+                </div>
             </div>
-            <div class="status in-stock">
-              <i class="fas fa-check-circle" aria-hidden="true"></i>
-              <div class="status-text">
-                <span class="status-label">In Stock</span>
-                <h2><%= sufficientStockCount %></h2>
-              </div>
+            <div class="status in-stock" data-filter="in-stock" onclick="navigateToInventory(this)">
+                <i class="fas fa-check-circle" aria-hidden="true"></i>
+                <div class="status-text">
+                    <span class="status-label">In Stock</span>
+                    <h2><%= sufficientStockCount %></h2>
+                </div>
             </div>
         </section>
-
+        
         <!-- Summary Section -->
         <section class="summary">
             <div class="summary-card chart-card">
@@ -109,7 +109,7 @@
                         
                 
             </div>
-            <div class="summary-card">
+            <div class="summary-card" onclick="openInventoryModal()">
                 <h4>Inventory Value</h4>
                 <p><%= inventoryCost %> Php</p>
             </div>
@@ -121,7 +121,7 @@
                 <h4>Delivery</h4>
                 <p><%= totalDelivery %> Php</p>
             </div>
-            <div class="summary-card">
+            <div class="summary-card" onclick="redirectToPurchaseOrders()">
                 <h4>Orders</h4>
                 <p><%= pending %> Pending Purchase Orders</p>
                 <p><%= forApproval %> Orders for Approval</p>
@@ -152,12 +152,48 @@
         </div>
         
     </div>
+    <div id="inventoryModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeInventoryModal()">&times;</span>
+            <h3>Item Value</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Price (Php)</th>
+                            <th>Quantity</th>
+                            <th>Total Amount (Php)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% inventory.forEach(item => { %>
+                            <tr>
+                                <td><%= item.name %></td>
+                                <td><%= item.price.toFixed(2) %></td>
+                                <td><%= item.quantity %></td>
+                                <td><%= (item.price * item.quantity).toFixed(2) %></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    </div>
     </div>
     
 
     <!-- Add a script for the chart -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+
+    function navigateToInventory(element) {
+    const filterBy = element.getAttribute('data-filter');
+    const inventoryUrl = `/inventory?filterBy=${encodeURIComponent(filterBy)}`;
+    window.location.href = inventoryUrl;
+}
         // Get the data from the hidden div
         const chartDataElement = document.getElementById('chartData');
         const mostStockedCategories = JSON.parse(chartDataElement.getAttribute('data-most-stocked'));
@@ -205,6 +241,21 @@
                 cutout: "70%"
             }
         });
+
+        function openInventoryModal() {
+    const modal = document.getElementById('inventoryModal');
+    modal.style.display = 'block';
+}
+
+function closeInventoryModal() {
+    const modal = document.getElementById('inventoryModal');
+    modal.style.display = 'none';
+}
+
+function redirectToPurchaseOrders() {
+    // Redirect to the purchase orders page
+    window.location.href = '/purchaseorder';
+}
     </script>
     
 </body>

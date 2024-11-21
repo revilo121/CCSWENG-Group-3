@@ -25,7 +25,9 @@ router.get('/logout', (req, res) => {
 
 router.get('/supplier', async (req, res) => {
 
-  const selectedBranch = req.session.selectedBranch || 'Main'; // Default to 'Main' if none selected
+
+  if(req.session.isAuthenticated){
+    const selectedBranch = req.session.selectedBranch || 'Main'; // Default to 'Main' if none selected
   const branches = await Branch.find({}, 'name');
   const suppliers = await Supplier.find({});
   console.log(suppliers);
@@ -42,6 +44,10 @@ router.get('/supplier', async (req, res) => {
       console.error('Error fetching suppliers:', error);
       res.status(500).send('Server Error');
   }
+  } else {
+    res.redirect('/');
+  }
+  
 });
 
 router.post('/add-supplier', async (req, res) => {
@@ -229,7 +235,8 @@ router.post('/login', async (req, res) => {
 });
 
 router.get('/manageacc', async (req, res) => {
-  try {
+  if(req.session.isAuthenticated){
+    try {
       // Fetch all users from the database
       const users = await User.find();
 
@@ -239,6 +246,10 @@ router.get('/manageacc', async (req, res) => {
       console.error(error);
       res.status(500).send('Server error');
   }
+  } else {
+    res.redirect('/');
+  }
+  
 });
 
 router.post('/submit-account', async (req, res) => {
@@ -354,157 +365,170 @@ router.post('/select-branch', (req, res) => {
 });
 
 router.get('/history', async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1; // Current page
-    const pageSize = 10; // Page size
-    const branches = await Branch.find({}, 'name');
-    const selectedBranch = req.session.selectedBranch || 'Main'; // Default to 'Main' if none selected
 
-    // Fetch filter parameters
-    const selectedUser = req.query.user || ''; // Action By filter
-    const selectedActionType = req.query.actionType || ''; // Action Type filter
-    const selectedDateRange = req.query.dateRange || ''; // Date Range filter
-
-    // Build query object for filters
-    const query = { branch: selectedBranch }; // Ensure it only shows actions from the selected branch
-    
-    if (selectedUser) {
-      query.actionBy = selectedUser; // Filter by Action By
+  if(req.session.isAuthenticated){
+    try {
+      const page = parseInt(req.query.page) || 1; // Current page
+      const pageSize = 10; // Page size
+      const branches = await Branch.find({}, 'name');
+      const selectedBranch = req.session.selectedBranch || 'Main'; // Default to 'Main' if none selected
+  
+      // Fetch filter parameters
+      const selectedUser = req.query.user || ''; // Action By filter
+      const selectedActionType = req.query.actionType || ''; // Action Type filter
+      const selectedDateRange = req.query.dateRange || ''; // Date Range filter
+  
+      // Build query object for filters
+      const query = { branch: selectedBranch }; // Ensure it only shows actions from the selected branch
+      
+      if (selectedUser) {
+        query.actionBy = selectedUser; // Filter by Action By
+      }
+      if (selectedActionType) {
+        query.actionType = selectedActionType; // Filter by Action Type
+      }
+  
+      // Apply Date Range filter
+      const now = new Date();
+      if (selectedDateRange === 'today') {
+        query.date = {
+          $gte: new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        };
+      } else if (selectedDateRange === 'this-week') {
+        const firstDayOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+        query.date = { $gte: firstDayOfWeek };
+      } else if (selectedDateRange === 'this-month') {
+        const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        query.date = { $gte: firstDayOfMonth };
+      }
+  
+      // Fetch total actions count for pagination
+      const totalActions = await History.countDocuments(query);
+  
+      // Fetch history actions with pagination and sorting
+      const historyActions = await History.find(query)
+                                          .sort({ date: -1 })
+                                          .skip((page - 1) * pageSize)
+                                          .limit(pageSize);
+  
+      // Fetch unique usernames for the Action By dropdown
+      const users = await History.distinct('actionBy', { branch: selectedBranch }); // Filter by branch
+  
+      // Calculate total pages for pagination
+      const totalPages = Math.ceil(totalActions / pageSize);
+  
+      // Render the history page with filters
+      res.render('history', {
+        branches,
+        historyActions,
+        currentPage: page,
+        totalPages,
+        users, // Send users to the view for Action By dropdown
+        selectedUser,
+        selectedActionType,
+        selectedDateRange,
+        selectedBranch, // Pass the selected branch to the view
+        username: req.session.username,
+        role: req.session.role
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Server Error');
     }
-    if (selectedActionType) {
-      query.actionType = selectedActionType; // Filter by Action Type
-    }
-
-    // Apply Date Range filter
-    const now = new Date();
-    if (selectedDateRange === 'today') {
-      query.date = {
-        $gte: new Date(now.getFullYear(), now.getMonth(), now.getDate())
-      };
-    } else if (selectedDateRange === 'this-week') {
-      const firstDayOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-      query.date = { $gte: firstDayOfWeek };
-    } else if (selectedDateRange === 'this-month') {
-      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      query.date = { $gte: firstDayOfMonth };
-    }
-
-    // Fetch total actions count for pagination
-    const totalActions = await History.countDocuments(query);
-
-    // Fetch history actions with pagination and sorting
-    const historyActions = await History.find(query)
-                                        .sort({ date: -1 })
-                                        .skip((page - 1) * pageSize)
-                                        .limit(pageSize);
-
-    // Fetch unique usernames for the Action By dropdown
-    const users = await History.distinct('actionBy', { branch: selectedBranch }); // Filter by branch
-
-    // Calculate total pages for pagination
-    const totalPages = Math.ceil(totalActions / pageSize);
-
-    // Render the history page with filters
-    res.render('history', {
-      branches,
-      historyActions,
-      currentPage: page,
-      totalPages,
-      users, // Send users to the view for Action By dropdown
-      selectedUser,
-      selectedActionType,
-      selectedDateRange,
-      selectedBranch, // Pass the selected branch to the view
-      username: req.session.username,
-      role: req.session.role
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Server Error');
-  }
+  } else {
+    res.redirect('/');
+  } 
+  
 });
 
 
 router.get('/dashboard', async (req, res) => {
-  try {
-    const branches = await Branch.find({}, 'name');  // Fetch all branch names
-    const selectedBranch = req.session.selectedBranch || 'Main';
-    let query = { branchStored: selectedBranch };
-    let inventory = await Item.find(query);
 
-    
-    const inventoryCost = inventory.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-    const zeroStockItems = inventory
-    .filter(item => item.quantity === 0)
-    .slice(0, 5);
-
-// Get top 5 items below lowStockThreshold
-    const lowStockItems = inventory
-    .filter(item => item.quantity > 0 && item.quantity < item.lowStockThreshold)
-    .slice(0, 5);
-    
-    // For Inventory Summary in Dashboard
-    const outOfStockCount = inventory.filter(item => item.quantity === 0).length;
-    const lowStockCount = inventory.filter(item => item.quantity > 0 && item.quantity <= item.lowStockThreshold).length;
-    const sufficientStockCount = inventory.filter(item => item.quantity > item.lowStockThreshold).length;
-
-    // Count items by category
-    const categoryCounts = inventory.reduce((counts, item) => {
-      counts[item.category] = (counts[item.category] || 0) + 1;
-      return counts;
-    }, {});
-
-// Convert the counts object to an array of category objects, then sort and get the top 5
-    const mostStockedCategories = Object.entries(categoryCounts)
-      .map(([category, count]) => ({ category, count }))
-      .sort((a, b) => b.count - a.count)
+  if(req.session.isAuthenticated){
+    try {
+      const branches = await Branch.find({}, 'name');  // Fetch all branch names
+      const selectedBranch = req.session.selectedBranch || 'Main';
+      let query = { branchStored: selectedBranch };
+      let inventory = await Item.find(query);
+  
+      
+      const inventoryCost = inventory.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  
+      const zeroStockItems = inventory
+      .filter(item => item.quantity === 0)
       .slice(0, 5);
-
-    
-
-
-    // For History Box in Dashboard
-    const latestHistory = await History.find( {branch: selectedBranch} )
-                                       .sort({ date: -1 })
-                                       .limit(5);
-
-    const purchaseorders = await PurchaseOrder.find ( {branchStored: selectedBranch} );
-
-    const pending = purchaseorders.filter(transferorder => transferorder.status === 'Pending').length;
-    const forApproval = purchaseorders.filter(transferorder => transferorder.status === 'For Approval').length;
-    
-
-    const totalExpenses = purchaseorders.reduce((sum, order) => sum + order.totalCost, 0);
-
-    const totalDelivery = purchaseorders.reduce((sum, order) => sum + order.deliveryCost, 0);
-
-
-
-    // Render the dashboard and pass branches and selectedBranch to the sidebar partial
-    res.render('dashboard', {
-      branches,
-      selectedBranch,  // This is the selected branch or default 'Main'
-      currentRoute: '/dashboard',
-      username: req.session.username,
-      role: req.session.role,
-      outOfStockCount,
-      lowStockCount,
-      sufficientStockCount,
-      latestHistory,
-      totalExpenses,
-      totalDelivery,
-      pending,
-      forApproval,
-      inventoryCost,
-      mostStockedCategories,
-      zeroStockItems,
-      lowStockItems
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Server Error');
+  
+  // Get top 5 items below lowStockThreshold
+      const lowStockItems = inventory
+      .filter(item => item.quantity > 0 && item.quantity < item.lowStockThreshold)
+      .slice(0, 5);
+      
+      // For Inventory Summary in Dashboard
+      const outOfStockCount = inventory.filter(item => item.quantity === 0).length;
+      const lowStockCount = inventory.filter(item => item.quantity > 0 && item.quantity <= item.lowStockThreshold).length;
+      const sufficientStockCount = inventory.filter(item => item.quantity > item.lowStockThreshold).length;
+  
+      // Count items by category
+      const categoryCounts = inventory.reduce((counts, item) => {
+        counts[item.category] = (counts[item.category] || 0) + 1;
+        return counts;
+      }, {});
+  
+  // Convert the counts object to an array of category objects, then sort and get the top 5
+      const mostStockedCategories = Object.entries(categoryCounts)
+        .map(([category, count]) => ({ category, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+  
+      
+  
+  
+      // For History Box in Dashboard
+      const latestHistory = await History.find( {branch: selectedBranch} )
+                                         .sort({ date: -1 })
+                                         .limit(5);
+  
+      const purchaseorders = await PurchaseOrder.find ( {branchStored: selectedBranch} );
+  
+      const pending = purchaseorders.filter(transferorder => transferorder.status === 'Pending').length;
+      const forApproval = purchaseorders.filter(transferorder => transferorder.status === 'For Approval').length;
+      
+  
+      const totalExpenses = purchaseorders.reduce((sum, order) => sum + order.totalCost, 0);
+  
+      const totalDelivery = purchaseorders.reduce((sum, order) => sum + order.deliveryCost, 0);
+  
+  
+  
+      // Render the dashboard and pass branches and selectedBranch to the sidebar partial
+      res.render('dashboard', {
+        branches,
+        selectedBranch,  // This is the selected branch or default 'Main'
+        currentRoute: '/dashboard',
+        username: req.session.username,
+        role: req.session.role,
+        outOfStockCount,
+        lowStockCount,
+        sufficientStockCount,
+        latestHistory,
+        totalExpenses,
+        totalDelivery,
+        pending,
+        forApproval,
+        inventoryCost,
+        inventory,
+        mostStockedCategories,
+        zeroStockItems,
+        lowStockItems
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Server Error');
+    }
+  } else {
+    res.redirect('/');
   }
+  
 });
 
 
@@ -1138,13 +1162,14 @@ router.post('/edit-purchase-order', async (req, res) => {
 
 router.get('/transferorder', async (req, res) => {
 
-  const branches = await Branch.find({}, 'name');
-  const selectedBranch = req.session.selectedBranch || 'Main';
-  let query = { branchStored: selectedBranch };
-  let inventory = await Item.find(query);
-  const sortBy = req.query.sortBy || '';
-  const searchTerm = req.query.search || '';
-  const filterBy = req.query.filterBy || '';
+  if(req.session.isAuthenticated){
+    const branches = await Branch.find({}, 'name');
+    const selectedBranch = req.session.selectedBranch || 'Main';
+    let query = { branchStored: selectedBranch };
+    let inventory = await Item.find(query);
+    const sortBy = req.query.sortBy || '';
+    const searchTerm = req.query.search || '';
+    const filterBy = req.query.filterBy || '';
 
   let allOrders = await TransferOrder.find();
   const forApproval = allOrders.filter(transferorder => transferorder.status === 'For Approval').length;
@@ -1184,6 +1209,10 @@ router.get('/transferorder', async (req, res) => {
     sortBy,
     filterBy
   });
+  } else {
+    res.redirect('/');
+  }
+  
 
 });
 
