@@ -897,6 +897,20 @@ router.get('/purchaseorder', async (req, res) => {
       const sortBy = req.query.sortBy || ''; 
       const filterBy = req.query.filterBy || '';
 
+      const allOrders = await PurchaseOrder.find();
+
+      const forApprovalCount = allOrders.filter(order => order.status === 'For Approval').length;
+      const pendingCount = allOrders.filter(order => order.status === 'Pending').length;
+      const completedCount = allOrders.filter(order => {
+        const orderDate = new Date(order.createdAt);
+        const now = new Date();
+        return (
+          order.status === 'Closed' &&
+          orderDate.getFullYear() === now.getFullYear() &&
+          orderDate.getMonth() === now.getMonth()
+        );
+      }).length;
+
        // Query for purchase orders based on the search term
        let purchaseorderQuery = {};
        if (searchTerm) {
@@ -943,6 +957,9 @@ router.get('/purchaseorder', async (req, res) => {
         purchaseorder, 
         sortBy,
         filterBy,
+        forApprovalCount,
+        pendingCount,
+        completedCount,
         nextOrderNumber  
       });
     } catch (error) {
