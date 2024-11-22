@@ -191,6 +191,7 @@
 
                   <div id="displayPurchaseOrderModal" class="modal" style="display: none;">
                     <div class="modal-display">
+                        <input type="hidden" id="orderID" value="">
                         <span class="close" onclick="closeDisplayPurchaseOrderModal()">&times;</span>
                         <h2>Purchase Order Details</h2>
                 
@@ -222,7 +223,7 @@
 
                             <button type="button" onclick="enableEditing()">Edit</button>
                             <button type="submit">Apply Changes</button>
-                
+                            <button type="button" onclick="deletePurchaseOrder()">Delete Purchase Order</button>
                             <label for="displayTotalCost">Total Cost:</label>
                             <input type="number" id="displayTotalCost" name="totalCost" readonly>
                         </form>   
@@ -438,6 +439,7 @@
 
         function openDisplayPurchaseOrderModal(orderId) {
             currentOrder = orderId;
+            document.getElementById('orderID').value = orderId;
 
             fetch(`/purchaseorder/${orderId}`)
                 .then(response => response.json())
@@ -583,6 +585,37 @@
               window.location.href = `/purchaseorder?search=${encodeURIComponent(searchTerm)}`;
             }
         });
+    
+        async function deletePurchaseOrder() {
+        const orderId = document.getElementById('orderID').value;
+
+  if (!orderId) {
+    alert('No Purchase Order ID found.');
+    return;
+  }
+
+  const confirmation = confirm('Are you sure you want to delete this purchase order?');
+  if (!confirmation) return;
+
+  try {
+    const response = await fetch(`/purchaseorder/${orderId}`, {
+      method: 'DELETE',
+    });
+
+    if (response.ok) {
+      alert('Purchase Order deleted successfully.');
+      // Refresh or redirect to update the list
+      window.location.reload();
+    } else {
+      const error = await response.json();
+      alert(`Error: ${error.message}`);
+    }
+  } catch (error) {
+    console.error('Error deleting purchase order:', error);
+    alert('An error occurred while deleting the purchase order.');
+  }
+}
+
 
     function applySorting() {
     const sortBy = document.getElementById('sortBy').value;

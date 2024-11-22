@@ -1177,6 +1177,25 @@ router.post('/edit-purchase-order', async (req, res) => {
   }
 });
 
+router.delete('/purchaseorder/:id', async (req, res) => {
+  try {
+    const orderId = req.params.id;
+
+    // Find and delete the purchase order by ID
+    const deletedOrder = await PurchaseOrder.findByIdAndDelete(orderId);
+
+    if (!deletedOrder) {
+      return res.status(404).json({ message: 'Purchase Order not found.' });
+    }
+
+    res.json({ message: 'Purchase Order deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting purchase order:', error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+
 router.get('/transferorder', async (req, res) => {
 
   if(req.session.isAuthenticated){
